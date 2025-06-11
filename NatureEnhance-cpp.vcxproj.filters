@@ -131,5 +131,11 @@
     <ClCompile Include="NatureEnhance\Main.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="NatureEnhance\GMJson.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="NatureEnhance\GameMakerMath.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

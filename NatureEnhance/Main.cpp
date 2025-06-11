@@ -1,8 +1,13 @@
 #include "Main.h"
-#include "json.hpp"
-#include <stack>
+
+gm::CGMVariable GetResource(GMString res)
+{
+    return gm::execute_string("return " + std::string(res));
+}
 
 #pragma region Error
+bool show_error = true;
+
 fnReal ShowErrorMessage(GMReal mode)
 {
 	show_error = static_cast<bool>(mode);
@@ -11,6 +16,11 @@ fnReal ShowErrorMessage(GMReal mode)
 #pragma endregion
 
 #pragma region Camera
+GMReal CameraX, CameraY, ViewX, ViewY;
+GMReal RoomWidth = 400, RoomHeight = 225, ViewWidth = 400, ViewHeight = 225;
+GMReal Mode = 1, SnapDiv = 12, OffsetX = 24, OffsetY = -24, Factor = 0.16, MoveMode = 0;
+GMReal LimitLeft = 0, LimitTop = 0, OldCameraX = 0, OldCameraY = 0, RegistryRoot = 0;
+
 fnReal CameraInit(GMReal mode, GMReal playerX, GMReal playerY, GMReal playerScale, GMReal limitLeft, 
 	GMReal limitTop, GMReal roomWidth, GMReal roomHeight, GMReal viewWidth, GMReal viewHeight)
 {
@@ -55,7 +65,16 @@ fnReal CameraInit(GMReal mode, GMReal playerX, GMReal playerY, GMReal playerScal
         
         finish;
 	}
-    simplecatch("CameraInit");
+    catch (const wchar_t* e)
+    {
+        if (show_error)
+        {
+            std::wstring err = L"在执行函数 CameraInit 时抛出异常。\n" + std::wstring(e);
+            MessageBox(0, err.c_str(), L"NatureEnhance Error", MB_OK | MB_ICONERROR);
+        }
+        
+        fail;
+    };
 }
 
 fnReal CameraMove(GMReal playerX, GMReal playerY, GMReal playerScale)
@@ -154,7 +173,16 @@ fnReal CameraMove(GMReal playerX, GMReal playerY, GMReal playerScale)
 
         finish;
     }
-    simplecatch("CameraMove");
+    catch (const wchar_t* e)
+    {
+        if (show_error)
+        {
+            std::wstring err = L"在执行函数 CameraInit 时抛出异常。\n" + std::wstring(e);
+            MessageBox(0, err.c_str(), L"NatureEnhance Error", MB_OK | MB_ICONERROR);
+        }
+
+        fail;
+    };
 }
 
 fnReal CameraSetOffset(GMReal offsetX, GMReal offsetY)
@@ -259,6 +287,9 @@ fnReal CameraSetViewSize(GMReal viewWidth, GMReal viewHeight)
 #pragma endregion
 
 #pragma region Rope Calculate
+double RopeA, RopeB, RopeC;
+int Iterations = 15, RopeSteps = 16;
+
 static GMReal RopeArclength(GMReal a, GMReal b, GMReal x)
 {
     auto temp1 = 2 * a * (x - b);
@@ -466,77 +497,4 @@ fnReal DrawRope(GMReal x1, GMReal y1, GMReal x2, GMReal y2, GMReal length, GMRea
 
     return state;
 }
-#pragma endregion
-
-#pragma region Json
-using json = nlohmann::json;
-GMReal jsonMapDictionary, jsonListDictionary;
-
-struct JsonStruct
-{
-    bool isMap;
-    GMReal id;
-};
-
-fnReal JsonInit()
-{
-    jsonMapDictionary = gm::ds_map_create();
-	jsonListDictionary = gm::ds_list_create();
-}
-
-fnReal JsonDecode(GMString jsonstr)
-{
-    json data = json::parse(std::string(jsonstr));
-
-    std::stack<std::pair<json, JsonStruct>> stack;
-    JsonStruct jsonStruct = { true, gm::ds_map_create() };
-    stack.push({ data, jsonStruct });
-
-    while (!stack.empty())
-    {
-        auto [current, _struct] = stack.top();
-		stack.pop();
-
-		if (current.is_object())
-		{
-			GMReal mapId = gm::ds_map_create();
-			gm::ds_map_add(jsonMapDictionary, _struct.id, mapId);
-			for (auto& [key, value] : current.items())
-			{
-				GMString keyStr = gm::string(key);
-				GMReal valueId;
-				if (value.is_object() || value.is_array())
-				{
-					valueId = gm::ds_map_create();
-					stack.push({ value, { value.is_object(), valueId } });
-				}
-				else
-				{
-					valueId = gm::execute_string("return " + gm::string(value));
-				}
-				gm::ds_map_add(mapId, keyStr, valueId);
-			}
-		}
-		else if (current.is_array())
-		{
-			GMReal listId = gm::ds_list_create();
-			gm::ds_list_add(jsonListDictionary, listId);
-			for (size_t i = 0; i < current.size(); ++i)
-			{
-				GMReal itemId;
-				if (current[i].is_object() || current[i].is_array())
-				{
-					itemId = gm::ds_map_create();
-					stack.push({ current[i], { current[i].is_object(), itemId } });
-				}
-				else
-				{
-					itemId = gm::execute_string("return " + gm::string(current[i]));
-				}
-				gm::ds_list_add(listId, itemId);
-			}
-		})
-    }
-}
-
 #pragma endregion
