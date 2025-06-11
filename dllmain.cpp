@@ -2,7 +2,7 @@
 #include "pch.h"
 #include "Gmapi.h"
 
-extern gm::CGMAPI* gmapi = nullptr;
+gm::CGMAPI* gmapi = nullptr;
 
 BOOL APIENTRY DllMain( HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserved)
 {

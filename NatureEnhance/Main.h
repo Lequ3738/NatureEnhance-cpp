@@ -18,6 +18,7 @@ typedef char* GMString;
 gm::CGMVariable GetResource(GMString res);
 
 extern bool show_error;
+extern gm::CGMAPI* gmapi;
 
 extern "C"
 {

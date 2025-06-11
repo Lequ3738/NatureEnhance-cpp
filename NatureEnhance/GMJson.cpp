@@ -236,8 +236,6 @@ fnReal JsonDecode(GMString jsonstr)
 	}
 }
 
-
-
 fnReal JsonDestroy(GMReal rootNode)
 {
 	try
