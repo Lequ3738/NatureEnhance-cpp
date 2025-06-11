@@ -369,8 +369,8 @@ fnReal DrawRope(GMReal x1, GMReal y1, GMReal x2, GMReal y2, GMReal length, GMRea
     GMReal width = 1, height = 1;
     if (back != gm::noone)
     {
-        width = gm::background_get_width(back);
-		height = gm::background_get_height(back);
+        width = gm::background_get_width(static_cast<int>(back));
+		height = gm::background_get_height(static_cast<int>(back));
     }
 
 	GMReal state = RopeCalculate(x1, y1, x2, y2, length);
@@ -398,7 +398,8 @@ fnReal DrawRope(GMReal x1, GMReal y1, GMReal x2, GMReal y2, GMReal length, GMRea
             }
 
             gm::texture_set_repeat(true);
-            gm::draw_primitive_begin_texture(gm::pr_trianglestrip, gm::background_get_texture(back));
+            gm::draw_primitive_begin_texture(gm::pr_trianglestrip, 
+                gm::background_get_texture(static_cast<int>(back)));
 
             tx1 = x1;
             ty1 = RopeA * sqr(tx1 - RopeB) + RopeC;
@@ -450,7 +451,9 @@ fnReal DrawRope(GMReal x1, GMReal y1, GMReal x2, GMReal y2, GMReal length, GMRea
                 ty *= height / 2 / d;
 
                 gm::texture_set_repeat(true);
-                gm::draw_primitive_begin_texture(gm::pr_trianglestrip, gm::background_get_texture(back));
+                gm::draw_primitive_begin_texture(gm::pr_trianglestrip, 
+                    gm::background_get_texture(static_cast<int>(back)));
+
                 gm::draw_vertex_texture(x1 - ty - 0.5, y1 + tx - 0.5, 0, 1);
                 gm::draw_vertex_texture(x1 + ty - 0.5, y1 - tx - 0.5, 0, 0);
                 gm::draw_vertex_texture(x2 - ty - 0.5, y2 + tx - 0.5, length / width, 1);
@@ -475,7 +478,9 @@ fnReal DrawRope(GMReal x1, GMReal y1, GMReal x2, GMReal y2, GMReal length, GMRea
             GMReal e = (y2 - y1 + length) / 2 / width;
 
             gm::texture_set_repeat(true);
-            gm::draw_primitive_begin_texture(gm::pr_trianglestrip, gm::background_get_texture(back));
+            gm::draw_primitive_begin_texture(gm::pr_trianglestrip, 
+                gm::background_get_texture(static_cast<int>(back)));
+
             gm::draw_vertex_texture(x1 - d - 0.5, y1 - 0.5, 0, 1);
             gm::draw_vertex_texture(x1 + d - 0.5, y1 - 0.5, 0, 0);
             gm::draw_vertex_texture(tx - d, ty, e, 1);
