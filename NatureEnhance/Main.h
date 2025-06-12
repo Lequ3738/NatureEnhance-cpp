@@ -48,7 +48,9 @@ extern "C"
 
 	expReal JsonInit();
 	expReal JsonFree();
-	expReal JsonDecode(GMString jsonstr);
+	expReal JsonDecode(GMString jsonstr, GMString inputCoding, GMString outputCoding);
 	expReal JsonDestroy(GMReal rootNode);
 	expReal JsonGetDsType(GMReal rootNode, GMReal list);
+
+	expString StringChangeCoding(GMString str, GMString in, GMString out);
 }

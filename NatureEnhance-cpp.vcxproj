@@ -97,8 +97,8 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
-      <AdditionalLibraryDirectories>C:\Project\GMK\NatureEnhance-cpp\GMAPICore;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>GMAPICore.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\Project\GMK\NatureEnhance-cpp\Librarys;C:\Project\GMK\NatureEnhance-cpp\GMAPICore;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>GMAPICore.lib;libiconv.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalOptions>/nodefaultlib:libci /SAFESEH:NO %(AdditionalOptions)</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
@@ -121,8 +121,8 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
-      <AdditionalLibraryDirectories>C:\Project\GMK\NatureEnhance-cpp\GMAPICore;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>GMAPICore.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\Project\GMK\NatureEnhance-cpp\Librarys;C:\Project\GMK\NatureEnhance-cpp\GMAPICore;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>GMAPICore.lib;libiconv.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalOptions>/nodefaultlib:libci /SAFESEH:NO %(AdditionalOptions)</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
@@ -141,8 +141,8 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
-      <AdditionalLibraryDirectories>C:\Project\GMK\NatureEnhance-cpp\GMAPICore;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>GMAPICore.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\Project\GMK\NatureEnhance-cpp\Librarys;C:\Project\GMK\NatureEnhance-cpp\GMAPICore;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>GMAPICore.lib;libiconv.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalOptions>/nodefaultlib:libci /SAFESEH:NO %(AdditionalOptions)</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
@@ -165,8 +165,8 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
-      <AdditionalLibraryDirectories>C:\Project\GMK\NatureEnhance-cpp\GMAPICore;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>GMAPICore.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\Project\GMK\NatureEnhance-cpp\Librarys;C:\Project\GMK\NatureEnhance-cpp\GMAPICore;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>GMAPICore.lib;libiconv.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalOptions>/nodefaultlib:libci /SAFESEH:NO %(AdditionalOptions)</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
@@ -189,6 +189,7 @@
     <ClInclude Include="GMAPI\GmapiPopups.h" />
     <ClInclude Include="GMAPI\GmapiResources.h" />
     <ClInclude Include="GMAPI\GmapiSounds.h" />
+    <ClInclude Include="Librarys\iconv.h" />
     <ClInclude Include="Librarys\json.hpp" />
     <ClInclude Include="NatureEnhance\GameMakerMath.h" />
     <ClInclude Include="NatureEnhance\Main.h" />

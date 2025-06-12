@@ -55,3 +55,15 @@ double point_distance(double x1, double y1, double x2, double y2)
 }
 
 double sign(double x) { return (x > 0) - (x < 0); }
+
+void toUpperAscii(char* str)
+{
+    if (str == nullptr)
+        return;
+
+    for (int i = 0; str[i] != '\0'; i++)
+    {
+        if (str[i] >= 'a' && str[i] <= 'z')
+            str[i] -= 32;
+    }
+}

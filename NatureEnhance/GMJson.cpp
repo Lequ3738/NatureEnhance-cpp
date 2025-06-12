@@ -1,9 +1,11 @@
 #include "Main.h"
 #include "json.hpp"
+#include "iconv.h"
 #include <stack>
 #include <map>
 #include <vector>
 #include <variant>
+#include <string>
 
 using Json = nlohmann::json;
 using namespace std;
@@ -117,15 +119,62 @@ static Tree* GetTreeNode(GMReal id)
 	return it->first;
 }
 
-fnReal JsonDecode(GMString jsonstr)
+#define isChangeCoding(coding) \
+	strcmp(coding, "UTF-8") != 0 && strcmp(coding, "") != 0
+
+static GMString ChangeCoding(const char* str, const char* inputCoding, const char* outputCoding)
+{
+	iconv_t cd = iconv_open(outputCoding, inputCoding);
+	if (cd == (iconv_t)-1)
+		return nullptr;
+
+	size_t in_len = strlen(str);
+	size_t out_len = in_len * 4;  // UTF-8 最多是原始大小的 4 倍
+	char* output = new char[out_len + 1]; // +1 存放终止符
+	memset(output, 0, out_len + 1);
+
+	// 设置输入/输出缓冲区指针
+	char* in_ptr = const_cast<char*>(str);
+	char* out_ptr = output;
+	size_t in_bytes_left = in_len;
+	size_t out_bytes_left = out_len;
+
+	// 执行转换
+	if (iconv(cd, (const char**)&in_ptr, &in_bytes_left, &out_ptr, &out_bytes_left) == (size_t)-1)
+	{
+		iconv_close(cd);
+		delete[] output;
+		return nullptr;
+	}
+
+	// 添加终止符并清理
+	*out_ptr = '\0';
+	iconv_close(cd);
+	return output;
+}
+
+#define changeInput(str) \
+	(isChangeCoding(inputCoding) ? ChangeCoding(str, inputCoding, "UTF-8") : str)
+
+#define changeOutput(str) \
+	(isChangeCoding(outputCoding) ? ChangeCoding(str, "UTF-8", outputCoding) : str)
+
+fnReal JsonDecode(GMString jsonstr, GMString inputCoding, GMString outputCoding)
 {
 	try
 	{
 		if (JsonDeleteMap == nullptr || JsonDeleteList == nullptr)
 			throw L"JsonDeleteMap 未初始化，请先调用 JsonInit 函数。";
+
+		toUpperAscii(inputCoding);
+		toUpperAscii(outputCoding);
+
+		const char* utf8JsonStr = changeInput(jsonstr);
+		if (utf8JsonStr == nullptr)
+			throw L"编码转换失败，请检查输入编码是否正确。";
 		
 		// Json 支持注释
-		Json json = Json::parse(jsonstr, nullptr, true, true);
+		Json json = Json::parse(utf8JsonStr, nullptr, true, true);
 		int root = gm::ds_map_create();
 		
 		Tree* tree = new Tree(true);  // 删除时用到的节点树
@@ -172,7 +221,11 @@ fnReal JsonDecode(GMString jsonstr)
 			}
 			else if (curr->is_string())
 			{
-				AddToParent(curr->get<std::string>());
+				const char* str = changeOutput(curr->get<std::string>().c_str());
+				if (str == nullptr)
+					throw L"编码转换失败，请检查输出编码是否正确。";
+
+				AddToParent(str);
 			}
 			else if (curr->is_boolean())
 			{
@@ -378,4 +431,12 @@ fnReal JsonGetDsType(GMReal rootNode, GMReal list)
 
 		return -1;
 	}
+}
+
+GMString StringChangeCoding(GMString str, GMString in, GMString out)
+{
+	toUpperAscii(in);
+	toUpperAscii(out);
+
+	return ChangeCoding(str, in, out);
 }
