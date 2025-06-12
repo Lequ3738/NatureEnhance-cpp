@@ -64,27 +64,40 @@ fnReal JsonInit()
 	finish;
 }
 
+bool contains(const vector<int>& vec, int target)
+{
+	return find(vec.begin(), vec.end(), target) != vec.end();
+}
+
 fnReal JsonFree()
 {
+	vector<int> deletedDatas;
+
 	// 销毁 JsonDeleteMap 中的所有 ds_map 引用
 	for (auto it = JsonDeleteMap->begin(); it != JsonDeleteMap->end(); )
 	{
-		if (it->second >= 0)
+		if (it->second >= 0 && !contains(deletedDatas, it->second))
 		{
 			gm::ds_map_destroy(it->second);
 			it = JsonDeleteMap->erase(it);
+
+			deletedDatas.push_back(it->second);
 		}
 		else
 			++it;
 	}
 
+	deletedDatas.clear();
+
 	// 销毁 JsonDeleteList 中的所有 ds_list 引用
 	for (auto it = JsonDeleteList->begin(); it != JsonDeleteList->end(); )
 	{
-		if (it->second >= 0)
+		if (it->second >= 0 && !contains(deletedDatas, it->second))
 		{
 			gm::ds_list_destroy(it->second);
 			it = JsonDeleteList->erase(it);
+
+			deletedDatas.push_back(it->second);
 		}
 		else
 			++it;
@@ -303,6 +316,8 @@ fnReal JsonDestroy(GMReal rootNode)
 		stack<Tree*> treeStack;
 		treeStack.push(treeRoot);
 
+		vector<int> deletedMaps, deletedLists;
+
 		while (!treeStack.empty())
 		{
 			Tree* curTree = treeStack.top();
@@ -311,14 +326,18 @@ fnReal JsonDestroy(GMReal rootNode)
 			for (Tree* child : curTree->children)
 				treeStack.push(child);
 
-			if (curTree->ismap)
+			if (curTree->ismap && !contains(deletedMaps, (*JsonDeleteMap)[curTree]))
 			{
 				gm::ds_map_destroy((*JsonDeleteMap)[curTree]);
+				deletedMaps.push_back((*JsonDeleteMap)[curTree]);
+
 				(*JsonDeleteMap)[curTree] = gm::noone;  // 清除映射表中的引用
 			}
-			else
+			else if (!contains(deletedLists, (*JsonDeleteList)[curTree]))
 			{
 				gm::ds_list_destroy((*JsonDeleteList)[curTree]);
+				deletedLists.push_back((*JsonDeleteList)[curTree]);
+
 				(*JsonDeleteList)[curTree] = gm::noone;  // 清除映射表中的引用
 			}
 		}
