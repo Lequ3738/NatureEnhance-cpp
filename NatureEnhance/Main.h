@@ -18,11 +18,13 @@ typedef char* GMString;
 gm::CGMVariable GetResource(GMString res);
 
 extern bool show_error;
+extern HWND GMWindowsHandle;
 extern gm::CGMAPI* gmapi;
 
 extern "C"
 {
 	expReal ShowErrorMessage(GMReal mode);
+	expReal GetGMWindowsHandle(GMReal handle);
 
 	expReal CameraInit(GMReal mode, GMReal playerX, GMReal playerY, GMReal playerScale,
 		GMReal limitLeft, GMReal limitTop, GMReal roomWidth, GMReal roomHeight,

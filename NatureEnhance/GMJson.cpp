@@ -259,7 +259,7 @@ fnReal JsonDecode(GMString jsonstr, GMString inputCoding, GMString outputCoding)
 			string errorMsg = "函数 JsonDecode 出现解析错误：\n" + string(e.what());
 			wstring werror(errorMsg.begin(), errorMsg.end());
 
-			MessageBox(NULL, werror.c_str(), L"NatureEnhance Error",
+			MessageBox(GMWindowsHandle, werror.c_str(), L"NatureEnhance Error",
 				MB_OK | MB_ICONERROR);
 		}
 
@@ -271,7 +271,7 @@ fnReal JsonDecode(GMString jsonstr, GMString inputCoding, GMString outputCoding)
 		{
 			wstring errorMsg = L"函数 JsonDecode 出现运行错误：\n" + wstring(e);
 
-			MessageBox(NULL, errorMsg.c_str(), L"NatureEnhance Error",
+			MessageBox(GMWindowsHandle, errorMsg.c_str(), L"NatureEnhance Error",
 				MB_OK | MB_ICONERROR);
 		}
 
@@ -281,7 +281,7 @@ fnReal JsonDecode(GMString jsonstr, GMString inputCoding, GMString outputCoding)
 	{
 		if (show_error)
 		{
-			MessageBox(NULL, L"函数 JsonDecode 出现未知错误。", L"NatureEnhance Error",
+			MessageBox(GMWindowsHandle, L"函数 JsonDecode 出现未知错误。", L"NatureEnhance Error",
 				MB_OK | MB_ICONERROR);
 		}
 
@@ -350,7 +350,7 @@ fnReal JsonDestroy(GMReal rootNode)
 		{
 			wstring errorMsg = L"函数 JsonDestroy 出现运行错误：\n" + wstring(e);
 
-			MessageBox(NULL, errorMsg.c_str(), L"NatureEnhance Error",
+			MessageBox(GMWindowsHandle, errorMsg.c_str(), L"NatureEnhance Error",
 				MB_OK | MB_ICONERROR);
 		}
 
@@ -360,7 +360,7 @@ fnReal JsonDestroy(GMReal rootNode)
 	{
 		if (show_error)
 		{
-			MessageBox(NULL, L"函数 JsonDestroy 出现未知错误。", L"NatureEnhance Error",
+			MessageBox(GMWindowsHandle, L"函数 JsonDestroy 出现未知错误。", L"NatureEnhance Error",
 				MB_OK | MB_ICONERROR);
 		}
 
@@ -415,7 +415,7 @@ fnReal JsonGetDsType(GMReal rootNode, GMReal list)
 		{
 			wstring errorMsg = L"函数 JsonGetDsType 出现运行错误：\n" + wstring(e);
 
-			MessageBox(NULL, errorMsg.c_str(), L"NatureEnhance Error",
+			MessageBox(GMWindowsHandle, errorMsg.c_str(), L"NatureEnhance Error",
 				MB_OK | MB_ICONERROR);
 		}
 
@@ -425,7 +425,7 @@ fnReal JsonGetDsType(GMReal rootNode, GMReal list)
 	{
 		if (show_error)
 		{
-			MessageBox(NULL, L"函数 JsonGetDsType 出现未知错误。", L"NatureEnhance Error",
+			MessageBox(GMWindowsHandle, L"函数 JsonGetDsType 出现未知错误。", L"NatureEnhance Error",
 				MB_OK | MB_ICONERROR);
 		}
 

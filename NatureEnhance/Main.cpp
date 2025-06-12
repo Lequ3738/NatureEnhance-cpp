@@ -13,6 +13,13 @@ fnReal ShowErrorMessage(GMReal mode)
 	show_error = static_cast<bool>(mode);
 	finish;
 }
+
+HWND GMWindowsHandle = nullptr;
+fnReal GetGMWindowsHandle(GMReal handle)
+{
+    GMWindowsHandle = (HWND)(DWORD)handle;
+    finish;
+}
 #pragma endregion
 
 #pragma region Camera
@@ -70,7 +77,7 @@ fnReal CameraInit(GMReal mode, GMReal playerX, GMReal playerY, GMReal playerScal
         if (show_error)
         {
             std::wstring err = L"在执行函数 CameraInit 时抛出异常。\n" + std::wstring(e);
-            MessageBox(0, err.c_str(), L"NatureEnhance Error", MB_OK | MB_ICONERROR);
+            MessageBox(GMWindowsHandle, err.c_str(), L"NatureEnhance Error", MB_OK | MB_ICONERROR);
         }
         
         fail;
@@ -178,7 +185,7 @@ fnReal CameraMove(GMReal playerX, GMReal playerY, GMReal playerScale)
         if (show_error)
         {
             std::wstring err = L"在执行函数 CameraInit 时抛出异常。\n" + std::wstring(e);
-            MessageBox(0, err.c_str(), L"NatureEnhance Error", MB_OK | MB_ICONERROR);
+            MessageBox(GMWindowsHandle, err.c_str(), L"NatureEnhance Error", MB_OK | MB_ICONERROR);
         }
 
         fail;
