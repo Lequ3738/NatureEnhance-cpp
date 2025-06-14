@@ -532,6 +532,8 @@ std::vector<int> DrawSpritesList;
 
 expReal LoadDrawSpritesList(GMReal a, GMReal b, GMReal c, GMReal d, GMReal e, GMReal f)
 {
+    DrawSpritesList.reserve(6);
+
     DrawSpritesList.clear();
     DrawSpritesList.push_back(static_cast<int>(a));
     DrawSpritesList.push_back(static_cast<int>(b));
@@ -569,6 +571,9 @@ expReal LoadRoomTiles(GMString path)
 
         // Tiles
         num = gm::buffer_read_uint32(buffer);
+        resList.reserve(num);
+        resExistsList.reserve(num);
+
         for (int i = 0; i < num; ++i)
         {
             std::string name = gm::buffer_read_string(buffer);
@@ -614,6 +619,9 @@ expReal LoadRoomTiles(GMString path)
 
         // Sprites
         num = gm::buffer_read_uint32(buffer);
+        resList.reserve(num);
+        resExistsList.reserve(num);
+
         for (int i = 0; i < num; ++i)
         {
             std::string name = gm::buffer_read_string(buffer);
