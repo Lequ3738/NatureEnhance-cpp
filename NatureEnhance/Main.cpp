@@ -558,7 +558,7 @@ expReal LoadRoomTiles(GMString path)
         GMReal version = gm::buffer_read_uint8(buffer);
 
         // Tile Layer - 在非编辑模式下无用
-        GMReal num = gm::buffer_read_uint32(buffer);
+        int num = static_cast<int>(gm::buffer_read_uint32(buffer));
         for (int i = 0; i < num; ++i)
         {
             gm::buffer_read_int32(buffer);
@@ -570,7 +570,7 @@ expReal LoadRoomTiles(GMString path)
         std::string err = "";
 
         // Tiles
-        num = gm::buffer_read_uint32(buffer);
+        num = static_cast<int>(gm::buffer_read_uint32(buffer));
         resList.reserve(num);
         resExistsList.reserve(num);
 
@@ -589,7 +589,7 @@ expReal LoadRoomTiles(GMString path)
                 resExistsList.push_back(true);
         }
 
-        num = gm::buffer_read_uint32(buffer);
+        num = static_cast<int>(gm::buffer_read_uint32(buffer));
         for (int i = 0; i < num; ++i)
         {
             int pos = static_cast<int>(gm::buffer_read_int32(buffer));
@@ -618,7 +618,7 @@ expReal LoadRoomTiles(GMString path)
         resExistsList.clear();
 
         // Sprites
-        num = gm::buffer_read_uint32(buffer);
+        num = static_cast<int>(gm::buffer_read_uint32(buffer));
         resList.reserve(num);
         resExistsList.reserve(num);
 
@@ -637,7 +637,7 @@ expReal LoadRoomTiles(GMString path)
                 resExistsList.push_back(true);
         }
 
-        num = gm::buffer_read_uint32(buffer);
+        num = static_cast<int>(gm::buffer_read_uint32(buffer));
         for (int i = 0; i < num; ++i)
         {
             int pos = static_cast<int>(gm::buffer_read_int32(buffer));
