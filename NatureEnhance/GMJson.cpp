@@ -4,8 +4,6 @@
 #include <stack>
 #include <map>
 #include <vector>
-#include <variant>
-#include <string>
 
 using Json = nlohmann::json;
 using namespace std;
@@ -39,7 +37,6 @@ public:
 	}
 };
 
-typedef variant<string, GMReal> dynamic;
 #define getvalue(v) \
 	holds_alternative<string>(v) ? get<string>(v) : get<GMReal>(v)
 
@@ -56,7 +53,7 @@ map<Tree*, int>* JsonDeleteMap;
 // 用于控制销毁的 Tree 与 存放数据的 ds_list 之间的映射表
 map<Tree*, int>* JsonDeleteList;
 
-fnReal JsonInit()
+expReal JsonInit()
 {
 	JsonDeleteMap = new map<Tree*, int>();
 	JsonDeleteList = new map<Tree*, int>();
@@ -69,7 +66,7 @@ bool contains(const vector<int>& vec, int target)
 	return find(vec.begin(), vec.end(), target) != vec.end();
 }
 
-fnReal JsonFree()
+expReal JsonFree()
 {
 	vector<int> deletedDatas;
 
@@ -172,7 +169,7 @@ static GMString ChangeCoding(const char* str, const char* inputCoding, const cha
 #define changeOutput(str) \
 	(isChangeCoding(outputCoding) ? ChangeCoding(str, "UTF-8", outputCoding) : str)
 
-fnReal JsonDecode(GMString jsonstr, GMString inputCoding, GMString outputCoding)
+expReal JsonDecode(GMString jsonstr, GMString inputCoding, GMString outputCoding)
 {
 	try
 	{
@@ -302,7 +299,7 @@ fnReal JsonDecode(GMString jsonstr, GMString inputCoding, GMString outputCoding)
 	}
 }
 
-fnReal JsonDestroy(GMReal rootNode)
+expReal JsonDestroy(GMReal rootNode)
 {
 	try
 	{
@@ -387,10 +384,7 @@ fnReal JsonDestroy(GMReal rootNode)
 	}
 }
 
-#define ds_type_map 0
-#define ds_type_list 1
-
-fnReal JsonGetDsType(GMReal rootNode, GMReal list)
+expReal JsonGetDsType(GMReal rootNode, GMReal list)
 {
 	try
 	{
@@ -452,7 +446,7 @@ fnReal JsonGetDsType(GMReal rootNode, GMReal list)
 	}
 }
 
-GMString StringChangeCoding(GMString str, GMString in, GMString out)
+expString StringChangeCoding(GMString str, GMString in, GMString out)
 {
 	toUpperAscii(in);
 	toUpperAscii(out);

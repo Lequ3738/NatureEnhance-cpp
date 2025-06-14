@@ -84,6 +84,12 @@
     <ClInclude Include="Librarys\iconv.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="Librarys\buffer.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="NatureEnhance\DataStruct.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -138,6 +144,12 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="NatureEnhance\GameMakerMath.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Librarys\buffer.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="NatureEnhance\DataStruct.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

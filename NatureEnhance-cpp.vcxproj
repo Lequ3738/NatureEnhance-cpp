@@ -191,8 +191,10 @@
     <ClInclude Include="GMAPI\GmapiPopups.h" />
     <ClInclude Include="GMAPI\GmapiResources.h" />
     <ClInclude Include="GMAPI\GmapiSounds.h" />
+    <ClInclude Include="Librarys\buffer.h" />
     <ClInclude Include="Librarys\iconv.h" />
     <ClInclude Include="Librarys\json.hpp" />
+    <ClInclude Include="NatureEnhance\DataStruct.h" />
     <ClInclude Include="NatureEnhance\GameMakerMath.h" />
     <ClInclude Include="NatureEnhance\Main.h" />
     <ClInclude Include="pch.h" />
@@ -212,6 +214,8 @@
     <ClCompile Include="GMAPI\GmapiPopups.cpp" />
     <ClCompile Include="GMAPI\GmapiResources.cpp" />
     <ClCompile Include="GMAPI\GmapiSounds.cpp" />
+    <ClCompile Include="Librarys\buffer.cpp" />
+    <ClCompile Include="NatureEnhance\DataStruct.cpp" />
     <ClCompile Include="NatureEnhance\GameMakerMath.cpp" />
     <ClCompile Include="NatureEnhance\GMJson.cpp" />
     <ClCompile Include="NatureEnhance\Main.cpp" />

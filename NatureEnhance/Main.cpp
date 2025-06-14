@@ -1,23 +1,39 @@
 #include "Main.h"
+#include "buffer.h"
+#include "DataStruct.h"
+#include <filesystem>
+#include <vector>
 
 gm::CGMVariable GetResource(GMString res)
 {
     return gm::execute_string("return " + std::string(res));
 }
 
-#pragma region Error
-bool show_error = true;
+gm::CGMVariable GetResource(std::string res)
+{
+    return gm::execute_string("return " + res);
+}
 
-fnReal ShowErrorMessage(GMReal mode)
+#pragma region GameMaker
+bool show_error = true;
+expReal ShowErrorMessage(GMReal mode)
 {
 	show_error = static_cast<bool>(mode);
 	finish;
 }
 
 HWND GMWindowsHandle = nullptr;
-fnReal GetGMWindowsHandle(GMReal handle)
+expReal GetGMWindowsHandle(GMReal handle)
 {
     GMWindowsHandle = (HWND)(DWORD)handle;
+    finish;
+}
+
+GMReal PropertyMap, NameMap;
+expReal GetDSController(GMReal propertyMap, GMReal nameMap)
+{
+    PropertyMap = propertyMap;
+    NameMap = nameMap;
     finish;
 }
 #pragma endregion
@@ -28,7 +44,7 @@ GMReal RoomWidth = 400, RoomHeight = 225, ViewWidth = 400, ViewHeight = 225;
 GMReal Mode = 1, SnapDiv = 12, OffsetX = 24, OffsetY = -24, Factor = 0.16, MoveMode = 0;
 GMReal LimitLeft = 0, LimitTop = 0, OldCameraX = 0, OldCameraY = 0, RegistryRoot = 0;
 
-fnReal CameraInit(GMReal mode, GMReal playerX, GMReal playerY, GMReal playerScale, GMReal limitLeft, 
+expReal CameraInit(GMReal mode, GMReal playerX, GMReal playerY, GMReal playerScale, GMReal limitLeft,
 	GMReal limitTop, GMReal roomWidth, GMReal roomHeight, GMReal viewWidth, GMReal viewHeight)
 {
 	try
@@ -84,7 +100,7 @@ fnReal CameraInit(GMReal mode, GMReal playerX, GMReal playerY, GMReal playerScal
     };
 }
 
-fnReal CameraMove(GMReal playerX, GMReal playerY, GMReal playerScale)
+expReal CameraMove(GMReal playerX, GMReal playerY, GMReal playerScale)
 {
     try
     {
@@ -192,7 +208,7 @@ fnReal CameraMove(GMReal playerX, GMReal playerY, GMReal playerScale)
     };
 }
 
-fnReal CameraSetOffset(GMReal offsetX, GMReal offsetY)
+expReal CameraSetOffset(GMReal offsetX, GMReal offsetY)
 {
     OffsetX = offsetX;
     OffsetY = offsetY;
@@ -200,19 +216,19 @@ fnReal CameraSetOffset(GMReal offsetX, GMReal offsetY)
     finish;
 }
 
-fnReal CameraSetMode(GMReal mode)
+expReal CameraSetMode(GMReal mode)
 {
     Mode = mode;
     finish;
 }
 
-fnReal CameraSetSnapLevel(GMReal level)
+expReal CameraSetSnapLevel(GMReal level)
 {
     SnapDiv = level;
     finish;
 }
 
-fnReal CameraExport(GMReal type)
+expReal CameraExport(GMReal type)
 {
     if (type == 0)
         return ViewX;
@@ -220,7 +236,7 @@ fnReal CameraExport(GMReal type)
         return ViewY;
 }
 
-fnReal CameraSetView(GMReal cameraX, GMReal cameraY)
+expReal CameraSetView(GMReal cameraX, GMReal cameraY)
 {
     OldCameraX = CameraX;
     OldCameraY = CameraY;
@@ -231,7 +247,7 @@ fnReal CameraSetView(GMReal cameraX, GMReal cameraY)
     finish;
 }
 
-fnReal CameraSetRelativeView(GMReal cameraX, GMReal cameraY)
+expReal CameraSetRelativeView(GMReal cameraX, GMReal cameraY)
 {
     OldCameraX = CameraX;
     OldCameraY = CameraY;
@@ -242,13 +258,13 @@ fnReal CameraSetRelativeView(GMReal cameraX, GMReal cameraY)
     finish;
 }
 
-fnReal CameraSetStopFactor(GMReal factor)
+expReal CameraSetStopFactor(GMReal factor)
 {
     Factor = factor;
     finish;
 }
 
-fnReal CameraSetRoomSize(GMReal roomWidth, GMReal roomHeight)
+expReal CameraSetRoomSize(GMReal roomWidth, GMReal roomHeight)
 {
     RoomWidth = roomWidth;
     RoomHeight = roomHeight;
@@ -256,7 +272,7 @@ fnReal CameraSetRoomSize(GMReal roomWidth, GMReal roomHeight)
     finish;
 }
 
-fnReal CameraSetLimit(GMReal limitLeft, GMReal limitTop)
+expReal CameraSetLimit(GMReal limitLeft, GMReal limitTop)
 {
     LimitLeft = limitLeft;
     LimitTop = limitTop;
@@ -264,27 +280,27 @@ fnReal CameraSetLimit(GMReal limitLeft, GMReal limitTop)
     finish;
 }
 
-fnReal CameraGetSpeedDirection()
+expReal CameraGetSpeedDirection()
 {
     return point_direction(CameraX, CameraY, OldCameraX, OldCameraY);
 }
 
-fnReal CameraGetSpeed()
+expReal CameraGetSpeed()
 {
     return point_distance(CameraX, CameraY, OldCameraX, OldCameraY);
 }
 
-fnReal CameraGetXSpeed()
+expReal CameraGetXSpeed()
 {
     return CameraX - OldCameraX;
 }
 
-fnReal CameraGetYSpeed()
+expReal CameraGetYSpeed()
 {
     return CameraY - OldCameraY;
 }
 
-fnReal CameraSetViewSize(GMReal viewWidth, GMReal viewHeight)
+expReal CameraSetViewSize(GMReal viewWidth, GMReal viewHeight)
 {
     ViewWidth = viewWidth;
     ViewHeight = viewHeight;
@@ -305,7 +321,7 @@ static GMReal RopeArclength(GMReal a, GMReal b, GMReal x)
     return temp2 * (x - b) / 2 - log(temp2 - temp1) / a / 4;
 }
 
-fnReal RopeSetAccuracy(GMReal iterations, GMReal steps)
+expReal RopeSetAccuracy(GMReal iterations, GMReal steps)
 {
     Iterations = static_cast<int>(iterations);
 	RopeSteps = static_cast<int>(steps);
@@ -371,7 +387,7 @@ static GMReal RopeCalculate(GMReal x1, GMReal y1, GMReal x2, GMReal y2, GMReal l
     return 1;
 }
 
-fnReal DrawRope(GMReal x1, GMReal y1, GMReal x2, GMReal y2, GMReal length, GMReal back)
+expReal DrawRope(GMReal x1, GMReal y1, GMReal x2, GMReal y2, GMReal length, GMReal back)
 {
     GMReal width = 1, height = 1;
     if (back != gm::noone)
@@ -509,4 +525,149 @@ fnReal DrawRope(GMReal x1, GMReal y1, GMReal x2, GMReal y2, GMReal length, GMRea
 
     return state;
 }
+#pragma endregion
+
+#pragma region Load Tiles
+std::vector<int> DrawSpritesList;
+
+expReal LoadDrawSpritesList(GMReal a, GMReal b, GMReal c, GMReal d, GMReal e, GMReal f)
+{
+    DrawSpritesList.clear();
+    DrawSpritesList.push_back(static_cast<int>(a));
+    DrawSpritesList.push_back(static_cast<int>(b));
+    DrawSpritesList.push_back(static_cast<int>(c));
+    DrawSpritesList.push_back(static_cast<int>(d));
+    DrawSpritesList.push_back(static_cast<int>(e));
+    DrawSpritesList.push_back(static_cast<int>(f));
+
+    finish;
+}
+
+expReal LoadRoomTiles(GMString path)
+{
+    try
+    {
+        if (!std::filesystem::exists(path))
+            return 0.0;
+
+        GMReal buffer = gm::buffer_create();
+        gm::buffer_read_from_file(buffer, path);
+
+        GMReal version = gm::buffer_read_uint8(buffer);
+
+        // Tile Layer - 在非编辑模式下无用
+        GMReal num = gm::buffer_read_uint32(buffer);
+        for (int i = 0; i < num; ++i)
+        {
+            gm::buffer_read_int32(buffer);
+            gm::buffer_read_string(buffer);
+        }
+
+        std::vector<int> resList;
+        std::vector<bool> resExistsList;
+        std::string err = "";
+
+        // Tiles
+        num = gm::buffer_read_uint32(buffer);
+        for (int i = 0; i < num; ++i)
+        {
+            std::string name = gm::buffer_read_string(buffer);
+            int back = static_cast<int>(GetResource(name));
+            resList.push_back(back);
+
+            if (!gm::background_exists(back))
+            {
+                err += "在 scrLoadRoomTiles() 中，背景 (" + name + ") 不存在。\n";
+                resExistsList.push_back(false);
+            }
+            else
+                resExistsList.push_back(true);
+        }
+
+        num = gm::buffer_read_uint32(buffer);
+        for (int i = 0; i < num; ++i)
+        {
+            int pos = static_cast<int>(gm::buffer_read_int32(buffer));
+            if (!resExistsList[pos])
+            {
+                gm::buffer_set_pos(buffer, gm::buffer_get_pos(buffer) + 9 * 4 + 1);
+                continue;
+            }
+
+            int tile = gm::tile_add(resList[pos], (int)gm::buffer_read_int32(buffer),
+                (int)gm::buffer_read_int32(buffer), (int)gm::buffer_read_int32(buffer),
+                (int)gm::buffer_read_int32(buffer), gm::buffer_read_int32(buffer),
+                gm::buffer_read_int32(buffer), (int)gm::buffer_read_int32(buffer));
+
+            gm::tile_set_scale(tile, gm::buffer_read_float32(buffer),
+                gm::buffer_read_float32(buffer));
+
+            gm::tile_set_alpha(tile, gm::buffer_read_uint8(buffer) / 255);
+        }
+
+        resList.clear();
+        resExistsList.clear();
+
+        // Sprites
+        num = gm::buffer_read_uint32(buffer);
+        for (int i = 0; i < num; ++i)
+        {
+            std::string name = gm::buffer_read_string(buffer);
+            int spr = static_cast<int>(GetResource(name));
+            resList.push_back(spr);
+
+            if (!gm::sprite_exists(spr))
+            {
+                err += "在 scrLoadRoomTiles() 中，Sprite (" + name + ") 不存在。\n";
+                resExistsList.push_back(false);
+            }
+            else
+                resExistsList.push_back(true);
+        }
+
+        num = gm::buffer_read_uint32(buffer);
+        for (int i = 0; i < num; ++i)
+        {
+            int pos = static_cast<int>(gm::buffer_read_int32(buffer));
+            if (!resExistsList[pos])
+            {
+                gm::buffer_set_pos(buffer, gm::buffer_get_pos(buffer) + 8 * 4 + 2);
+                continue;
+            }
+
+            int map = gm::ds_map_create();
+            gm::ds_map_add(map, "sprite", resList[pos]);
+            gm::ds_map_add(map, "scrollX", gm::buffer_read_float32(buffer));
+            gm::ds_map_add(map, "scrollY", gm::buffer_read_float32(buffer));
+            gm::ds_map_add(map, "curIndex", gm::buffer_read_int32(buffer));
+            gm::ds_map_add(map, "x", gm::buffer_read_int32(buffer));
+            gm::ds_map_add(map, "y", gm::buffer_read_int32(buffer));
+            gm::ds_map_add(map, "xscale", gm::buffer_read_float32(buffer));
+            gm::ds_map_add(map, "yscale", gm::buffer_read_float32(buffer));
+            gm::ds_map_add(map, "alpha", gm::buffer_read_uint8(buffer) / 255);
+            gm::ds_map_add(map, "speed", gm::buffer_read_float32(buffer));
+
+            if (gm::ds_map_find_value(map, "speed") != 0)
+                gm::ds_map_replace(map, "curIndex", 0);
+
+            int listPos = static_cast<int>(gm::buffer_read_uint8(buffer));
+            if (listPos > 5)
+            {
+                err += "在 scrLoadRoomTiles() 中，层 " + std::to_string(listPos) + " 不存在。\n";
+                continue;
+            }
+
+            gm::ds_list_add(DrawSpritesList[listPos], map);
+        }
+
+        gm::buffer_destroy(buffer);
+
+        if (err != "")
+            throw std::wstring(err.begin(), err.end()).c_str();
+
+        finish;
+    }
+    simplecatch(L"scrLoadRoomTiles()", 0)
+}
+
 #pragma endregion
