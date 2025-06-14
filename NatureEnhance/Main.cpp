@@ -594,14 +594,18 @@ expReal LoadRoomTiles(GMString path)
                 continue;
             }
 
-            int tile = gm::tile_add(resList[pos], (int)gm::buffer_read_int32(buffer),
-                (int)gm::buffer_read_int32(buffer), (int)gm::buffer_read_int32(buffer),
-                (int)gm::buffer_read_int32(buffer), gm::buffer_read_int32(buffer),
-                gm::buffer_read_int32(buffer), (int)gm::buffer_read_int32(buffer));
+            int left = static_cast<int>(gm::buffer_read_int32(buffer));
+            int top = static_cast<int>(gm::buffer_read_int32(buffer));
+            int width = static_cast<int>(gm::buffer_read_int32(buffer));
+            int height = static_cast<int>(gm::buffer_read_int32(buffer));
+            GMReal x = gm::buffer_read_int32(buffer);
+            GMReal y = gm::buffer_read_int32(buffer);
+            int depth = static_cast<int>(gm::buffer_read_int32(buffer));
+            GMReal xscale = gm::buffer_read_float32(buffer);
+            GMReal yscale = gm::buffer_read_float32(buffer);
 
-            gm::tile_set_scale(tile, gm::buffer_read_float32(buffer),
-                gm::buffer_read_float32(buffer));
-
+            int tile = gm::tile_add(resList[pos], left, top, width, height, x, y, depth);
+            gm::tile_set_scale(tile, xscale, yscale);
             gm::tile_set_alpha(tile, gm::buffer_read_uint8(buffer) / 255);
         }
 
