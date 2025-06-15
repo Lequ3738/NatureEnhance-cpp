@@ -215,7 +215,11 @@ expReal ne_list_write_buffer(GMReal list, GMReal buffer, GMReal types)
 		{
 			GMReal type = gm::ds_list_find_value((int)types, i % typeSize);
 			gm::CGMVariable value = gm::ds_list_find_value((int)list, i);
-			gm::buffer_write((int)buffer, (int)type, value);
+
+			if (value.IsString())
+				gm::buffer_write((int)buffer, (int)type, value.c_str());
+			else
+				gm::buffer_write((int)buffer, (int)type, value.real());
 		}
 
 		ne_list_destroy(types);
