@@ -56,14 +56,20 @@ double point_distance(double x1, double y1, double x2, double y2)
 
 double sign(double x) { return (x > 0) - (x < 0); }
 
-void toUpperAscii(char* str)
-{
-    if (str == nullptr)
-        return;
+char* toUpperAscii(const char* str)  
+{  
+    if (str == nullptr)  
+        return nullptr;  
 
-    for (int i = 0; str[i] != '\0'; i++)
-    {
-        if (str[i] >= 'a' && str[i] <= 'z')
-            str[i] -= 32;
-    }
+    size_t len = strlen(str) + 1;  
+    char* copy = new char[len];  
+    strcpy_s(copy, len, str);  
+
+    for (size_t i = 0; i < len - 1; i++)
+    {  
+        if (copy[i] >= 'a' && copy[i] <= 'z')  
+            copy[i] -= 32;  
+    }  
+
+    return copy;  
 }

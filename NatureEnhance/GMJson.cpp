@@ -164,10 +164,10 @@ static GMString ChangeCoding(const char* str, const char* inputCoding, const cha
 }
 
 #define changeInput(str) \
-	(isChangeCoding(inputCoding) ? ChangeCoding(str, inputCoding, "UTF-8") : str)
+	(isChangeCoding(input) ? ChangeCoding(str, input, "UTF-8") : str)
 
 #define changeOutput(str) \
-	(isChangeCoding(outputCoding) ? ChangeCoding(str, "UTF-8", outputCoding) : str)
+	(isChangeCoding(output) ? ChangeCoding(str, "UTF-8", output) : str)
 
 expReal JsonDecode(GMString jsonstr, GMString inputCoding, GMString outputCoding)
 {
@@ -176,8 +176,8 @@ expReal JsonDecode(GMString jsonstr, GMString inputCoding, GMString outputCoding
 		if (JsonDeleteMap == nullptr || JsonDeleteList == nullptr)
 			throw L"JsonDeleteMap 未初始化，请先调用 JsonInit 函数。";
 
-		toUpperAscii(inputCoding);
-		toUpperAscii(outputCoding);
+		char* input = toUpperAscii(inputCoding);
+		char* output = toUpperAscii(outputCoding);
 
 		const char* utf8JsonStr = changeInput(jsonstr);
 		if (utf8JsonStr == nullptr)
@@ -448,8 +448,8 @@ expReal JsonGetDsType(GMReal rootNode, GMReal list)
 
 expString StringChangeCoding(GMString str, GMString in, GMString out)
 {
-	toUpperAscii(in);
-	toUpperAscii(out);
+	char* input = toUpperAscii(in);
+	char* output = toUpperAscii(out);
 
-	return ChangeCoding(str, in, out);
+	return ChangeCoding(str, input, output);
 }

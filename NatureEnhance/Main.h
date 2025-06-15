@@ -5,7 +5,7 @@
 #include <string>
 
 typedef double GMReal;
-typedef char* GMString;
+typedef const char* GMString;
 
 #define expReal extern "C" __declspec(dllexport) GMReal _cdecl
 #define expString extern "C" __declspec(dllexport) GMString _cdecl

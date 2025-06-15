@@ -13,4 +13,4 @@ double point_direction(double x1, double y1, double x2, double y2);
 double point_distance(double x1, double y1, double x2, double y2);
 double sign(double x);
 
-void toUpperAscii(char* str);
+char* toUpperAscii(const char* str);
