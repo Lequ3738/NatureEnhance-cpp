@@ -3,6 +3,7 @@
 #include "DataStruct.h"
 #include <filesystem>
 #include <vector>
+#include <fstream>
 
 gm::CGMVariable GetResource(GMString res)
 {
@@ -680,6 +681,115 @@ expReal LoadRoomTiles(GMString path)
         finish;
     }
     simplecatch(L"scrLoadRoomTiles()", 0)
+}
+
+#pragma endregion
+
+#pragma region Load Text Resources
+
+static void StringReplaceAll(std::string& str, const std::string& from, const std::string& to)
+{
+    if (from.empty()) return; // 避免空子串导致死循环
+
+    size_t start_pos = 0;
+    while ((start_pos = str.find(from, start_pos)) != std::string::npos)
+    {
+        str.replace(start_pos, from.length(), to);
+        start_pos += to.length();
+    }
+}
+
+expReal InitTexts(GMString path)
+{
+    using namespace std;
+    namespace fs = filesystem;
+
+    try
+    {
+        if (!fs::exists(path))
+        {
+            string errpath = path;
+            wstring err = L"文件夹路径 (" + wstring(errpath.begin(), errpath.end()) + L") 不存在。";
+            throw err.c_str();
+        }
+
+        vector<fs::path> textFilePath;
+
+        if (fs::is_regular_file(path))  // 读取指定的文件
+            textFilePath.push_back(path);
+        else
+        {
+            // 读取文件夹（及其子文件夹）下所有的 .txt 文件
+            for (const auto& entry : fs::recursive_directory_iterator(path))
+            {
+                if (entry.is_regular_file() && entry.path().extension() == ".txt")
+                    textFilePath.push_back(entry.path().lexically_normal());
+            }
+        }
+
+        for (auto& file : textFilePath)
+        {
+            ifstream filestream(file);
+            if (!filestream)
+            {
+                wstring err = L"文件 (" + wstring(file) + L") 打开失败。";
+                throw err.c_str();
+            }
+
+            // 将整个文件都读取到字符串中，减少 I/O 调用带来的性能开销
+            string data = {
+                istreambuf_iterator<char>(filestream),
+                istreambuf_iterator<char>()
+            };
+
+            istringstream strstream(data);
+            string line, code = "";
+
+            while (getline(strstream, line))
+            {
+                // 去掉前面的空格和制表符
+                size_t whitePos = line.find_first_not_of(" \t");
+                line = (whitePos == string::npos) ? "" : line.substr(whitePos);
+
+                if (line == "")
+                    continue;
+                
+                size_t commentPos = line.find("//");
+                if (commentPos == 0)
+                    continue;
+                else if (commentPos != string::npos)
+                    line = line.substr(0U, commentPos);
+                
+                size_t regionPos = line.find("#region");
+                if (regionPos >= 0 && regionPos != string::npos)
+                    continue;
+                
+                size_t regionEndPos = line.find("#end");
+                if (regionEndPos >= 0 && regionEndPos != string::npos)
+                    continue;
+                
+                size_t namedPos = line.find_first_of('[');
+                if (namedPos == string::npos)
+                {
+                    namedPos = line.find_first_of('=');
+                    if (namedPos == string::npos)
+                        continue;
+                }
+
+                string name = line.substr(0U, namedPos);
+
+                StringReplaceAll(line, "#", "\n");
+                StringReplaceAll(line, "''", "\" + chr(34) + \"");
+
+                code += "globalvar " + name + "; " + line + "\n";
+            }
+
+            gm::execute_string(code);
+        }
+
+        finish;
+    }
+    simplecatch(L"InitTexts", 0)
 }
 
 #pragma endregion
