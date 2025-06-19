@@ -37,6 +37,25 @@ expReal GetDSController(GMReal propertyMap, GMReal nameMap)
     NameMap = nameMap;
     finish;
 }
+
+expReal BinToDec(GMString bin)
+{
+    try
+    {
+        int value = 0;
+        while (*bin)
+        {
+            if (*bin != '0' && *bin != '1')
+                throw L"不合法的二进制字符串字面量。";
+
+            value = (value << 1) | (*bin - '0');
+            ++bin;
+        }
+
+        return value;
+    }
+    simplecatch(L"BinToDec", -1)
+}
 #pragma endregion
 
 #pragma region Camera
