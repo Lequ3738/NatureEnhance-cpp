@@ -219,6 +219,7 @@
     <ClCompile Include="NatureEnhance\GameMakerMath.cpp" />
     <ClCompile Include="NatureEnhance\GMJson.cpp" />
     <ClCompile Include="NatureEnhance\Main.cpp" />
+    <ClCompile Include="NatureEnhance\String.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

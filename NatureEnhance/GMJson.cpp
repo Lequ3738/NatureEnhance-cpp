@@ -132,37 +132,6 @@ static Tree* GetTreeNode(GMReal id)
 #define isChangeCoding(coding) \
 	strcmp(coding, "UTF-8") != 0 && strcmp(coding, "") != 0
 
-static GMString ChangeCoding(const char* str, const char* inputCoding, const char* outputCoding)
-{
-	iconv_t cd = iconv_open(outputCoding, inputCoding);
-	if (cd == (iconv_t)-1)
-		return nullptr;
-
-	size_t in_len = strlen(str);
-	size_t out_len = in_len * 4;  // UTF-8 最多是原始大小的 4 倍
-	char* output = new char[out_len + 1]; // +1 存放终止符
-	memset(output, 0, out_len + 1);
-
-	// 设置输入/输出缓冲区指针
-	char* in_ptr = const_cast<char*>(str);
-	char* out_ptr = output;
-	size_t in_bytes_left = in_len;
-	size_t out_bytes_left = out_len;
-
-	// 执行转换
-	if (iconv(cd, (const char**)&in_ptr, &in_bytes_left, &out_ptr, &out_bytes_left) == (size_t)-1)
-	{
-		iconv_close(cd);
-		delete[] output;
-		return nullptr;
-	}
-
-	// 添加终止符并清理
-	*out_ptr = '\0';
-	iconv_close(cd);
-	return output;
-}
-
 #define changeInput(str) \
 	(isChangeCoding(input) ? ChangeCoding(str, input, "UTF-8") : str)
 

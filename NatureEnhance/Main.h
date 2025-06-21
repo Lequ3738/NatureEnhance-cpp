@@ -26,6 +26,8 @@ constexpr GMReal ds_type_priority = 5;
 
 gm::CGMVariable GetResource(GMString res);
 gm::CGMVariable GetResource(std::string res);
+GMString ChangeCoding(GMString str, GMString inputCoding, GMString outputCoding);
+GMString string_to_char(const std::string& str);
 
 extern bool show_error;
 extern HWND GMWindowsHandle;

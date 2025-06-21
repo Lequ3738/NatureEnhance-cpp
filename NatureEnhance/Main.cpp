@@ -1,9 +1,12 @@
 #include "Main.h"
 #include "buffer.h"
 #include "DataStruct.h"
+#include "iconv.h"
 #include <filesystem>
 #include <vector>
 #include <fstream>
+#include <codecvt>
+#include <regex>
 
 gm::CGMVariable GetResource(GMString res)
 {
@@ -56,13 +59,97 @@ expReal BinToDec(GMString bin)
     }
     simplecatch(L"BinToDec", -1)
 }
+
+typedef void (WINAPI* GetVersionPtr)(LPDWORD, LPDWORD, LPDWORD);
+
+expReal OSGetVersion()
+{
+    HMODULE ntdllModule = GetModuleHandleW(L"ntdll.dll");
+    if (!ntdllModule)
+        return -1;
+
+    auto GetVersion = (GetVersionPtr)GetProcAddress(ntdllModule, "RtlGetNtVersionNumbers");
+    if (!GetVersion)
+        return -1;
+
+    DWORD major, minor, build;
+    GetVersion(&major, &minor, &build);
+
+    if (major == 10)
+    {
+        if (build >= 22000) return 11;
+        else return 10;
+    }
+    else if (major == 6)
+    {
+        if (minor == 3) return 8.1;
+        if (minor == 2) return 8;
+        if (minor == 1) return 7;
+        if (minor == 0) return 6;
+    }
+
+    return (double)major;
+}
+
+expReal ShowMessageBox(GMString text, GMString caption, GMReal icon)
+{
+    UINT realIcon = 0;
+    if (icon == 1)
+        realIcon = MB_ICONERROR;
+    else if (icon == 2)
+        realIcon = MB_ICONWARNING;
+    else if (icon == 3)
+        realIcon = MB_ICONINFORMATION;
+
+    MessageBoxA(GMWindowsHandle, text, caption, MB_OK | realIcon);
+    finish;
+}
+
+GMString ChangeCoding(GMString str, GMString inputCoding, GMString outputCoding)
+{
+    iconv_t cd = iconv_open(outputCoding, inputCoding);
+    if (cd == (iconv_t)-1)
+        return nullptr;
+
+    size_t in_len = strlen(str);
+    size_t out_len = in_len * 4;  // UTF-8 最多是原始大小的 4 倍
+    char* output = new char[out_len + 1]; // +1 存放终止符
+    memset(output, 0, out_len + 1);
+
+    // 设置输入/输出缓冲区指针
+    char* in_ptr = const_cast<char*>(str);
+    char* out_ptr = output;
+    size_t in_bytes_left = in_len;
+    size_t out_bytes_left = out_len;
+
+    // 执行转换
+    if (iconv(cd, (GMString*)&in_ptr, &in_bytes_left, &out_ptr, &out_bytes_left) == (size_t)-1)
+    {
+        iconv_close(cd);
+        delete[] output;
+        return nullptr;
+    }
+
+    // 添加终止符并清理
+    *out_ptr = '\0';
+    iconv_close(cd);
+    return output;
+}
+
+std::wstring ToWstring(GMString str)
+{
+    GMString utf8_str = ChangeCoding(str, "GB2312", "UTF-8");
+    std::string stdstr(utf8_str);
+    std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
+    return converter.from_bytes(str);
+}
 #pragma endregion
 
 #pragma region Camera
 GMReal CameraX, CameraY, ViewX, ViewY;
 GMReal RoomWidth = 400, RoomHeight = 225, ViewWidth = 400, ViewHeight = 225;
 GMReal Mode = 1, SnapDiv = 12, OffsetX = 24, OffsetY = -24, Factor = 0.16, MoveMode = 0;
-GMReal LimitLeft = 0, LimitTop = 0, OldCameraX = 0, OldCameraY = 0, RegistryRoot = 0;
+GMReal LimitLeft = 0, LimitTop = 0, OldCameraX = 0, OldCameraY = 0;
 
 expReal CameraInit(GMReal mode, GMReal playerX, GMReal playerY, GMReal playerScale, GMReal limitLeft,
 	GMReal limitTop, GMReal roomWidth, GMReal roomHeight, GMReal viewWidth, GMReal viewHeight)
@@ -811,4 +898,207 @@ expReal InitTexts(GMString path)
     simplecatch(L"InitTexts", 0)
 }
 
+#pragma endregion
+
+#pragma region High Resolution Timer
+
+ULONGLONG frequency = 1;
+
+GMReal TimerInit()
+{
+    if (QueryPerformanceFrequency((LARGE_INTEGER*)&frequency))
+        finish;
+
+    fail;
+}
+
+GMReal TimerGet()
+{
+    ULONGLONG time = 0;
+    if (QueryPerformanceCounter((LARGE_INTEGER*)&time))
+        return (double)(time / frequency);
+    
+    return -1;
+}
+
+#pragma endregion
+
+#pragma region IO
+HKEY RegistryRoot;
+
+GMReal RegistrySetRoot(GMReal root)
+{
+    switch ((int)root)
+    {
+    case 0: RegistryRoot = HKEY_CURRENT_USER; finish;
+    case 1: RegistryRoot = HKEY_LOCAL_MACHINE; finish;
+    case 2: RegistryRoot = HKEY_CLASSES_ROOT; finish;
+    case 3: RegistryRoot = HKEY_USERS; finish;
+    }
+
+    fail;
+}
+
+GMReal RegistryDeleteKey(GMString name, GMString key)
+{
+    try
+    {
+        HKEY hkey;
+        std::wstring subKey = ToWstring(name);
+        std::wstring valueName = ToWstring(key);
+
+        long result = RegOpenKeyEx(RegistryRoot, subKey.c_str(), 0, KEY_WRITE, &hkey);
+        if (result != ERROR_SUCCESS)
+        {
+            if (result == ERROR_FILE_NOT_FOUND)
+            {
+                std::wstring err = L"注册表路径不存在: " + subKey;
+                throw err.c_str();
+            }
+
+            std::wstring err = L"打开注册表失败 (错误代码: " + std::to_wstring(result) + L")";
+            throw err.c_str();
+        }
+
+        result = RegDeleteValue(hkey, valueName.c_str());
+        if (result != ERROR_SUCCESS)
+        {
+            if (result == ERROR_FILE_NOT_FOUND)
+            {
+                std::wstring err = L"值不存在: " + valueName;
+                throw err.c_str();
+            }
+
+            std::wstring err = L"删除失败 (错误代码: " + std::to_wstring(result) + L")";
+            throw err.c_str();
+        }
+
+        RegCloseKey(hkey);
+        finish;
+    }
+    simplecatch(L"RegistryDeleteKey", 0)
+}
+
+std::vector<GMString> MatchedFiles;
+
+GMReal GetAllFilesInSubfolders(GMString dir, GMString starchPattern)
+{
+    namespace fs = std::filesystem;
+
+    try
+    {
+        MatchedFiles.clear();
+
+        fs::path directory(dir);
+        std::string pattern(starchPattern);
+
+        pattern = pattern.empty() ? "*" : pattern;
+
+        // 转换通配符为正则表达式
+        std::string regexPattern;
+        regexPattern.reserve(pattern.size() * 2);
+
+        for (char c : pattern)
+        {
+            switch (c)
+            {
+            case '*':   regexPattern += ".*";   break;
+            case '?':   regexPattern += '.';    break;
+            case '.':   regexPattern += "\\.";  break;
+            case '\\':  regexPattern += "\\\\"; break;
+            default:    regexPattern += c;      break;
+            }
+        }
+
+        std::regex regex = std::regex(regexPattern, std::regex_constants::icase);
+
+        for (const auto& entry : fs::recursive_directory_iterator(
+            directory, fs::directory_options::skip_permission_denied))
+        {
+            if (entry.is_regular_file())
+            {
+                std::string filename = entry.path().filename().string();
+
+                if (std::regex_match(filename, regex))
+                    MatchedFiles.push_back(string_to_char(entry.path().string()));
+            }
+        }
+
+        return MatchedFiles.size();
+    }
+    catch (const std::regex_error& e)
+    {
+        if (show_error)
+        {
+            MessageBox(GMWindowsHandle, L"在执行函数 GetAllFilesInSubfolders 时抛出异常。\n无效的通配符。", 
+                L"NatureEnhance Error", MB_OK | MB_ICONERROR);
+        }
+        
+        return -1;
+    }
+    catch (const fs::filesystem_error& e)
+    {
+        if (show_error)
+        {
+            MessageBox(GMWindowsHandle, L"在执行函数 GetAllFilesInSubfolders 时抛出异常。\n文件系统错误。",
+                L"NatureEnhance Error", MB_OK | MB_ICONERROR);
+        }
+
+        return -1;
+    }
+    simplecatch(L"GetAllFilesInSubfolders", -1)
+}
+
+GMString GetAllFilesDir(GMReal num)
+{
+    if (num < 0 || num > MatchedFiles.size() - 1)
+        return "";
+
+    return MatchedFiles[(int)num];
+}
+
+GMString ReadAllText(GMString file)
+{
+    try
+    {
+        std::ifstream filestream(file);
+        if (!filestream)
+        {
+            std::wstring err = L"文件 (" + std::wstring(std::filesystem::path(file)) +
+                L") 打开失败。";
+            throw err.c_str();
+        }
+
+        std::string data = {
+            std::istreambuf_iterator<char>(filestream),
+            std::istreambuf_iterator<char>()
+        };
+
+        return string_to_char(data);
+    }
+    simplecatch(L"ReadAllText", "")
+}
+
+GMReal FileIsUsing(GMString file)
+{
+    HANDLE hFile = CreateFileA(
+        file,
+        GENERIC_READ | GENERIC_WRITE,
+        0,  // 独占模式打开
+        NULL,
+        OPEN_EXISTING,
+        FILE_ATTRIBUTE_NORMAL,
+        NULL
+    );
+
+    if (hFile == INVALID_HANDLE_VALUE)
+    {
+        DWORD error = GetLastError();
+        // 共享冲突或拒绝访问表示文件被占用
+        return (error == ERROR_SHARING_VIOLATION || error == ERROR_ACCESS_DENIED);
+    }
+
+    CloseHandle(hFile);
+    return false;  // 文件未被占用
+}
 #pragma endregion
