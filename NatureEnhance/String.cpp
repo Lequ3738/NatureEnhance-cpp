@@ -135,15 +135,15 @@ expString TimeString(GMReal time)
 {
 	std::string timeString;
 
-	timeString = std::to_string(floor(time / 3600)) + ":";
+	timeString = std::to_string((int)floor(time / 3600)) + ":";
 	time = fmod(time, 3600);
-	timeString += std::to_string(floor(time / 600));
+	timeString += std::to_string((int)floor(time / 600));
 	time = fmod(time, 600);
-	timeString += std::to_string(floor(time / 60)) + ":";
+	timeString += std::to_string((int)floor(time / 60)) + ":";
 	time = fmod(time, 60);
-	timeString += std::to_string(floor(time / 10));
+	timeString += std::to_string((int)floor(time / 10));
 	time = fmod(time, 10);
-	timeString += std::to_string(floor(time));
+	timeString += std::to_string((int)floor(time));
 
 	return string_to_char(timeString);
 }
