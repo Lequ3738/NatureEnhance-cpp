@@ -158,32 +158,33 @@ expString GetString(GMReal num, GMString format, GMString country)
 		}
 		else if (*country == '\0')
 		{
-			return string_to_char(std::format("{:" + std::string(format) + "}", num));
+			return string_to_char(std::vformat("{:" + std::string(format) + "}", 
+				std::make_format_args(num)));
 		}
 		else
 		{
-			return string_to_char(std::format(std::locale(country), 
-				"{0:" + std::string(format) + "}", num));
+			return string_to_char(std::vformat(std::locale(country), 
+				"{0:" + std::string(format) + "}", std::make_format_args(num)));
 		}
 	}
 	simplecatch(L"GetString", "")
 }
 
-std::vector<GMString> StringTokenResult;
+std::vector<std::wstring> StringTokenResult;
 
 expReal StringToken(GMString text, GMString sep, GMReal dontRemoveEmpty)
 {
 	StringTokenResult.clear();
 
-	if (*sep == '\0')
-	{
-		StringTokenResult.push_back(text);
-		return 1;
-	}
-
 	std::wstring w_text = gb2312_to_wstring(text);
 	std::wstring w_sep = gb2312_to_wstring(sep);
-
+	
+	if (*sep == '\0')
+	{
+		StringTokenResult.push_back(w_text);
+		return 1;
+	}
+	
 	size_t pos = 0, found = 0;
 	while ((found = w_text.find(w_sep, pos)) != std::wstring::npos)
 	{
@@ -191,7 +192,14 @@ expReal StringToken(GMString text, GMString sep, GMReal dontRemoveEmpty)
 		pos = found + w_sep.length();
 		
 		if (!token.empty() || dontRemoveEmpty > 0.5)
-			StringTokenResult.push_back(wstring_to_gb2312(token));
+			StringTokenResult.push_back(token);
+	}
+
+	if (pos <= w_text.length())
+	{
+		std::wstring token = w_text.substr(pos);
+		if (!token.empty() || dontRemoveEmpty > 0.5)
+			StringTokenResult.push_back(token);
 	}
 
 	return StringTokenResult.size();
@@ -202,7 +210,7 @@ expString StringGetToken(GMReal num)
 	if (num < 0 || num > StringTokenResult.size() - 1)
 		return "";
 
-	return StringTokenResult[(int)num];
+	return wstring_to_gb2312(StringTokenResult[(int)num]);
 }
 
 expReal StringTryParse(GMString str)

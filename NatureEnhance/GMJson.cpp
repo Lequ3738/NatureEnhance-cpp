@@ -1,6 +1,5 @@
 #include "Main.h"
 #include "json.hpp"
-#include "iconv.h"
 #include <stack>
 #include <map>
 #include <vector>

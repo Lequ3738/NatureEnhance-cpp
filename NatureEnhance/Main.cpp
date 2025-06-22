@@ -1,12 +1,11 @@
 #include "Main.h"
 #include "buffer.h"
-#include "DataStruct.h"
 #include "iconv.h"
 #include <filesystem>
 #include <vector>
 #include <fstream>
-#include <codecvt>
 #include <regex>
+#include <psapi.h>
 
 gm::CGMVariable GetResource(GMString res)
 {
@@ -105,6 +104,26 @@ expReal ShowMessageBox(GMString text, GMString caption, GMReal icon)
     finish;
 }
 
+expReal window_set_dpiaware()
+{
+    SetProcessDPIAware();
+    finish;
+}
+
+expReal get_ram_usage()
+{
+    DWORD dwProcessId;
+    HANDLE Process;
+    PROCESS_MEMORY_COUNTERS_EX pmc;
+
+    dwProcessId = GetCurrentProcessId();
+    Process = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, dwProcessId);
+    GetProcessMemoryInfo(Process, (PROCESS_MEMORY_COUNTERS*)&pmc, sizeof(pmc));
+    CloseHandle(Process);
+
+    return pmc.PrivateUsage;
+}
+
 GMString ChangeCoding(GMString str, GMString inputCoding, GMString outputCoding)
 {
     iconv_t cd = iconv_open(outputCoding, inputCoding);
@@ -140,8 +159,7 @@ std::wstring ToWstring(GMString str)
 {
     GMString utf8_str = ChangeCoding(str, "GB2312", "UTF-8");
     std::string stdstr(utf8_str);
-    std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
-    return converter.from_bytes(str);
+    return std::wstring(stdstr.begin(), stdstr.end());
 }
 #pragma endregion
 
@@ -904,7 +922,7 @@ expReal InitTexts(GMString path)
 
 ULONGLONG frequency = 1;
 
-GMReal TimerInit()
+expReal TimerInit()
 {
     if (QueryPerformanceFrequency((LARGE_INTEGER*)&frequency))
         finish;
@@ -912,11 +930,11 @@ GMReal TimerInit()
     fail;
 }
 
-GMReal TimerGet()
+expReal TimerGet()
 {
     ULONGLONG time = 0;
     if (QueryPerformanceCounter((LARGE_INTEGER*)&time))
-        return (double)(time / frequency);
+        return (double)time / (double)frequency;
     
     return -1;
 }
@@ -926,7 +944,7 @@ GMReal TimerGet()
 #pragma region IO
 HKEY RegistryRoot;
 
-GMReal RegistrySetRoot(GMReal root)
+expReal RegistrySetRoot(GMReal root)
 {
     switch ((int)root)
     {
@@ -939,7 +957,7 @@ GMReal RegistrySetRoot(GMReal root)
     fail;
 }
 
-GMReal RegistryDeleteKey(GMString name, GMString key)
+expReal RegistryDeleteKey(GMString name, GMString key)
 {
     try
     {
@@ -981,7 +999,7 @@ GMReal RegistryDeleteKey(GMString name, GMString key)
 
 std::vector<GMString> MatchedFiles;
 
-GMReal GetAllFilesInSubfolders(GMString dir, GMString starchPattern)
+expReal GetAllFilesInSubfolders(GMString dir, GMString starchPattern)
 {
     namespace fs = std::filesystem;
 
@@ -1006,7 +1024,12 @@ GMReal GetAllFilesInSubfolders(GMString dir, GMString starchPattern)
             case '?':   regexPattern += '.';    break;
             case '.':   regexPattern += "\\.";  break;
             case '\\':  regexPattern += "\\\\"; break;
-            default:    regexPattern += c;      break;
+            default:
+                if (std::isalnum(static_cast<unsigned char>(c)))
+                    regexPattern += c;
+                else
+                    regexPattern += '\\', regexPattern += c;
+                break;
             }
         }
 
@@ -1026,7 +1049,7 @@ GMReal GetAllFilesInSubfolders(GMString dir, GMString starchPattern)
 
         return MatchedFiles.size();
     }
-    catch (const std::regex_error& e)
+    catch (const std::regex_error&)
     {
         if (show_error)
         {
@@ -1036,7 +1059,7 @@ GMReal GetAllFilesInSubfolders(GMString dir, GMString starchPattern)
         
         return -1;
     }
-    catch (const fs::filesystem_error& e)
+    catch (const fs::filesystem_error&)
     {
         if (show_error)
         {
@@ -1049,7 +1072,7 @@ GMReal GetAllFilesInSubfolders(GMString dir, GMString starchPattern)
     simplecatch(L"GetAllFilesInSubfolders", -1)
 }
 
-GMString GetAllFilesDir(GMReal num)
+expString GetAllFilesDir(GMReal num)
 {
     if (num < 0 || num > MatchedFiles.size() - 1)
         return "";
@@ -1057,11 +1080,11 @@ GMString GetAllFilesDir(GMReal num)
     return MatchedFiles[(int)num];
 }
 
-GMString ReadAllText(GMString file)
+expString ReadAllText(GMString file)
 {
     try
     {
-        std::ifstream filestream(file);
+        std::ifstream filestream(file, std::ios::binary);
         if (!filestream)
         {
             std::wstring err = L"нд╪Ч (" + std::wstring(std::filesystem::path(file)) +
@@ -1079,7 +1102,7 @@ GMString ReadAllText(GMString file)
     simplecatch(L"ReadAllText", "")
 }
 
-GMReal FileIsUsing(GMString file)
+expReal FileIsUsing(GMString file)
 {
     HANDLE hFile = CreateFileA(
         file,
