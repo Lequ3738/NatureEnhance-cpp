@@ -124,6 +124,34 @@ expReal get_ram_usage()
     return pmc.PrivateUsage;
 }
 
+expReal WindowIsFocused()
+{
+    return GetForegroundWindow() == GMWindowsHandle;
+}
+
+expReal WindowSetFocus()
+{
+    if (!SetForegroundWindow(GMWindowsHandle))
+    {
+        // 附加输入线程处理（绕过系统限制）
+        DWORD threadID = GetWindowThreadProcessId(GetForegroundWindow(), NULL);
+        DWORD currentThreadID = GetCurrentThreadId();
+
+        if (threadID != currentThreadID)
+        {
+            AttachThreadInput(currentThreadID, threadID, TRUE);
+            SetForegroundWindow(GMWindowsHandle);
+            AttachThreadInput(currentThreadID, threadID, FALSE);
+        }
+    }
+
+    // 确保窗口激活
+    SetActiveWindow(GMWindowsHandle);
+    SetFocus(GMWindowsHandle);
+
+    finish;
+}
+
 GMString ChangeCoding(GMString str, GMString inputCoding, GMString outputCoding)
 {
     iconv_t cd = iconv_open(outputCoding, inputCoding);
