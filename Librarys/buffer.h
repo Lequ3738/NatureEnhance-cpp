@@ -16,7 +16,7 @@ typedef const char* (*s_rr)(double, double);
 namespace gm
 {
 	extern r_v buffer_create;
-	extern r_r buffer_destroy, buffer_exists, buffer_get_pos, buffer_get_length;
+	extern r_r buffer_destroy, buffer_exists, buffer_get_pos, buffer_get_size;
 	extern r_r buffer_at_end, buffer_get_error, buffer_clear_error, buffer_clear;
 	extern r_r buffer_zlib_compress, buffer_zlib_uncompress, buffer_read_int8;
 	extern r_r buffer_read_uint8, buffer_read_int16, buffer_read_uint16;
@@ -27,7 +27,7 @@ namespace gm
 	extern r_rr buffer_write_int16, buffer_write_uint16, buffer_write_int32;
 	extern r_rr buffer_write_uint32, buffer_write_int64, buffer_write_uint64;
 	extern r_rr buffer_write_intv, buffer_write_uintv, buffer_write_float32, buffer_write_float64;
-	extern r_rr buffer_write_buffer;
+	extern r_rr buffer_write_buffer, buffer_get_address, buffer_set_size;
 	extern r_rs buffer_read_from_file, buffer_write_to_file, buffer_append_to_file;
 	extern r_rs buffer_rc4_crypt, buffer_write_string, buffer_write_data, buffer_write_hex;
 	extern r_rsrr buffer_read_from_file_part;
