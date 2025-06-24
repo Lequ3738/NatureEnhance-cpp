@@ -75,9 +75,9 @@ expReal JsonFree()
 		if (it->second >= 0 && !contains(deletedDatas, it->second))
 		{
 			gm::ds_map_destroy(it->second);
-			it = JsonDeleteMap->erase(it);
-
 			deletedDatas.push_back(it->second);
+
+			it = JsonDeleteMap->erase(it);
 		}
 		else
 			++it;
@@ -91,9 +91,9 @@ expReal JsonFree()
 		if (it->second >= 0 && !contains(deletedDatas, it->second))
 		{
 			gm::ds_list_destroy(it->second);
-			it = JsonDeleteList->erase(it);
-
 			deletedDatas.push_back(it->second);
+
+			it = JsonDeleteList->erase(it);
 		}
 		else
 			++it;
@@ -298,7 +298,7 @@ expReal JsonDestroy(GMReal rootNode)
 
 				(*JsonDeleteMap)[curTree] = gm::noone;  // 清除映射表中的引用
 			}
-			else if (!contains(deletedLists, (*JsonDeleteList)[curTree]))
+			else if (!curTree->ismap && !contains(deletedLists, (*JsonDeleteList)[curTree]))
 			{
 				gm::ds_list_destroy((*JsonDeleteList)[curTree]);
 				deletedLists.push_back((*JsonDeleteList)[curTree]);

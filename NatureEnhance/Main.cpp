@@ -26,9 +26,13 @@ expReal ShowErrorMessage(GMReal mode)
 }
 
 HWND GMWindowsHandle = nullptr;
+IDirect3DDevice8* Device = nullptr;
+
 expReal GetGMWindowsHandle(GMReal handle)
 {
     GMWindowsHandle = (HWND)(DWORD)handle;
+    Device = gmapi->GetDirect3DDevice();
+
     finish;
 }
 
@@ -1155,9 +1159,6 @@ expReal FileIsUsing(GMString file)
 #pragma endregion
 
 #pragma region Buffer & Surface
-
-IDirect3DDevice8* Device = nullptr;
-
 inline void D3DCheck(HRESULT result, int pos)
 {
     if (SUCCEEDED(result))

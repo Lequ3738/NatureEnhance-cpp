@@ -46,3 +46,5 @@
 #else
 #define GMAPI_API __declspec(dllimport)
 #endif
+
+extern gm::CGMAPI* gmapi;
