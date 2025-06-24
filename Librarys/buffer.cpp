@@ -5,7 +5,7 @@ HMODULE BufferDLL = nullptr;
 namespace gm
 {
 	r_v buffer_create;
-	r_r buffer_destroy, buffer_exists, buffer_get_pos, buffer_get_length;
+	r_r buffer_destroy, buffer_exists, buffer_get_pos, buffer_get_size;
 	r_r buffer_at_end, buffer_get_error, buffer_clear_error, buffer_clear;
 	r_r buffer_zlib_compress, buffer_zlib_uncompress, buffer_read_int8;
 	r_r buffer_read_uint8, buffer_read_int16, buffer_read_uint16;
@@ -16,7 +16,7 @@ namespace gm
 	r_rr buffer_write_int16, buffer_write_uint16, buffer_write_int32;
 	r_rr buffer_write_uint32, buffer_write_int64, buffer_write_uint64;
 	r_rr buffer_write_intv, buffer_write_uintv, buffer_write_float32, buffer_write_float64;
-	r_rr buffer_write_buffer;
+	r_rr buffer_write_buffer, buffer_get_address, buffer_set_size;
 	r_rs buffer_read_from_file, buffer_write_to_file, buffer_append_to_file;
 	r_rs buffer_rc4_crypt, buffer_write_string, buffer_write_data, buffer_write_hex;
 	r_rsrr buffer_read_from_file_part;
@@ -50,7 +50,7 @@ expReal ImportBufferModule(GMString path)
 		load(gm::buffer_exists, "buffer_exists", r_r);
 		load(gm::buffer_to_string, "buffer_to_string", s_r);
 		load(gm::buffer_get_pos, "buffer_get_pos", r_r);
-		load(gm::buffer_get_length, "buffer_get_length", r_r);
+		load(gm::buffer_get_size, "buffer_get_length", r_r);
 		load(gm::buffer_at_end, "buffer_at_end", r_r);
 		load(gm::buffer_get_error, "buffer_get_error", r_r);
 		load(gm::buffer_clear_error, "buffer_clear_error", r_r);
@@ -96,6 +96,8 @@ expReal ImportBufferModule(GMString path)
 		load(gm::buffer_read_hex, "buffer_read_hex", s_rr);
 		load(gm::buffer_write_buffer, "buffer_write_buffer", r_rr);
 		load(gm::buffer_write_buffer_part, "buffer_write_buffer_part", r_rrrr);
+		load(gm::buffer_get_address, "buffer_get_address", r_rr);
+		load(gm::buffer_set_size, "buffer_set_size", r_rr);
 
 		finish;
 	}
@@ -114,7 +116,7 @@ expReal FreeBufferModule()
 	gm::buffer_destroy = nullptr;
 	gm::buffer_exists = nullptr;
 	gm::buffer_get_pos = nullptr;
-	gm::buffer_get_length = nullptr;
+	gm::buffer_get_size = nullptr;
 	gm::buffer_at_end = nullptr;
 	gm::buffer_get_error = nullptr;
 	gm::buffer_clear_error = nullptr;
@@ -161,6 +163,8 @@ expReal FreeBufferModule()
 	gm::buffer_read_data = nullptr;
 	gm::buffer_read_hex = nullptr;
 	gm::buffer_write_buffer_part = nullptr;
+	gm::buffer_get_address = nullptr;
+	gm::buffer_set_size = nullptr;
 
 	finish;
 }

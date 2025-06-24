@@ -1,6 +1,8 @@
 #pragma once
 #include "Gmapi.h"
 #include "GameMakerMath.h"
+#include "d3dx8.h"
+#include "dxerr8.h"
 #include <variant>
 #include <string>
 

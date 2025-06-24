@@ -10,6 +10,10 @@ BOOL APIENTRY DllMain( HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReser
     {
         case DLL_PROCESS_ATTACH:
         {
+            // 应对 vs 内联 sprintf 导致 d3d8.lib 找不到 _sprintf 的问题
+            char f__kInline[1];
+            sprintf(f__kInline, "");
+
             DWORD result = 0;
             gmapi = gm::CGMAPI::Create(&result);
             // Check the initialization
