@@ -32,16 +32,16 @@ namespace gm
 		throw err.c_str(); \
 	}
 
-expReal ImportBufferModule(GMString path)
+expReal ImportBufferModule(GMString name)
 {
 	try
 	{
-		std::wstring wpath(path, path + strlen(path));
-		BufferDLL = LoadLibrary(wpath.c_str());
+		std::wstring wname(name, name + strlen(name));
+		BufferDLL = GetModuleHandle(wname.c_str());
 
 		if (BufferDLL == nullptr)
 		{
-			std::wstring err = L"º”‘ÿ " + wpath + L"  ß∞‹°£";
+			std::wstring err = L"º”‘ÿ " + wname + L"  ß∞‹°£";
 			throw err.c_str();
 		}
 
@@ -106,11 +106,7 @@ expReal ImportBufferModule(GMString path)
 
 expReal FreeBufferModule()
 {
-	if (BufferDLL != nullptr)
-	{
-		FreeLibrary(BufferDLL);
-		BufferDLL = nullptr;
-	}
+	BufferDLL = nullptr;
 
 	gm::buffer_create = nullptr;
 	gm::buffer_destroy = nullptr;

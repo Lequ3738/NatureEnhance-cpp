@@ -1159,7 +1159,7 @@ expReal FileIsUsing(GMString file)
 #pragma endregion
 
 #pragma region Buffer & Surface
-inline void D3DCheck(HRESULT result, int pos)
+void D3DCheck(HRESULT result, int pos)
 {
     if (SUCCEEDED(result))
         return;
@@ -1177,11 +1177,11 @@ expReal TextureToBuffer(GMReal buffer, GMReal gmtex, GMReal w, GMReal h)
         IDirect3DTexture8* texture = gm::CGMAPI::GetTextureArray()[(int)gmtex].texture;
         if (Device == nullptr)
             D3DCheck(texture->GetDevice(&Device), 1);
-
+        
         IDirect3DSurface8* surf = nullptr;
         IDirect3DSurface8* surfTemp = nullptr;
         D3DCheck(texture->GetSurfaceLevel(0, &surf), 2);
-
+        
         // 因为 GameMaker 的纹理被设置为 D3DPOOL_DEFAULT，不能直接读取数据信息
         // 所以要创建一个额外的 IDirect3DSurface8，将里面的数据复制过来
         D3DCheck(Device->CreateImageSurface(width, height, D3DFMT_A8R8G8B8, &surfTemp), 3);
@@ -1261,8 +1261,6 @@ expReal BufferToTexture(GMReal buffer, GMReal gmtex, GMReal w, GMReal h)
 
 expReal BufferToSurface(GMReal buffer, GMReal surface)
 {
-    char* src = (char*)(int)gm::buffer_get_address(buffer, false);
-
     int gmtex = gm::surface_get_texture((int)surface);
     int width = gm::surface_get_width((int)surface);
     int height = gm::surface_get_height((int)surface);
@@ -1274,6 +1272,74 @@ expReal ARGBGetColor(GMReal color) { return ((UINT)color) & 0x00ffffff; }
 expReal ARGBGetAlpha(GMReal color)
 {
     return ((double)((((UINT)color) & 0xff000000) >> 24)) / 0xff;
+}
+
+expReal BufferPeekReal(GMReal buffer, GMReal offset, GMReal type)
+{
+    int t = (int)type;
+    if (t == buffer_string || t == buffer_string_part || t == buffer_hex)
+        fail;
+
+    if (!gm::buffer_exists(buffer))
+        fail;
+
+    GMReal oldPos = gm::buffer_get_pos(buffer);
+    gm::buffer_set_pos(buffer, offset);
+    dynamic result = gm::buffer_read((int)buffer, t);
+    gm::buffer_set_pos(buffer, oldPos);
+
+    return std::get<GMReal>(result);
+}
+
+expString BufferPeekString(GMReal buffer, GMReal offset, GMReal type)
+{
+    int t = (int)type;
+    if (t != buffer_string && t != buffer_string_part && t != buffer_hex)
+        return "";
+
+    if (!gm::buffer_exists(buffer))
+        return "";
+
+    GMReal oldPos = gm::buffer_get_pos(buffer);
+    gm::buffer_set_pos(buffer, offset);
+    dynamic result = gm::buffer_read((int)buffer, t);
+    gm::buffer_set_pos(buffer, oldPos);
+
+    return string_to_char(std::get<std::string>(result));
+}
+
+expReal BufferPokeReal(GMReal buffer, GMReal offset, GMReal type, GMReal value)
+{
+    int t = (int)type;
+    if (t == buffer_string || t == buffer_string_part || t == buffer_hex)
+        fail;
+
+    if (!gm::buffer_exists(buffer))
+        fail;
+
+    GMReal oldPos = gm::buffer_get_pos(buffer);
+    gm::buffer_set_pos(buffer, offset);
+    gm::buffer_write((int)buffer, t, value);
+    gm::buffer_set_pos(buffer, oldPos);
+
+    finish;
+}
+
+expReal BufferPokeString(GMReal buffer, GMReal offset, GMReal type, GMString value)
+{
+    int t = (int)type;
+    if (t != buffer_string && t != buffer_string_part && t != buffer_hex)
+        fail;
+
+    if (!gm::buffer_exists(buffer))
+        fail;
+
+    GMReal oldPos = gm::buffer_get_pos(buffer);
+    gm::buffer_set_pos(buffer, offset);
+    gm::buffer_write((int)buffer, t, value);
+    gm::buffer_set_pos(buffer, oldPos);
+
+    finish;
 }
 
 #pragma endregion

@@ -441,6 +441,9 @@
     <ClInclude Include="Direct3D_8\xprtdefs.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="Librarys\MaizeMusic.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -504,6 +507,12 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="NatureEnhance\String.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="NatureEnhance\Video.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Librarys\MaizeMusic.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

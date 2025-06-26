@@ -30,11 +30,13 @@ gm::CGMVariable GetResource(GMString res);
 gm::CGMVariable GetResource(std::string res);
 GMString ChangeCoding(GMString str, GMString inputCoding, GMString outputCoding);
 GMString string_to_char(const std::string& str);
+void D3DCheck(HRESULT result, int pos);
 
 extern bool show_error;
 extern HWND GMWindowsHandle;
 extern gm::CGMAPI* gmapi;
 extern GMReal PropertyMap, NameMap;
+extern IDirect3DDevice8* Device;
 
 typedef std::variant<std::string, GMReal> dynamic;
 
@@ -57,3 +59,6 @@ typedef std::variant<std::string, GMReal> dynamic;
 		} \
 		return returns; \
 	}
+
+expReal BufferToTexture(GMReal buffer, GMReal gmtex, GMReal w, GMReal h);
+expReal TimerGet();
