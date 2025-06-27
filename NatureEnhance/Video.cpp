@@ -13,7 +13,7 @@ bool VideoUseInterframe, VideoLoop, VideoUseSoundtrack;
 GMString GMTempPath;
 
 float VideoFPS;
-uint VideoTotal, VideoCurrent;
+int VideoTotal, VideoCurrent;
 ushort VideoWidth, VideoHeight;
 
 bool VideoPlaying;
@@ -118,7 +118,8 @@ expReal VideoPlay(GMString path, GMReal loop, GMReal interframe)
 		FrameTime = 1 / VideoFPS;
 		VideoPlaying = true;
 		VideoSpeed = 1;
-		VideoLoop = false;
+		VideoLoop = loop > 0.5;
+		VideoUseInterframe = interframe > 0.5;
 		VideoCurrent = -1;
 		FrameOffset = 0;
 		
@@ -158,7 +159,7 @@ expReal VideoUpdate()
 		if (!VideoPlaying)
 			fail;
 
-		uint pos;
+		int pos;
 
 		if (!VideoUseSoundtrack)
 		{
@@ -185,7 +186,7 @@ expReal VideoUpdate()
 			{
 				GMReal p = min(1, mm::get_pos(Soundtrack) / SoundtrackLength) * VideoTotal;
 				FrameOffset = fmod(p, 1.0);  // 取 p 的小数部分
-				pos = (uint)p;  // 取 p 的整数部分
+				pos = (int)p;  // 取 p 的整数部分
 			}
 		}
 
@@ -217,31 +218,26 @@ expReal VideoUpdate()
 			if (!gm::surface_exists(VideoExportSurface))
 				VideoExportSurface = gm::surface_create(VideoWidth, VideoHeight);
 
+			if (!gm::surface_exists(VideoScratchSurface))
+				VideoScratchSurface = gm::surface_create(VideoWidth, VideoHeight);
+
+			int gmtex = gm::surface_get_texture(VideoScratchSurface);
+			BufferToTexture(FrameBuffer, gmtex, VideoWidth, VideoHeight);
+
 			if (VideoUseInterframe)
 			{
-				if (!gm::surface_exists(VideoScratchSurface))
-					VideoScratchSurface = gm::surface_create(VideoWidth, VideoHeight);
-
 				if (!gm::surface_exists(VideoTempSurface1))
 					VideoTempSurface1 = gm::surface_create(VideoWidth, VideoHeight);
 
 				if (!gm::surface_exists(VideoTempSurface2))
 					VideoTempSurface2 = gm::surface_create(VideoWidth, VideoHeight);
 
-				int gmtex = gm::surface_get_texture(VideoScratchSurface);
-				BufferToTexture(FrameBuffer, gmtex, VideoWidth, VideoHeight);
-
 				gm::surface_copy(VideoTempSurface1, 0, 0, VideoExportSurface);
+			}
 
-				gm::surface_set_target(VideoExportSurface);
-				gm::draw_surface(VideoScratchSurface, 0, 0);
-				gm::surface_reset_target();
-			}
-			else
-			{
-				int gmtex = gm::surface_get_texture(VideoExportSurface);
-				BufferToTexture(FrameBuffer, gmtex, VideoWidth, VideoHeight);
-			}
+			gm::surface_set_target(VideoExportSurface);
+			gm::draw_surface(VideoScratchSurface, 0, 0);
+			gm::surface_reset_target();
 		}
 
 		if (VideoUseInterframe)
@@ -267,7 +263,7 @@ expReal VideoUpdate()
 			else
 				VideoPlaying = false;
 		}
-
+		
 		finish;
 	}
 	simplecatch(L"VideoUpdate", 0)
