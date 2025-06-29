@@ -50,6 +50,8 @@ expReal VideoFree()
 			gm::surface_free(VideoTempSurface2);
 	}
 
+	VideoPlaying = false;
+
 	finish;
 }
 

@@ -60,5 +60,7 @@ typedef std::variant<std::string, GMReal> dynamic;
 		return returns; \
 	}
 
+void DEBUG(std::string str);
+
 expReal BufferToTexture(GMReal buffer, GMReal gmtex, GMReal w, GMReal h);
 expReal TimerGet();

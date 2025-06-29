@@ -311,6 +311,7 @@
     <ClInclude Include="Librarys\buffer.h" />
     <ClInclude Include="Librarys\iconv.h" />
     <ClInclude Include="Librarys\json.hpp" />
+    <ClInclude Include="Librarys\lodepng.h" />
     <ClInclude Include="Librarys\MaizeMusic.h" />
     <ClInclude Include="NatureEnhance\DataStruct.h" />
     <ClInclude Include="NatureEnhance\GameMakerMath.h" />
@@ -333,11 +334,16 @@
     <ClCompile Include="GMAPI\GmapiResources.cpp" />
     <ClCompile Include="GMAPI\GmapiSounds.cpp" />
     <ClCompile Include="Librarys\buffer.cpp" />
+    <ClCompile Include="Librarys\lodepng.cpp" />
     <ClCompile Include="Librarys\MaizeMusic.cpp" />
+    <ClCompile Include="NatureEnhance\Camera.cpp" />
     <ClCompile Include="NatureEnhance\DataStruct.cpp" />
     <ClCompile Include="NatureEnhance\GameMakerMath.cpp" />
     <ClCompile Include="NatureEnhance\GMJson.cpp" />
+    <ClCompile Include="NatureEnhance\LoadPicture.cpp" />
     <ClCompile Include="NatureEnhance\Main.cpp" />
+    <ClCompile Include="NatureEnhance\GMBuffer.cpp" />
+    <ClCompile Include="NatureEnhance\RopeCalculate.cpp" />
     <ClCompile Include="NatureEnhance\String.cpp" />
     <ClCompile Include="NatureEnhance\Video.cpp" />
     <ClCompile Include="pch.cpp">

@@ -444,6 +444,9 @@
     <ClInclude Include="Librarys\MaizeMusic.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="Librarys\lodepng.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -513,6 +516,21 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="Librarys\MaizeMusic.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Librarys\lodepng.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="NatureEnhance\Camera.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="NatureEnhance\RopeCalculate.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="NatureEnhance\GMBuffer.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="NatureEnhance\LoadPicture.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
