@@ -188,10 +188,13 @@ expReal ne_list_read_buffer(GMReal list, GMReal buffer, GMReal types)
 		gm::ds_list_clear((int)list);
 		for (int i = 0; i < listSize; ++i)
 		{
-			GMReal type = std::get<GMReal>(gm::buffer_read((int)buffer,
-				(int)gm::ds_list_find_value((int)types, i % typeSize)));
+			GMReal type = gm::ds_list_find_value((int)types, i % typeSize);
+			dynamic value = gm::buffer_read((int)buffer, (int)type);
 
-			gm::ds_list_add((int)list, type);
+			if (std::holds_alternative<std::string>(value))
+				gm::ds_list_add((int)list, std::get<std::string>(value));
+			else
+				gm::ds_list_add((int)list, std::get<GMReal>(value));
 		}
 
 		ne_list_destroy(types);
@@ -214,12 +217,12 @@ expReal ne_list_write_buffer(GMReal list, GMReal buffer, GMReal types)
 		for (int i = 0; i < listSize; ++i)
 		{
 			GMReal type = gm::ds_list_find_value((int)types, i % typeSize);
-			gm::CGMVariable value = gm::ds_list_find_value((int)list, i);
+			dynamic value = gm::ds_list_find_value((int)list, i);
 
-			if (value.IsString())
-				gm::buffer_write((int)buffer, (int)type, value.c_str());
+			if (std::holds_alternative<std::string>(value))
+				gm::buffer_write((int)buffer, (int)type, std::get<std::string>(value));
 			else
-				gm::buffer_write((int)buffer, (int)type, value.real());
+				gm::buffer_write((int)buffer, (int)type, std::get<GMReal>(value));
 		}
 
 		ne_list_destroy(types);

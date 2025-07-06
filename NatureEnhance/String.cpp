@@ -6,7 +6,7 @@
 
 inline bool is_gb2312_leader(unsigned char c)
 {
-	return c >= 0xA1 && c <= 0xF7;
+	return c > 0x7F;
 }
 
 std::wstring gb2312_to_wstring(GMString str)
@@ -24,7 +24,7 @@ std::wstring gb2312_to_wstring(GMString str)
 			wstr.push_back(static_cast<wchar_t>(c));
 			i += 1;
 		}
-		else if (is_gb2312_leader(c))
+		else
 		{
 			if (i + 1 >= len)
 				break;

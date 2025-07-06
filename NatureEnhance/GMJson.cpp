@@ -164,7 +164,7 @@ expReal JsonDecode(GMString jsonstr, GMString inputCoding, GMString outputCoding
 
 		while (!jsonStack.empty())
 		{
-			StackItem item = jsonStack.top();  // 程序运行到这里就崩溃了
+			StackItem item = jsonStack.top();
 			jsonStack.pop();
 			
 			Json* curr = item.current;
