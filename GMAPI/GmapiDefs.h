@@ -452,7 +452,7 @@ namespace gm {
     int arraySize;
   } GMFONTSTORAGE, *PGMFONTSTORAGE;
 
-  typedef DECLSPEC_ALIGN( 1 ) struct __GMFUNCTIONINFO {
+  typedef DECLSPEC_ALIGN( 4 ) struct __GMFUNCTIONINFO {
     BYTE nameLength;
     char name[67];
 

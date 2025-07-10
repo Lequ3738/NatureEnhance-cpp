@@ -447,6 +447,27 @@
     <ClInclude Include="Librarys\lodepng.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="Librarys\utf8.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Librarys\utf8\unchecked.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Librarys\utf8\core.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Librarys\utf8\checked.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Librarys\utf8\cpp11.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Librarys\utf8\cpp17.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Librarys\utf8\cpp20.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">

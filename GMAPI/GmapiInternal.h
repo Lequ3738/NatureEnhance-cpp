@@ -462,6 +462,16 @@ namespace gm {
                               real( aValue ),
                               string( NULL ) {}
 
+    GMVALUE(bool aValue) : type(VT_REAL),
+        real((bool)aValue),
+        string(NULL) {
+    }
+
+    GMVALUE(int aValue) : type(VT_REAL),
+        real((int)aValue),
+        string(NULL) {
+    }
+
     GMVALUE( const char* aValue ): type( VT_REAL ),
                              string( aValue ) {}
 
@@ -512,17 +522,17 @@ namespace gm {
     }
 
     /// Type of the value
-    GMValueType type;
+    GMValueType type = VT_REAL;
 
-    __PADDING4 _padding1;
+    __PADDING4 _padding1 = 0;
 
     /// GM holds real value here if its type is "real".
-    double real;
+    double real = 0;
 
     /// GM holds here pointer to the string if value's type is "string".
-    const char* string;
+    const char* string = nullptr;
 
-    __PADDING4 _padding2;
+    __PADDING4 _padding2 = 0;
   };
 
   struct GMVARIABLE: public GMVARIABLESYMBOLID, public GMVALUE {
@@ -1038,7 +1048,7 @@ namespace gm {
       }
 
     protected:
-      int m_resourceId;
+      int m_resourceId = 0;
   };
 
   class EGMAPISpriteNotExist: public EGMAPIResourceException {

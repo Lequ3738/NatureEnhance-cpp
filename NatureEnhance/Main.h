@@ -11,6 +11,7 @@ typedef const char* GMString;
 
 #define expReal extern "C" __declspec(dllexport) GMReal _cdecl
 #define expString extern "C" __declspec(dllexport) GMString _cdecl
+#define innerCall void __fastcall
 
 #define fnReal GMReal _cdecl
 #define fnString GMString _cdecl
@@ -29,7 +30,8 @@ constexpr GMReal ds_type_priority = 5;
 gm::CGMVariable GetResource(GMString res);
 gm::CGMVariable GetResource(std::string res);
 GMString ChangeCoding(GMString str, GMString inputCoding, GMString outputCoding);
-GMString string_to_char(const std::string& str);
+GMString string_to_cstr(const std::string& str);
+GMString STRCPY(GMString str);
 void D3DCheck(HRESULT result, int pos);
 
 extern bool show_error;

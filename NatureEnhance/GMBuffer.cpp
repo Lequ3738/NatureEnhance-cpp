@@ -147,7 +147,7 @@ expString BufferPeekString(GMReal buffer, GMReal offset, GMReal type)
     dynamic result = gm::buffer_read((int)buffer, t);
     gm::buffer_set_pos(buffer, oldPos);
 
-    return string_to_char(std::get<std::string>(result));
+    return string_to_cstr(std::get<std::string>(result));
 }
 
 expReal BufferPokeReal(GMReal buffer, GMReal offset, GMReal type, GMReal value)

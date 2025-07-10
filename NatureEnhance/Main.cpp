@@ -596,7 +596,7 @@ expReal GetAllFilesInSubfolders(GMString dir, GMString starchPattern)
                 std::string filename = entry.path().filename().string();
 
                 if (std::regex_match(filename, regex))
-                    MatchedFiles.push_back(string_to_char(entry.path().string()));
+                    MatchedFiles.push_back(string_to_cstr(entry.path().string()));
             }
         }
 
@@ -650,7 +650,7 @@ expString ReadAllText(GMString file)
             std::istreambuf_iterator<char>()
         };
 
-        return string_to_char(data);
+        return string_to_cstr(data);
     }
     simplecatch(L"ReadAllText", "")
 }

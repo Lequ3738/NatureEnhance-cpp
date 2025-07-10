@@ -135,7 +135,7 @@ static Tree* GetTreeNode(GMReal id)
 	(isChangeCoding(input) ? ChangeCoding(str, input, "UTF-8") : str)
 
 #define changeOutput(str) \
-	(isChangeCoding(output) ? ChangeCoding(str, "UTF-8", output) : str)
+	(isChangeCoding(output) ? ChangeCoding(str, "UTF-8", output) : STRCPY(str))
 
 expReal JsonDecode(GMString jsonstr, GMString inputCoding, GMString outputCoding)
 {
@@ -419,5 +419,18 @@ expString StringChangeCoding(GMString str, GMString in, GMString out)
 	char* input = toUpperAscii(in);
 	char* output = toUpperAscii(out);
 
-	return ChangeCoding(str, input, output);
+	GMString result = ChangeCoding(str, input, output);
+	if (result == nullptr)
+	{
+		if (show_error)
+		{
+			std::wstring errorMsg = L"函数 StringChangeCoding 出现编码转换错误：\n"
+				L"请检查输入编码和输出编码是否正确。";
+			MessageBox(GMWindowsHandle, errorMsg.c_str(), L"NatureEnhance Error",
+				MB_OK | MB_ICONERROR);
+		}
+		return "";
+	}
+
+	return result;
 }

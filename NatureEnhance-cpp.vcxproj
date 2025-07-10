@@ -115,6 +115,7 @@
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
+      <AdditionalOptions>/Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -313,6 +314,13 @@
     <ClInclude Include="Librarys\json.hpp" />
     <ClInclude Include="Librarys\lodepng.h" />
     <ClInclude Include="Librarys\MaizeMusic.h" />
+    <ClInclude Include="Librarys\utf8.h" />
+    <ClInclude Include="Librarys\utf8\checked.h" />
+    <ClInclude Include="Librarys\utf8\core.h" />
+    <ClInclude Include="Librarys\utf8\cpp11.h" />
+    <ClInclude Include="Librarys\utf8\cpp17.h" />
+    <ClInclude Include="Librarys\utf8\cpp20.h" />
+    <ClInclude Include="Librarys\utf8\unchecked.h" />
     <ClInclude Include="NatureEnhance\DataStruct.h" />
     <ClInclude Include="NatureEnhance\GameMakerMath.h" />
     <ClInclude Include="NatureEnhance\Main.h" />
