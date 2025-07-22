@@ -113,10 +113,47 @@ expReal ShowMessageBox(GMString text, GMString caption, GMReal icon)
     finish;
 }
 
-expReal window_set_dpiaware()
+#include <ShellScalingApi.h>
+typedef HRESULT (WINAPI *GetDpi81)(HMONITOR, MONITOR_DPI_TYPE, UINT*, UINT*);
+typedef UINT(WINAPI *GetDpi10)(HWND);
+
+expReal os_get_dpiscale()
 {
-    SetProcessDPIAware();
-    finish;
+    // windows 10+ API
+    if (HMODULE user32 = GetModuleHandle(L"user32.dll"))
+    {
+        auto GetDpi = (GetDpi10)GetProcAddress(user32, "GetDpiForWindow");
+        if (GetDpi)
+        {
+			UINT dpi = GetDpi(GMWindowsHandle);
+			return (double)dpi / 96.0; // 96 DPI 是标准 DPI
+        }
+    }
+
+	// windows 8.1 API
+    if (HMODULE shcore = LoadLibrary(L"shcore.dll"))
+    {
+        auto GetDpi = (GetDpi81)GetProcAddress(shcore, "GetDpiForMonitor");
+        if (GetDpi)
+        {
+            UINT dpiX, dpiY;
+            HMONITOR monitor = MonitorFromWindow(GMWindowsHandle, MONITOR_DEFAULTTONEAREST);
+            HRESULT hr = GetDpi(monitor, MDT_EFFECTIVE_DPI, &dpiX, &dpiY);
+            
+            if (SUCCEEDED(hr))
+            {
+                FreeLibrary(shcore);
+                return (double)dpiX / 96.0;
+            }
+        }
+        FreeLibrary(shcore);
+    }
+	
+    // windows 7 API
+    HDC hdc = GetDC(GMWindowsHandle);
+    int dpi = GetDeviceCaps(hdc, LOGPIXELSX); // 水平DPI
+    ReleaseDC(GMWindowsHandle, hdc);
+	return (double)dpi / 96.0;
 }
 
 expReal get_ram_usage()
@@ -499,6 +536,8 @@ HKEY RegistryRoot;
 
 expReal RegistrySetRoot(GMReal root)
 {
+    gm::registry_set_root((int)root);
+
     switch ((int)root)
     {
     case 0: RegistryRoot = HKEY_CURRENT_USER; finish;

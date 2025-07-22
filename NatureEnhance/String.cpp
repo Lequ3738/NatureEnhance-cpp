@@ -48,7 +48,6 @@ expReal StringLength(GMString str)
 
 expReal StringPos(GMString substr, GMString str)
 {
-
 	if (*substr == '\0' || *str == '\0')
 		return 0;
 
