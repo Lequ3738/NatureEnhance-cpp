@@ -74,7 +74,7 @@
     <IncludePath>C:\Project\GMK\NatureEnhance-cpp\Librarys;C:\Project\GMK\NatureEnhance-cpp\NatureEnhance;C:\Project\GMK\NatureEnhance-cpp\GMAPI;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>C:\Project\GMK\NatureEnhance-cpp\Librarys;C:\Project\GMK\NatureEnhance-cpp\NatureEnhance;C:\Project\GMK\NatureEnhance-cpp\GMAPI;$(IncludePath);C:\Project\GMK\NatureEnhance-cpp\Direct3D_8</IncludePath>
+    <IncludePath>Librarys;NatureEnhance;GMAPI;$(IncludePath);Direct3D_8</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <IncludePath>C:\Project\GMK\NatureEnhance-cpp\Librarys;C:\Project\GMK\NatureEnhance-cpp\NatureEnhance;C:\Project\GMK\NatureEnhance-cpp\GMAPI;$(IncludePath)</IncludePath>
@@ -123,7 +123,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
-      <AdditionalLibraryDirectories>C:\Project\GMK\NatureEnhance-cpp\Direct3D_8;C:\Project\GMK\NatureEnhance-cpp\Librarys;C:\Project\GMK\NatureEnhance-cpp\GMAPICore;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>Direct3D_8;Librarys;GMAPICore;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>legacy_stdio_definitions.lib;GMAPICore.lib;libiconv.lib;d3d8.lib;d3dx8.lib;DxErr8.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalOptions>/nodefaultlib:libci /SAFESEH:NO %(AdditionalOptions)</AdditionalOptions>
     </Link>
