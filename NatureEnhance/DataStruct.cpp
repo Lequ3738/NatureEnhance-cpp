@@ -217,12 +217,12 @@ expReal ne_list_write_buffer(GMReal list, GMReal buffer, GMReal types)
 		for (int i = 0; i < listSize; ++i)
 		{
 			GMReal type = gm::ds_list_find_value((int)types, i % typeSize);
-			dynamic value = gm::ds_list_find_value((int)list, i);
+			gm::CGMVariable value = gm::ds_list_find_value((int)list, i);
 
-			if (std::holds_alternative<std::string>(value))
-				gm::buffer_write((int)buffer, (int)type, std::get<std::string>(value));
+			if (value.IsString())
+				gm::buffer_write((int)buffer, (int)type, value.c_str());
 			else
-				gm::buffer_write((int)buffer, (int)type, std::get<GMReal>(value));
+				gm::buffer_write((int)buffer, (int)type, value.real());
 		}
 
 		ne_list_destroy(types);
