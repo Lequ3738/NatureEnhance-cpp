@@ -716,4 +716,47 @@ expReal FileIsUsing(GMString file)
     CloseHandle(hFile);
     return false;  // 文件未被占用
 }
+
+expReal ReadCBVFile(GMString filename)
+{
+    try
+    {
+        std::ifstream file(filename, std::ios::binary);
+        if (!file)
+        {
+            std::wstring err = L"文件 (" + std::wstring(std::filesystem::path(filename)) + L") 打开失败。";
+            throw err.c_str();
+        }
+
+        // 检测文件字节序是否和系统默认字节序一致
+        char endian_flag;
+        file.read(&endian_flag, 1);
+        bool reversed = (endian_flag != (char)std::endian::native);
+
+        // 计算文件中浮点数的数量
+        file.seekg(0, std::ios::end);
+        size_t num_floats = ((size_t)file.tellg() - 1) / 4;
+        file.seekg(1, std::ios::beg);  // 跳过首字节
+
+        int list = gm::ds_list_create();
+        for (size_t i = 0; i < num_floats; ++i)
+        {
+            char buffer[4];
+            file.read(buffer, 4);
+
+            if (reversed)  // 处理字节序转换
+                std::reverse(buffer, buffer + 4);
+
+            // 将字节转换为浮点数
+            float value;
+            std::memcpy(&value, buffer, sizeof(float));
+
+            // 将浮点数添加到列表中
+            gm::ds_list_add(list, value);
+        }
+
+        return list;
+    }
+    simplecatch(L"ReadCBVFile", -1)
+}
 #pragma endregion
