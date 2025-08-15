@@ -1,6 +1,7 @@
 #include "Main.h"
 #include "buffer.h"
 #include "iconv.h"
+#include "DataStruct.h"
 #include <filesystem>
 #include <vector>
 #include <fstream>
@@ -731,14 +732,15 @@ expReal ReadCBVFile(GMString filename)
         // 检测文件字节序是否和系统默认字节序一致
         char endian_flag;
         file.read(&endian_flag, 1);
-        bool reversed = (endian_flag != (char)std::endian::native);
+		bool reversed = (endian_flag != 1);  // 1 表示小端字节序，0 表示大端字节序
 
         // 计算文件中浮点数的数量
         file.seekg(0, std::ios::end);
         size_t num_floats = ((size_t)file.tellg() - 1) / 4;
         file.seekg(1, std::ios::beg);  // 跳过首字节
 
-        int list = gm::ds_list_create();
+        std::string info("CBV File's List: " + std::string(filename));
+        int list = ne_list_create(info.c_str());
         for (size_t i = 0; i < num_floats; ++i)
         {
             char buffer[4];
