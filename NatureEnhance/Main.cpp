@@ -241,6 +241,7 @@ std::wstring ToWstring(GMString str)
     std::string stdstr(utf8_str);
     return std::wstring(stdstr.begin(), stdstr.end());
 }
+
 #pragma endregion
 
 #pragma region Load Tiles
@@ -761,4 +762,48 @@ expReal ReadCBVFile(GMString filename)
     }
     simplecatch(L"ReadCBVFile", -1)
 }
+#pragma endregion
+
+#pragma region Array
+
+expReal GetLocalFirstDimensionSize(GMString var)
+{
+    int varid = gmapi->GetSymbolID(var);
+    auto gmvar = gmapi->GetLocalVariablePtr(gm::self, varid);
+    if (gmvar == nullptr)
+        return -1;
+
+    return gmvar->GetFirstDimensionSize();
+}
+
+expReal GetLocalSecondDimensionSize(GMString var, GMReal index)
+{
+    int varid = gmapi->GetSymbolID(var);
+    auto gmvar = gmapi->GetLocalVariablePtr(gm::self, varid);
+    if (gmvar == nullptr)
+        return -1;
+
+    return gmvar->GetSecondDimensionSize((ULONG)index);
+}
+
+expReal GetGlobalFirstDimensionSize(GMString var)
+{
+    int varid = gmapi->GetSymbolID(var);
+    auto gmvar = gmapi->GetGlobalVariablePtr(varid);
+    if (gmvar == nullptr)
+        return -1;
+
+    return gmvar->GetFirstDimensionSize();
+}
+
+expReal GetGlobalSecondDimensionSize(GMString var, GMReal index)
+{
+    int varid = gmapi->GetSymbolID(var);
+    auto gmvar = gmapi->GetGlobalVariablePtr(varid);
+    if (gmvar == nullptr)
+        return -1;
+
+    return gmvar->GetSecondDimensionSize((ULONG)index);
+}
+
 #pragma endregion
