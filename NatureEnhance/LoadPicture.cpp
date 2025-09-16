@@ -1,5 +1,6 @@
 #include "Main.h"
 #include "lodepng.h"
+#include "buffer.h"
 #include <future>
 
 typedef std::future<std::tuple<std::vector<UCHAR>, UINT, UINT>> PNGDecodeFuture;
@@ -82,4 +83,65 @@ expReal ToBackgroundAsync(GMReal id)
         return gm::noone;
     }
     simplecatch(L"LoadPNGToBackground", gm::noone)
+}
+
+PNGDecodeFuture AsyncDecodeGMBCK(GMString file)
+{
+    return std::async(std::launch::async, [file]() {
+        GMReal buffer = gm::buffer_create();
+		bool result = (bool)gm::buffer_read_from_file(buffer, file);
+        if (!result)
+			throw ("无法打开指定的文件：" + std::string(file)).c_str();
+
+        gm::buffer_set_pos(buffer, 4);  // 跳过 1234321
+		UINT size = (UINT)gm::buffer_read_int32(buffer);
+
+        GMReal data = gm::buffer_create();
+        gm::buffer_write_buffer_part(data, buffer, gm::buffer_get_pos(buffer), size);
+        gm::buffer_destroy(buffer);
+
+        gm::buffer_zlib_uncompress(data);
+
+        // 这 36 个字节分别为 (4 字节对齐)：
+		// 版本号 710、是否作为贴图使用、贴图宽、贴图高、垂直位移、水平位移、垂直步宽、水平步宽、版本号 800
+		gm::buffer_set_pos(data, sizeof(UINT) * 9);  // 跳过头部 36 字节
+        UINT width = (UINT)gm::buffer_read_int32(data);
+        UINT height = (UINT)gm::buffer_read_int32(data);
+        size = (UINT)gm::buffer_read_int32(data);
+        if (size == 0)
+			throw "无效的图片数据块大小。";
+
+        UCHAR* imageData = (UCHAR*)(int)gm::buffer_get_address(data, false);
+        if (imageData == nullptr)
+			throw "无效的图片数据块。";
+
+		imageData += sizeof(UINT) * 12;  // 跳过头部数据，直接指向图片数据
+
+		// 剩下的数据为 D3D8 的 ARGB 格式数据，无需转换
+        std::vector<UCHAR> image;
+		image.resize(size);
+
+        memcpy(image.data(), imageData, size);
+        gm::buffer_destroy(data);
+
+		return std::make_tuple(std::move(image), width, height);
+    });
+}
+
+expReal LoadGMBCKAsync(GMString file)
+{
+    AsyncDecodePNGList[AsyncDecodePNGId] = AsyncDecodeGMBCK(file);
+    return (GMReal)AsyncDecodePNGId++;
+}
+
+expReal LoadBackgroundAsync(GMString file)
+{
+    GMString ext = gm::filename_ext(file);
+    
+    if (strcmp(ext, ".png") == 0)
+        return LoadPNGAsync(file);
+    else if (strcmp(ext, ".gmbck") == 0)
+        return LoadGMBCKAsync(file);
+    else
+		return -1;  // 不支持的格式
 }

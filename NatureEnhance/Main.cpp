@@ -741,7 +741,7 @@ expReal ReadCBVFile(GMString filename)
         file.seekg(1, std::ios::beg);  // Ìø¹ýÊ××Ö½Ú
 
         std::string info("CBV File's List: " + std::string(filename));
-        int list = ne_list_create(info.c_str());
+        int list = (int)ne_list_create(info.c_str());
         for (size_t i = 0; i < num_floats; ++i)
         {
             char buffer[4];
