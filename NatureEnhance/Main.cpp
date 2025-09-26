@@ -247,9 +247,9 @@ std::wstring ToWstring(GMString str)
 #pragma region Load Tiles
 std::vector<int> DrawSpritesList;
 
-expReal LoadDrawSpritesList(GMReal a, GMReal b, GMReal c, GMReal d, GMReal e, GMReal f)
+expReal LoadDrawSpritesList(GMReal a, GMReal b, GMReal c, GMReal d, GMReal e, GMReal f, GMReal g, GMReal h)
 {
-    DrawSpritesList.reserve(6);
+    DrawSpritesList.reserve(8);
 
     DrawSpritesList.clear();
     DrawSpritesList.push_back(static_cast<int>(a));
@@ -258,6 +258,8 @@ expReal LoadDrawSpritesList(GMReal a, GMReal b, GMReal c, GMReal d, GMReal e, GM
     DrawSpritesList.push_back(static_cast<int>(d));
     DrawSpritesList.push_back(static_cast<int>(e));
     DrawSpritesList.push_back(static_cast<int>(f));
+    DrawSpritesList.push_back(static_cast<int>(g));
+    DrawSpritesList.push_back(static_cast<int>(h));
 
     finish;
 }
@@ -380,7 +382,7 @@ expReal LoadRoomTiles(GMString path)
                 gm::ds_map_replace(map, "curIndex", 0);
 
             int listPos = static_cast<int>(gm::buffer_read_uint8(buffer));
-            if (listPos > 5)
+            if (listPos > 7)
             {
                 err += "在 scrLoadRoomTiles() 中，层 " + std::to_string(listPos) + " 不存在。\n";
                 continue;
@@ -804,6 +806,19 @@ expReal GetGlobalSecondDimensionSize(GMString var, GMReal index)
         return -1;
 
     return gmvar->GetSecondDimensionSize((ULONG)index);
+}
+
+#pragma endregion
+
+#pragma region Graphic
+
+expReal GetTextureMipmapCount(GMReal gmtex)
+{
+    IDirect3DTexture8* texture = gm::CGMAPI::GetTextureArray()[(int)gmtex].texture;
+    if (texture == nullptr)
+		return -1;
+
+	return texture->GetLevelCount();
 }
 
 #pragma endregion
