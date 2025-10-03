@@ -28,7 +28,7 @@ namespace gm
 	var = (type)GetProcAddress(BufferDLL, name); \
 	if (var == nullptr) {\
 		std::wstring wname(name, name + strlen(name)); \
-		std::wstring err = L"º”‘ÿ Http.dll  ±ªÒ»°∫Ø ˝ (" + wname + L")  ß∞‹°£"; \
+		std::wstring err = L"Âä†ËΩΩ Http.dll Êó∂Ëé∑ÂèñÂáΩÊï∞ (" + wname + L") Â§±Ë¥•„ÄÇ"; \
 		throw err.c_str(); \
 	}
 
@@ -41,7 +41,7 @@ expReal ImportBufferModule(GMString name)
 
 		if (BufferDLL == nullptr)
 		{
-			std::wstring err = L"º”‘ÿ " + wname + L"  ß∞‹°£";
+			std::wstring err = L"Âä†ËΩΩ " + wname + L" Â§±Ë¥•„ÄÇ";
 			throw err.c_str();
 		}
 

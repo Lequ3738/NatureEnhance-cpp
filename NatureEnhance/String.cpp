@@ -29,8 +29,8 @@ GMString STRCPY(GMString str)
 	{ \
 		if (show_error) \
 		{ \
-			std::wstring err = L"ÔÚÖ´ĞĞº¯Êı " + std::wstring(funcname) + L" Ê±Å×³öÒì³£¡£" + \
-				L"ÊäÈë²»ºÏ·¨µÄ UTF-8 ×Ö·û´®¡£"; \
+			std::wstring err = L"åœ¨æ‰§è¡Œå‡½æ•° " + std::wstring(funcname) + L" æ—¶æŠ›å‡ºå¼‚å¸¸ã€‚" + \
+				L"è¾“å…¥ä¸åˆæ³•çš„ UTF-8 å­—ç¬¦ä¸²ã€‚"; \
 			MessageBox(GMWindowsHandle, err.c_str(), L"NatureEnhance Error", MB_OK | MB_ICONERROR); \
 		} \
 		return returns; \
@@ -96,7 +96,7 @@ expString StringCopy(GMString str, GMReal index, GMReal count)
 	}
 	catch (const utf8::not_enough_room&)
 	{
-		fin_it = end_it;  // ³¤¶È³¬³ö·¶Î§£¬½ØÈ¡µ½×Ö·û´®Ä©Î²
+		fin_it = end_it;  // é•¿åº¦è¶…å‡ºèŒƒå›´ï¼Œæˆªå–åˆ°å­—ç¬¦ä¸²æœ«å°¾
 	}
 	utf8catch(L"StringCopy", "");
 
@@ -155,7 +155,7 @@ expString StringDelete(GMString str, GMReal index, GMReal count)
 	}
 	catch (const utf8::not_enough_room&)
 	{
-		fin_it = end_it;  // ³¤¶È³¬³ö·¶Î§£¬½ØÈ¡µ½×Ö·û´®Ä©Î²
+		fin_it = end_it;  // é•¿åº¦è¶…å‡ºèŒƒå›´ï¼Œæˆªå–åˆ°å­—ç¬¦ä¸²æœ«å°¾
 	}
 	utf8catch(L"StringDelete", "");
 
@@ -265,13 +265,13 @@ expReal StringToken(GMString text, GMString sep, GMReal dontRemoveEmpty)
 
 	try
 	{
-		if (*sep == '\0')  // ¿Õ·Ö¸ô·û£º°´Ã¿¸ö×Ö·û·Ö¸î
+		if (*sep == '\0')  // ç©ºåˆ†éš”ç¬¦ï¼šæŒ‰æ¯ä¸ªå­—ç¬¦åˆ†å‰²
 		{
 			auto prev_it = start;
 
 			while (cur_it != end)
 			{
-				utf8::next(cur_it, end);  // »ñÈ¡ÏÂÒ»¸ö×Ö·û
+				utf8::next(cur_it, end);  // è·å–ä¸‹ä¸€ä¸ªå­—ç¬¦
 
 				std::string character(prev_it, cur_it);
 				StringTokenResult.push_back(character);
@@ -279,8 +279,8 @@ expReal StringToken(GMString text, GMString sep, GMReal dontRemoveEmpty)
 				prev_it = cur_it;
 			}
 
-			// Ìí¼Ó×îºóÒ»¸ö×Ö·û
-			utf8::next(cur_it, end);  // »ñÈ¡ÏÂÒ»¸ö×Ö·û
+			// æ·»åŠ æœ€åä¸€ä¸ªå­—ç¬¦
+			utf8::next(cur_it, end);  // è·å–ä¸‹ä¸€ä¸ªå­—ç¬¦
 			std::string character(prev_it, cur_it);
 			StringTokenResult.push_back(character);
 

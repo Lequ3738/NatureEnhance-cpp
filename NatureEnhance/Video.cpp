@@ -62,10 +62,10 @@ expReal VideoPlay(GMString path, GMReal loop, GMReal interframe)
 		VideoFree();
 
 		if (!fs::exists(path))
-			throw (L"³¢ÊÔ´ò¿ª²»´æÔÚµÄÎÄ¼ş£º" + std::wstring(path, path + strlen(path))).c_str();
+			throw (L"å°è¯•æ‰“å¼€ä¸å­˜åœ¨çš„æ–‡ä»¶ï¼š" + std::wstring(path, path + strlen(path))).c_str();
 
 		if (GMTempPath == nullptr)
-			throw L"ÇëÏÈµ÷ÓÃ VideoInit()¡£";
+			throw L"è¯·å…ˆè°ƒç”¨ VideoInit()ã€‚";
 
 		Buffer = gm::buffer_create();
 		FrameBuffer = gm::buffer_create();
@@ -77,10 +77,10 @@ expReal VideoPlay(GMString path, GMReal loop, GMReal interframe)
 		{
 			gm::buffer_destroy(Buffer);
 			gm::buffer_destroy(FrameBuffer);
-			throw L"¸ÃÎÄ¼şËÆºõ²»ÊÇRav±à½âÂëÆ÷Êı¾İ¿é¡£";
+			throw L"è¯¥æ–‡ä»¶ä¼¼ä¹ä¸æ˜¯Ravç¼–è§£ç å™¨æ•°æ®å—ã€‚";
 		}
 
-		// ¼ÓÔØÒôÆµÊı¾İ¿é
+		// åŠ è½½éŸ³é¢‘æ•°æ®å—
 		GMReal len = gm::buffer_read_uint32(Buffer);
 		if (len == 0)
 			VideoUseSoundtrack = false;
@@ -96,26 +96,26 @@ expReal VideoPlay(GMString path, GMReal loop, GMReal interframe)
 			gm::buffer_write_to_file(FrameBuffer, tempFile.c_str());
 			Soundtrack = mm::load_music(tempFile.c_str(), 0);
 			if (Soundtrack < 0x80000000)
-				throw L"¼ÓÔØÒôÆµÊı¾İ¿éÊ§°Ü¡£";
+				throw L"åŠ è½½éŸ³é¢‘æ•°æ®å—å¤±è´¥ã€‚";
 
 			SoundtrackLength = mm::get_length(Soundtrack);
 
 			gm::buffer_clear(FrameBuffer);
 		}
 
-		// ¶ÁÈ¡ÊÓÆµÎÄ¼şÍ·
+		// è¯»å–è§†é¢‘æ–‡ä»¶å¤´
 		VideoFPS = (float)gm::buffer_read_float32(Buffer);
 		VideoTotal = (uint)gm::buffer_read_uint32(Buffer);
 		VideoWidth = (ushort)gm::buffer_read_uint16(Buffer);
 		VideoHeight = (ushort)gm::buffer_read_uint16(Buffer);
 
-		// ²¥·ÅÒôÆµ
+		// æ’­æ”¾éŸ³é¢‘
 		if (VideoUseSoundtrack)
 			mm::play(Soundtrack);
 		else
 			LastFrame = TimerGet();
 
-		// ³õÊ¼»¯ÊÓÆµ±äÁ¿
+		// åˆå§‹åŒ–è§†é¢‘å˜é‡
 		FirstFrame = gm::buffer_get_pos(Buffer);
 		FrameTime = 1 / VideoFPS;
 		VideoPlaying = true;
@@ -187,8 +187,8 @@ expReal VideoUpdate()
 			else
 			{
 				GMReal p = min(1, mm::get_pos(Soundtrack) / SoundtrackLength) * VideoTotal;
-				FrameOffset = fmod(p, 1.0);  // È¡ p µÄĞ¡Êı²¿·Ö
-				pos = (int)p;  // È¡ p µÄÕûÊı²¿·Ö
+				FrameOffset = fmod(p, 1.0);  // å– p çš„å°æ•°éƒ¨åˆ†
+				pos = (int)p;  // å– p çš„æ•´æ•°éƒ¨åˆ†
 			}
 		}
 
@@ -196,7 +196,7 @@ expReal VideoUpdate()
 		{
 			++VideoCurrent;
 
-			// ÌáÈ¡Ò»Ö¡Êı¾İ
+			// æå–ä¸€å¸§æ•°æ®
 			gm::buffer_clear(FrameBuffer);
 
 			auto len = gm::buffer_read_uint32(Buffer);
@@ -206,14 +206,14 @@ expReal VideoUpdate()
 			gm::buffer_zlib_uncompress(FrameBuffer);
 			gm::buffer_set_pos(Buffer, p + len);
 
-			// ½«Êı¾İĞ´Èë±íÃæ
+			// å°†æ•°æ®å†™å…¥è¡¨é¢
 			GMReal size = VideoWidth * VideoHeight * 4;
 			GMReal cursize = gm::buffer_get_size(FrameBuffer);
 			if (cursize != size)
 			{
-				std::wstring err = L"ÊÓÆµÊı¾İ¿é´óĞ¡²»ÕıÈ·¡£\nÊÓÆµÖ¡£º" + std::to_wstring(VideoCurrent) + 
-					L"/" + std::to_wstring(VideoTotal) + L"\n¶ÁÈ¡µ½µÄÊı¾İ´óĞ¡£º" + 
-					std::to_wstring(cursize) + L"\nÓ¦¶ÁÈ¡µÄÊı¾İ´óĞ¡£º" + std::to_wstring(size);
+				std::wstring err = L"è§†é¢‘æ•°æ®å—å¤§å°ä¸æ­£ç¡®ã€‚\nè§†é¢‘å¸§ï¼š" + std::to_wstring(VideoCurrent) + 
+					L"/" + std::to_wstring(VideoTotal) + L"\nè¯»å–åˆ°çš„æ•°æ®å¤§å°ï¼š" + 
+					std::to_wstring(cursize) + L"\nåº”è¯»å–çš„æ•°æ®å¤§å°ï¼š" + std::to_wstring(size);
 				throw err.c_str();
 			}
 

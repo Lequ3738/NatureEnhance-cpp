@@ -47,9 +47,9 @@ struct StackItem
 	Tree* tree;
 };
 
-// ÓÃÓÚ¿ØÖÆÏú»ÙµÄ Tree Óë ´æ·ÅÊı¾İµÄ ds_map Ö®¼äµÄÓ³Éä±í
+// ç”¨äºæ§åˆ¶é”€æ¯çš„ Tree ä¸ å­˜æ”¾æ•°æ®çš„ ds_map ä¹‹é—´çš„æ˜ å°„è¡¨
 map<Tree*, int>* JsonDeleteMap;
-// ÓÃÓÚ¿ØÖÆÏú»ÙµÄ Tree Óë ´æ·ÅÊı¾İµÄ ds_list Ö®¼äµÄÓ³Éä±í
+// ç”¨äºæ§åˆ¶é”€æ¯çš„ Tree ä¸ å­˜æ”¾æ•°æ®çš„ ds_list ä¹‹é—´çš„æ˜ å°„è¡¨
 map<Tree*, int>* JsonDeleteList;
 
 expReal JsonInit()
@@ -69,7 +69,7 @@ expReal JsonFree()
 {
 	vector<int> deletedDatas;
 
-	// Ïú»Ù JsonDeleteMap ÖĞµÄËùÓĞ ds_map ÒıÓÃ
+	// é”€æ¯ JsonDeleteMap ä¸­çš„æ‰€æœ‰ ds_map å¼•ç”¨
 	for (auto it = JsonDeleteMap->begin(); it != JsonDeleteMap->end(); )
 	{
 		if (it->second >= 0 && !contains(deletedDatas, it->second))
@@ -85,7 +85,7 @@ expReal JsonFree()
 
 	deletedDatas.clear();
 
-	// Ïú»Ù JsonDeleteList ÖĞµÄËùÓĞ ds_list ÒıÓÃ
+	// é”€æ¯ JsonDeleteList ä¸­çš„æ‰€æœ‰ ds_list å¼•ç”¨
 	for (auto it = JsonDeleteList->begin(); it != JsonDeleteList->end(); )
 	{
 		if (it->second >= 0 && !contains(deletedDatas, it->second))
@@ -142,20 +142,20 @@ expReal JsonDecode(GMString jsonstr, GMString inputCoding, GMString outputCoding
 	try
 	{
 		if (JsonDeleteMap == nullptr || JsonDeleteList == nullptr)
-			throw L"JsonDeleteMap Î´³õÊ¼»¯£¬ÇëÏÈµ÷ÓÃ JsonInit º¯Êı¡£";
+			throw L"JsonDeleteMap æœªåˆå§‹åŒ–ï¼Œè¯·å…ˆè°ƒç”¨ JsonInit å‡½æ•°ã€‚";
 
 		char* input = toUpperAscii(inputCoding);
 		char* output = toUpperAscii(outputCoding);
 
 		const char* utf8JsonStr = changeInput(jsonstr);
 		if (utf8JsonStr == nullptr)
-			throw L"±àÂë×ª»»Ê§°Ü£¬Çë¼ì²éÊäÈë±àÂëÊÇ·ñÕıÈ·¡£";
+			throw L"ç¼–ç è½¬æ¢å¤±è´¥ï¼Œè¯·æ£€æŸ¥è¾“å…¥ç¼–ç æ˜¯å¦æ­£ç¡®ã€‚";
 		
-		// Json Ö§³Ö×¢ÊÍ
+		// Json æ”¯æŒæ³¨é‡Š
 		Json json = Json::parse(utf8JsonStr, nullptr, true, true);
 		int root = gm::ds_map_create();
 		
-		Tree* tree = new Tree(true);  // É¾³ıÊ±ÓÃµ½µÄ½ÚµãÊ÷
+		Tree* tree = new Tree(true);  // åˆ é™¤æ—¶ç”¨åˆ°çš„èŠ‚ç‚¹æ ‘
 		
 		stack<StackItem> jsonStack;
 		jsonStack.push(StackItem{ &json, "", root, tree });
@@ -201,7 +201,7 @@ expReal JsonDecode(GMString jsonstr, GMString inputCoding, GMString outputCoding
 			{
 				const char* str = changeOutput(curr->get<std::string>().c_str());
 				if (str == nullptr)
-					throw L"±àÂë×ª»»Ê§°Ü£¬Çë¼ì²éÊä³ö±àÂëÊÇ·ñÕıÈ·¡£";
+					throw L"ç¼–ç è½¬æ¢å¤±è´¥ï¼Œè¯·æ£€æŸ¥è¾“å‡ºç¼–ç æ˜¯å¦æ­£ç¡®ã€‚";
 
 				AddToParent(str);
 			}
@@ -214,19 +214,19 @@ expReal JsonDecode(GMString jsonstr, GMString inputCoding, GMString outputCoding
 				AddToParent(gm::noone);
 			}
 			else
-				throw L"²»Ö§³ÖµÄ JSON Êı¾İÀàĞÍ¡£";
+				throw L"ä¸æ”¯æŒçš„ JSON æ•°æ®ç±»å‹ã€‚";
 		}
 
-		// ½âÎöÍê³Éºó£¬»ñµÃµÄ ds_map µÄÊ÷½á¹¹ÊÇÕâÑùµÄ£º
+		// è§£æå®Œæˆåï¼Œè·å¾—çš„ ds_map çš„æ ‘ç»“æ„æ˜¯è¿™æ ·çš„ï¼š
 		//
 		// root -> dataroot -> ...
 		//
-		// ËùÒÔÒªÉ¾³ı×î¶¥²ãµÄ root ½Úµã£¬»ñµÃ´Ó json ¸ù²¿¿ªÊ¼µÄ ds_map Êı¾İ¡£
+		// æ‰€ä»¥è¦åˆ é™¤æœ€é¡¶å±‚çš„ root èŠ‚ç‚¹ï¼Œè·å¾—ä» json æ ¹éƒ¨å¼€å§‹çš„ ds_map æ•°æ®ã€‚
 		
 		int result = static_cast<int>(gm::ds_map_find_value(root, ""));
 		gm::ds_map_destroy(root);
 		
-		tree->Delete();  // É¾³ı×î¶¥²ãµÄÊ÷½Úµã
+		tree->Delete();  // åˆ é™¤æœ€é¡¶å±‚çš„æ ‘èŠ‚ç‚¹
 		
 		return result;
 	}
@@ -234,7 +234,7 @@ expReal JsonDecode(GMString jsonstr, GMString inputCoding, GMString outputCoding
 	{
 		if (show_error)
 		{
-			string errorMsg = "º¯Êı JsonDecode ³öÏÖ½âÎö´íÎó£º\n" + string(e.what());
+			string errorMsg = "å‡½æ•° JsonDecode å‡ºç°è§£æé”™è¯¯ï¼š\n" + string(e.what());
 			wstring werror(errorMsg.begin(), errorMsg.end());
 
 			MessageBox(GMWindowsHandle, werror.c_str(), L"NatureEnhance Error",
@@ -247,7 +247,7 @@ expReal JsonDecode(GMString jsonstr, GMString inputCoding, GMString outputCoding
 	{
 		if (show_error)
 		{
-			wstring errorMsg = L"º¯Êı JsonDecode ³öÏÖÔËĞĞ´íÎó£º\n" + wstring(e);
+			wstring errorMsg = L"å‡½æ•° JsonDecode å‡ºç°è¿è¡Œé”™è¯¯ï¼š\n" + wstring(e);
 
 			MessageBox(GMWindowsHandle, errorMsg.c_str(), L"NatureEnhance Error",
 				MB_OK | MB_ICONERROR);
@@ -259,7 +259,7 @@ expReal JsonDecode(GMString jsonstr, GMString inputCoding, GMString outputCoding
 	{
 		if (show_error)
 		{
-			MessageBox(GMWindowsHandle, L"º¯Êı JsonDecode ³öÏÖÎ´Öª´íÎó¡£", L"NatureEnhance Error",
+			MessageBox(GMWindowsHandle, L"å‡½æ•° JsonDecode å‡ºç°æœªçŸ¥é”™è¯¯ã€‚", L"NatureEnhance Error",
 				MB_OK | MB_ICONERROR);
 		}
 
@@ -274,9 +274,9 @@ expReal JsonDestroy(GMReal rootNode)
 		Tree* treeRoot = GetTreeNode(rootNode);
 		
 		if (treeRoot == nullptr)
-			throw L"´«ÈëµÄ ds_map ÒıÓÃÎŞĞ§¡£";
+			throw L"ä¼ å…¥çš„ ds_map å¼•ç”¨æ— æ•ˆã€‚";
 		else if (treeRoot->parent != nullptr)
-			throw L"´«ÈëµÄ ds_map ÒıÓÃ²»ÊÇÓÉ JsonDecode() º¯ÊıÉú³ÉµÄ¸ùÒıÓÃ¡£";
+			throw L"ä¼ å…¥çš„ ds_map å¼•ç”¨ä¸æ˜¯ç”± JsonDecode() å‡½æ•°ç”Ÿæˆçš„æ ¹å¼•ç”¨ã€‚";
 
 		stack<Tree*> treeStack;
 		treeStack.push(treeRoot);
@@ -296,18 +296,18 @@ expReal JsonDestroy(GMReal rootNode)
 				gm::ds_map_destroy((*JsonDeleteMap)[curTree]);
 				deletedMaps.push_back((*JsonDeleteMap)[curTree]);
 
-				(*JsonDeleteMap)[curTree] = gm::noone;  // Çå³ıÓ³Éä±íÖĞµÄÒıÓÃ
+				(*JsonDeleteMap)[curTree] = gm::noone;  // æ¸…é™¤æ˜ å°„è¡¨ä¸­çš„å¼•ç”¨
 			}
 			else if (!curTree->ismap && !contains(deletedLists, (*JsonDeleteList)[curTree]))
 			{
 				gm::ds_list_destroy((*JsonDeleteList)[curTree]);
 				deletedLists.push_back((*JsonDeleteList)[curTree]);
 
-				(*JsonDeleteList)[curTree] = gm::noone;  // Çå³ıÓ³Éä±íÖĞµÄÒıÓÃ
+				(*JsonDeleteList)[curTree] = gm::noone;  // æ¸…é™¤æ˜ å°„è¡¨ä¸­çš„å¼•ç”¨
 			}
 		}
 
-		// ÇåÀí JsonDeleteMap ÖĞµÄÎŞĞ§ÒıÓÃ
+		// æ¸…ç† JsonDeleteMap ä¸­çš„æ— æ•ˆå¼•ç”¨
 		for (auto it = JsonDeleteMap->begin(); it != JsonDeleteMap->end(); )
 		{
 			if (it->second == gm::noone)
@@ -316,7 +316,7 @@ expReal JsonDestroy(GMReal rootNode)
 				++it;
 		}
 
-		// ÇåÀí JsonDeleteList ÖĞµÄÎŞĞ§ÒıÓÃ
+		// æ¸…ç† JsonDeleteList ä¸­çš„æ— æ•ˆå¼•ç”¨
 		for (auto it = JsonDeleteList->begin(); it != JsonDeleteList->end(); )
 		{
 			if (it->second == gm::noone)
@@ -332,7 +332,7 @@ expReal JsonDestroy(GMReal rootNode)
 	{
 		if (show_error)
 		{
-			wstring errorMsg = L"º¯Êı JsonDestroy ³öÏÖÔËĞĞ´íÎó£º\n" + wstring(e);
+			wstring errorMsg = L"å‡½æ•° JsonDestroy å‡ºç°è¿è¡Œé”™è¯¯ï¼š\n" + wstring(e);
 
 			MessageBox(GMWindowsHandle, errorMsg.c_str(), L"NatureEnhance Error",
 				MB_OK | MB_ICONERROR);
@@ -344,7 +344,7 @@ expReal JsonDestroy(GMReal rootNode)
 	{
 		if (show_error)
 		{
-			MessageBox(GMWindowsHandle, L"º¯Êı JsonDestroy ³öÏÖÎ´Öª´íÎó¡£", L"NatureEnhance Error",
+			MessageBox(GMWindowsHandle, L"å‡½æ•° JsonDestroy å‡ºç°æœªçŸ¥é”™è¯¯ã€‚", L"NatureEnhance Error",
 				MB_OK | MB_ICONERROR);
 		}
 
@@ -394,7 +394,7 @@ expReal JsonGetDsType(GMReal rootNode, GMReal list)
 	{
 		if (show_error)
 		{
-			wstring errorMsg = L"º¯Êı JsonGetDsType ³öÏÖÔËĞĞ´íÎó£º\n" + wstring(e);
+			wstring errorMsg = L"å‡½æ•° JsonGetDsType å‡ºç°è¿è¡Œé”™è¯¯ï¼š\n" + wstring(e);
 
 			MessageBox(GMWindowsHandle, errorMsg.c_str(), L"NatureEnhance Error",
 				MB_OK | MB_ICONERROR);
@@ -406,7 +406,7 @@ expReal JsonGetDsType(GMReal rootNode, GMReal list)
 	{
 		if (show_error)
 		{
-			MessageBox(GMWindowsHandle, L"º¯Êı JsonGetDsType ³öÏÖÎ´Öª´íÎó¡£", L"NatureEnhance Error",
+			MessageBox(GMWindowsHandle, L"å‡½æ•° JsonGetDsType å‡ºç°æœªçŸ¥é”™è¯¯ã€‚", L"NatureEnhance Error",
 				MB_OK | MB_ICONERROR);
 		}
 
@@ -424,8 +424,8 @@ expString StringChangeCoding(GMString str, GMString in, GMString out)
 	{
 		if (show_error)
 		{
-			std::wstring errorMsg = L"º¯Êı StringChangeCoding ³öÏÖ±àÂë×ª»»´íÎó£º\n"
-				L"Çë¼ì²éÊäÈë±àÂëºÍÊä³ö±àÂëÊÇ·ñÕıÈ·¡£";
+			std::wstring errorMsg = L"å‡½æ•° StringChangeCoding å‡ºç°ç¼–ç è½¬æ¢é”™è¯¯ï¼š\n"
+				L"è¯·æ£€æŸ¥è¾“å…¥ç¼–ç å’Œè¾“å‡ºç¼–ç æ˜¯å¦æ­£ç¡®ã€‚";
 			MessageBox(GMWindowsHandle, errorMsg.c_str(), L"NatureEnhance Error",
 				MB_OK | MB_ICONERROR);
 		}

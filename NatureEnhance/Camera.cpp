@@ -45,7 +45,7 @@ expReal CameraInit(GMReal mode, GMReal playerX, GMReal playerY, GMReal playerSca
             ViewY = CameraY - (viewHeight / 2);
         }
         else
-            throw L"Î´¶¨Òå´ËÔË¶¯Ä£Ê½";
+            throw L"æœªå®šä¹‰æ­¤è¿åŠ¨æ¨¡å¼";
 
         finish;
     }
@@ -53,7 +53,7 @@ expReal CameraInit(GMReal mode, GMReal playerX, GMReal playerY, GMReal playerSca
     {
         if (show_error)
         {
-            std::wstring err = L"ÔÚÖ´ĞĞº¯Êı CameraInit Ê±Å×³öÒì³£¡£\n" + std::wstring(e);
+            std::wstring err = L"åœ¨æ‰§è¡Œå‡½æ•° CameraInit æ—¶æŠ›å‡ºå¼‚å¸¸ã€‚\n" + std::wstring(e);
             MessageBox(GMWindowsHandle, err.c_str(), L"NatureEnhance Error", MB_OK | MB_ICONERROR);
         }
 
@@ -65,7 +65,7 @@ expReal CameraMove(GMReal playerX, GMReal playerY, GMReal playerScale)
 {
     try
     {
-        if (Mode == 1)  //´«Í³µÄÒÔµ¥Ôª¸ñÎªµ¥Î»ÒÆ¶¯Ïà»ú
+        if (Mode == 1)  //ä¼ ç»Ÿçš„ä»¥å•å…ƒæ ¼ä¸ºå•ä½ç§»åŠ¨ç›¸æœº
         {
             GMReal xFollow = (floor(playerX / ViewWidth) * ViewWidth) + (ViewWidth / 2);
             GMReal yFollow = (floor(playerY / ViewHeight) * ViewHeight) + (ViewHeight / 2);
@@ -98,7 +98,7 @@ expReal CameraMove(GMReal playerX, GMReal playerY, GMReal playerScale)
             ViewX = clamp(CameraX - (ViewWidth / 2), LimitLeft, RoomWidth - ViewWidth);
             ViewY = clamp(CameraY - (ViewHeight / 2), LimitTop, RoomHeight - ViewHeight);
         }
-        else if (Mode == 2)  //ÒÔÎ»ÖÃÆ«²î²ÎÊı¸úËæÍæ¼ÒÀ´Æ½»¬ÒÆ¶¯Ïà»ú
+        else if (Mode == 2)  //ä»¥ä½ç½®åå·®å‚æ•°è·Ÿéšç©å®¶æ¥å¹³æ»‘ç§»åŠ¨ç›¸æœº
         {
             GMReal shackPlayerX = clamp(playerX, LimitLeft + (ViewWidth / 2) - (playerScale * OffsetX),
                 RoomWidth - (ViewWidth / 2) - (playerScale * OffsetX));
@@ -125,7 +125,7 @@ expReal CameraMove(GMReal playerX, GMReal playerY, GMReal playerScale)
             ViewX = CameraX - (ViewWidth / 2);
             ViewY = CameraY - (ViewHeight / 2);
         }
-        else if (Mode == 3)  //ÒÔÎ»ÖÃÆ«²î²ÎÊı¸úËæÍæ¼ÒÀ´Æ½»¬ÒÆ¶¯Ïà»ú
+        else if (Mode == 3)  //ä»¥ä½ç½®åå·®å‚æ•°è·Ÿéšç©å®¶æ¥å¹³æ»‘ç§»åŠ¨ç›¸æœº
         {
             GMReal shackPlayerX = clamp(playerX, LimitLeft + (ViewWidth / 2) - (playerScale * OffsetX),
                 RoomWidth - (ViewWidth / 2) - (playerScale * OffsetX));
@@ -153,7 +153,7 @@ expReal CameraMove(GMReal playerX, GMReal playerY, GMReal playerScale)
             ViewY = CameraY - (ViewHeight / 2);
         }
         else
-            throw L"Î´¶¨Òå´ËÔË¶¯Ä£Ê½";
+            throw L"æœªå®šä¹‰æ­¤è¿åŠ¨æ¨¡å¼";
 
         finish;
     }
@@ -161,7 +161,7 @@ expReal CameraMove(GMReal playerX, GMReal playerY, GMReal playerScale)
     {
         if (show_error)
         {
-            std::wstring err = L"ÔÚÖ´ĞĞº¯Êı CameraInit Ê±Å×³öÒì³£¡£\n" + std::wstring(e);
+            std::wstring err = L"åœ¨æ‰§è¡Œå‡½æ•° CameraInit æ—¶æŠ›å‡ºå¼‚å¸¸ã€‚\n" + std::wstring(e);
             MessageBox(GMWindowsHandle, err.c_str(), L"NatureEnhance Error", MB_OK | MB_ICONERROR);
         }
 

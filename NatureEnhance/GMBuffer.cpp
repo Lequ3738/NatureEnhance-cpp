@@ -6,7 +6,7 @@ void D3DCheck(HRESULT result, int pos)
     if (SUCCEEDED(result))
         return;
 
-    std::wstring err = L"Î»ÖÃ" + std::to_wstring(pos) + L": " + DXGetErrorDescription8(result);
+    std::wstring err = L"ä½ç½®" + std::to_wstring(pos) + L": " + DXGetErrorDescription8(result);
     throw err.c_str();
 }
 
@@ -24,29 +24,29 @@ expReal TextureToBuffer(GMReal buffer, GMReal gmtex, GMReal w, GMReal h)
         IDirect3DSurface8* surfTemp = nullptr;
         D3DCheck(texture->GetSurfaceLevel(0, &surf), 2);
 
-        // ÒòÎª GameMaker µÄÎÆÀí±»ÉèÖÃÎª D3DPOOL_DEFAULT£¬²»ÄÜÖ±½Ó¶ÁÈ¡Êı¾İĞÅÏ¢
-        // ËùÒÔÒª´´½¨Ò»¸ö¶îÍâµÄ IDirect3DSurface8£¬½«ÀïÃæµÄÊı¾İ¸´ÖÆ¹ıÀ´
+        // å› ä¸º GameMaker çš„çº¹ç†è¢«è®¾ç½®ä¸º D3DPOOL_DEFAULTï¼Œä¸èƒ½ç›´æ¥è¯»å–æ•°æ®ä¿¡æ¯
+        // æ‰€ä»¥è¦åˆ›å»ºä¸€ä¸ªé¢å¤–çš„ IDirect3DSurface8ï¼Œå°†é‡Œé¢çš„æ•°æ®å¤åˆ¶è¿‡æ¥
         D3DCheck(Device->CreateImageSurface(width, height, D3DFMT_A8R8G8B8, &surfTemp), 3);
         D3DCheck(D3DXLoadSurfaceFromSurface(surfTemp, nullptr, nullptr, surf, nullptr,
             nullptr, D3DX_FILTER_NONE, 0), 4);
 
-        // »ñÈ¡ÎÆÀíÊı¾İĞÅÏ¢
+        // è·å–çº¹ç†æ•°æ®ä¿¡æ¯
         D3DLOCKED_RECT lock;
         D3DCheck(surfTemp->LockRect(&lock, nullptr, 0), 5);
         char* src = (char*)lock.pBits;
 
-        // ´«ÈëµÄ buffer Ö±½Ó²Ù×÷ÆäÖ¸ÏòµÄÄÚ´æ£¬Ìá¸ßĞ§ÂÊ
+        // ä¼ å…¥çš„ buffer ç›´æ¥æ“ä½œå…¶æŒ‡å‘çš„å†…å­˜ï¼Œæé«˜æ•ˆç‡
         if (!gm::buffer_exists(buffer))
-            throw L"´«ÈëÎŞĞ§µÄ buffer ÒıÓÃ¡£";
+            throw L"ä¼ å…¥æ— æ•ˆçš„ buffer å¼•ç”¨ã€‚";
 
         gm::buffer_set_size(buffer, width * height * 4);
         gm::buffer_set_pos(buffer, 0);
         char* dest = (char*)(int)gm::buffer_get_address(buffer, false);
 
         if (dest == nullptr)
-            throw L"´«ÈëÎŞĞ§µÄ buffer ÒıÓÃ¡£";
+            throw L"ä¼ å…¥æ— æ•ˆçš„ buffer å¼•ç”¨ã€‚";
 
-        // ¸´ÖÆÎÆÀíĞÅÏ¢µ½ buffer ÖĞ¡£ÒòÎª¸ÃÎÆÀíÊÇ·ÇÑ¹ËõÎÆÀí£¬ËùÒÔÒª°´ĞĞ¸´ÖÆ
+        // å¤åˆ¶çº¹ç†ä¿¡æ¯åˆ° buffer ä¸­ã€‚å› ä¸ºè¯¥çº¹ç†æ˜¯éå‹ç¼©çº¹ç†ï¼Œæ‰€ä»¥è¦æŒ‰è¡Œå¤åˆ¶
         UINT srcPos = 0, destPos = 0, bufferStride = width * 4;
         for (UINT i = 0; i < height; ++i)
         {
@@ -55,7 +55,7 @@ expReal TextureToBuffer(GMReal buffer, GMReal gmtex, GMReal w, GMReal h)
             destPos += bufferStride;
         }
 
-        // ½áÊø£¬ÊÍ·ÅÄÚ´æ
+        // ç»“æŸï¼Œé‡Šæ”¾å†…å­˜
         D3DCheck(surfTemp->UnlockRect(), 6);
         surfTemp->Release();
         surf->Release();
@@ -81,7 +81,7 @@ expReal BufferToTexture(GMReal buffer, GMReal gmtex, GMReal w, GMReal h)
         UINT width = (UINT)w, height = (UINT)h;
         char* src = (char*)(int)gm::buffer_get_address(buffer, false);
         if (src == nullptr)
-            throw L"´«ÈëÎŞĞ§µÄ buffer ÒıÓÃ¡£";
+            throw L"ä¼ å…¥æ— æ•ˆçš„ buffer å¼•ç”¨ã€‚";
 
         IDirect3DTexture8* texture = gm::CGMAPI::GetTextureArray()[(int)gmtex].texture;
 

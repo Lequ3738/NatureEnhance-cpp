@@ -16,7 +16,7 @@ expReal ne_list_destroy(GMReal id)
 	try
 	{
 		if (!ds_exists(id, ds_type_list))
-			throw L"ÊÔÍ¼Ïú»ÙÎ´´Ó ne_list_create() ´´½¨µÄ ds_list¡£";
+			throw L"è¯•å›¾é”€æ¯æœªä» ne_list_create() åˆ›å»ºçš„ ds_listã€‚";
 
 		int i = static_cast<int>(id);
 
@@ -45,7 +45,7 @@ expReal ne_map_destroy(GMReal id)
 	try
 	{
 		if (!ds_exists(id, ds_type_map))
-			throw L"ÊÔÍ¼Ïú»ÙÎ´´Ó ne_map_create() ´´½¨µÄ ds_map¡£";
+			throw L"è¯•å›¾é”€æ¯æœªä» ne_map_create() åˆ›å»ºçš„ ds_mapã€‚";
 
 		int i = static_cast<int>(id);
 
@@ -74,7 +74,7 @@ expReal ne_stack_destroy(GMReal id)
 	try
 	{
 		if (!ds_exists(id, ds_type_stack))
-			throw L"ÊÔÍ¼Ïú»ÙÎ´´Ó ne_stack_create() ´´½¨µÄ ds_stack¡£";
+			throw L"è¯•å›¾é”€æ¯æœªä» ne_stack_create() åˆ›å»ºçš„ ds_stackã€‚";
 
 		int i = static_cast<int>(id);
 
@@ -103,7 +103,7 @@ expReal ne_queue_destroy(GMReal id)
 	try
 	{
 		if (!ds_exists(id, ds_type_queue))
-			throw L"ÊÔÍ¼Ïú»ÙÎ´´Ó ne_queue_create() ´´½¨µÄ ds_queue¡£";
+			throw L"è¯•å›¾é”€æ¯æœªä» ne_queue_create() åˆ›å»ºçš„ ds_queueã€‚";
 
 		int i = static_cast<int>(id);
 
@@ -132,7 +132,7 @@ expReal ne_grid_destroy(GMReal id)
 	try
 	{
 		if (!ds_exists(id, ds_type_grid))
-			throw L"ÊÔÍ¼Ïú»ÙÎ´´Ó ne_grid_create() ´´½¨µÄ ds_grid¡£";
+			throw L"è¯•å›¾é”€æ¯æœªä» ne_grid_create() åˆ›å»ºçš„ ds_gridã€‚";
 
 		int i = static_cast<int>(id);
 
@@ -161,7 +161,7 @@ expReal ne_priority_destroy(GMReal id)
 	try
 	{
 		if (!ds_exists(id, ds_type_priority))
-			throw L"ÊÔÍ¼Ïú»ÙÎ´´Ó ne_priority_create() ´´½¨µÄ ds_priority¡£";
+			throw L"è¯•å›¾é”€æ¯æœªä» ne_priority_create() åˆ›å»ºçš„ ds_priorityã€‚";
 
 		int i = static_cast<int>(id);
 
@@ -183,7 +183,7 @@ expReal ne_list_read_buffer(GMReal list, GMReal buffer, GMReal types)
 		int typeSize = gm::ds_list_size((int)types);
 
 		if (listSize % typeSize != 0)
-			throw L"±» buffer ¼ÇÔØµÄ list µÄ´óĞ¡²»ÄÜ±» types µÄ´óĞ¡Õû³ı¡£";
+			throw L"è¢« buffer è®°è½½çš„ list çš„å¤§å°ä¸èƒ½è¢« types çš„å¤§å°æ•´é™¤ã€‚";
 
 		gm::ds_list_clear((int)list);
 		for (int i = 0; i < listSize; ++i)
@@ -211,7 +211,7 @@ expReal ne_list_write_buffer(GMReal list, GMReal buffer, GMReal types)
 		int typeSize = gm::ds_list_size((int)types);
 
 		if (listSize % typeSize != 0)
-			throw L"´«ÈëµÄ list µÄ´óĞ¡²»ÄÜ±» types µÄ´óĞ¡Õû³ı¡£";
+			throw L"ä¼ å…¥çš„ list çš„å¤§å°ä¸èƒ½è¢« types çš„å¤§å°æ•´é™¤ã€‚";
 
 		gm::buffer_write_uint32(buffer, listSize);
 		for (int i = 0; i < listSize; ++i)

@@ -13,7 +13,7 @@ namespace mm
 	var = (type)GetProcAddress(MaizeMusicDLL, name); \
 	if (var == nullptr) {\
 		std::wstring wname(name, name + strlen(name)); \
-		std::wstring err = L"º”‘ÿ MaizeMusic.dll  ±ªÒ»°∫Ø ˝ (" + wname + L")  ß∞‹°£"; \
+		std::wstring err = L"Âä†ËΩΩ MaizeMusic.dll Êó∂Ëé∑ÂèñÂáΩÊï∞ (" + wname + L") Â§±Ë¥•„ÄÇ"; \
 		throw err.c_str(); \
 	}
 
@@ -26,7 +26,7 @@ expReal ImportMaizeMusicModule(GMString name)
 
 		if (MaizeMusicDLL == nullptr)
 		{
-			std::wstring err = L"º”‘ÿ " + wname + L"  ß∞‹°£";
+			std::wstring err = L"Âä†ËΩΩ " + wname + L" Â§±Ë¥•„ÄÇ";
 			throw err.c_str();
 		}
 

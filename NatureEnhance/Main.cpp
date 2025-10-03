@@ -58,7 +58,7 @@ expReal BinToDec(GMString bin)
         while (*bin)
         {
             if (*bin != '0' && *bin != '1')
-                throw L"²»ºÏ·¨µÄ¶ş½øÖÆ×Ö·û´®×ÖÃæÁ¿¡£";
+                throw L"ä¸åˆæ³•çš„äºŒè¿›åˆ¶å­—ç¬¦ä¸²å­—é¢é‡ã€‚";
 
             value = (value << 1) | (*bin - '0');
             ++bin;
@@ -127,7 +127,7 @@ expReal os_get_dpiscale()
         if (GetDpi)
         {
 			UINT dpi = GetDpi(GMWindowsHandle);
-			return (double)dpi / 96.0; // 96 DPI ÊÇ±ê×¼ DPI
+			return (double)dpi / 96.0; // 96 DPI æ˜¯æ ‡å‡† DPI
         }
     }
 
@@ -152,7 +152,7 @@ expReal os_get_dpiscale()
 	
     // windows 7 API
     HDC hdc = GetDC(GMWindowsHandle);
-    int dpi = GetDeviceCaps(hdc, LOGPIXELSX); // Ë®Æ½DPI
+    int dpi = GetDeviceCaps(hdc, LOGPIXELSX); // æ°´å¹³DPI
     ReleaseDC(GMWindowsHandle, hdc);
 	return (double)dpi / 96.0;
 }
@@ -180,7 +180,7 @@ expReal WindowSetFocus()
 {
     if (!SetForegroundWindow(GMWindowsHandle))
     {
-        // ¸½¼ÓÊäÈëÏß³Ì´¦Àí£¨ÈÆ¹ıÏµÍ³ÏŞÖÆ£©
+        // é™„åŠ è¾“å…¥çº¿ç¨‹å¤„ç†ï¼ˆç»•è¿‡ç³»ç»Ÿé™åˆ¶ï¼‰
         DWORD threadID = GetWindowThreadProcessId(GetForegroundWindow(), NULL);
         DWORD currentThreadID = GetCurrentThreadId();
 
@@ -192,7 +192,7 @@ expReal WindowSetFocus()
         }
     }
 
-    // È·±£´°¿Ú¼¤»î
+    // ç¡®ä¿çª—å£æ¿€æ´»
     SetActiveWindow(GMWindowsHandle);
     SetFocus(GMWindowsHandle);
 
@@ -211,17 +211,17 @@ GMString ChangeCoding(GMString str, GMString inputCoding, GMString outputCoding)
         return nullptr;
 
     size_t in_len = strlen(str);
-    size_t out_len = in_len * 4;  // UTF-8 ×î¶àÊÇÔ­Ê¼´óĞ¡µÄ 4 ±¶
-    char* output = new char[out_len + 1]; // +1 ´æ·ÅÖÕÖ¹·û
+    size_t out_len = in_len * 4;  // UTF-8 æœ€å¤šæ˜¯åŸå§‹å¤§å°çš„ 4 å€
+    char* output = new char[out_len + 1]; // +1 å­˜æ”¾ç»ˆæ­¢ç¬¦
     memset(output, 0, out_len + 1);
 
-    // ÉèÖÃÊäÈë/Êä³ö»º³åÇøÖ¸Õë
+    // è®¾ç½®è¾“å…¥/è¾“å‡ºç¼“å†²åŒºæŒ‡é’ˆ
     char* in_ptr = const_cast<char*>(str);
     char* out_ptr = output;
     size_t in_bytes_left = in_len;
     size_t out_bytes_left = out_len;
 
-    // Ö´ĞĞ×ª»»
+    // æ‰§è¡Œè½¬æ¢
     if (iconv(cd, (GMString*)&in_ptr, &in_bytes_left, &out_ptr, &out_bytes_left) == (size_t)-1)
     {
         iconv_close(cd);
@@ -229,7 +229,7 @@ GMString ChangeCoding(GMString str, GMString inputCoding, GMString outputCoding)
         return nullptr;
     }
 
-    // Ìí¼ÓÖÕÖ¹·û²¢ÇåÀí
+    // æ·»åŠ ç»ˆæ­¢ç¬¦å¹¶æ¸…ç†
     *out_ptr = '\0';
     iconv_close(cd);
     return output;
@@ -276,7 +276,7 @@ expReal LoadRoomTiles(GMString path)
 
         GMReal version = gm::buffer_read_uint8(buffer);
 
-        // Tile Layer - ÔÚ·Ç±à¼­Ä£Ê½ÏÂÎŞÓÃ
+        // Tile Layer - åœ¨éç¼–è¾‘æ¨¡å¼ä¸‹æ— ç”¨
         int num = static_cast<int>(gm::buffer_read_uint32(buffer));
         for (int i = 0; i < num; ++i)
         {
@@ -301,7 +301,7 @@ expReal LoadRoomTiles(GMString path)
 
             if (!gm::background_exists(back))
             {
-                err += "ÔÚ scrLoadRoomTiles() ÖĞ£¬±³¾° (" + name + ") ²»´æÔÚ¡£\n";
+                err += "åœ¨ scrLoadRoomTiles() ä¸­ï¼ŒèƒŒæ™¯ (" + name + ") ä¸å­˜åœ¨ã€‚\n";
                 resExistsList.push_back(false);
             }
             else
@@ -349,7 +349,7 @@ expReal LoadRoomTiles(GMString path)
 
             if (!gm::sprite_exists(spr))
             {
-                err += "ÔÚ scrLoadRoomTiles() ÖĞ£¬Sprite (" + name + ") ²»´æÔÚ¡£\n";
+                err += "åœ¨ scrLoadRoomTiles() ä¸­ï¼ŒSprite (" + name + ") ä¸å­˜åœ¨ã€‚\n";
                 resExistsList.push_back(false);
             }
             else
@@ -384,7 +384,7 @@ expReal LoadRoomTiles(GMString path)
             int listPos = static_cast<int>(gm::buffer_read_uint8(buffer));
             if (listPos > 7)
             {
-                err += "ÔÚ scrLoadRoomTiles() ÖĞ£¬²ã " + std::to_string(listPos) + " ²»´æÔÚ¡£\n";
+                err += "åœ¨ scrLoadRoomTiles() ä¸­ï¼Œå±‚ " + std::to_string(listPos) + " ä¸å­˜åœ¨ã€‚\n";
                 continue;
             }
 
@@ -407,7 +407,7 @@ expReal LoadRoomTiles(GMString path)
 
 static void StringReplaceAll(std::string& str, const std::string& from, const std::string& to)
 {
-    if (from.empty()) return; // ±ÜÃâ¿Õ×Ó´®µ¼ÖÂËÀÑ­»·
+    if (from.empty()) return; // é¿å…ç©ºå­ä¸²å¯¼è‡´æ­»å¾ªç¯
 
     size_t start_pos = 0;
     while ((start_pos = str.find(from, start_pos)) != std::string::npos)
@@ -427,17 +427,17 @@ expReal InitTexts(GMString path)
         if (!fs::exists(path))
         {
             string errpath = path;
-            wstring err = L"ÎÄ¼ş¼ĞÂ·¾¶ (" + wstring(errpath.begin(), errpath.end()) + L") ²»´æÔÚ¡£";
+            wstring err = L"æ–‡ä»¶å¤¹è·¯å¾„ (" + wstring(errpath.begin(), errpath.end()) + L") ä¸å­˜åœ¨ã€‚";
             throw err.c_str();
         }
 
         vector<fs::path> textFilePath;
 
-        if (fs::is_regular_file(path))  // ¶ÁÈ¡Ö¸¶¨µÄÎÄ¼ş
+        if (fs::is_regular_file(path))  // è¯»å–æŒ‡å®šçš„æ–‡ä»¶
             textFilePath.push_back(path);
         else
         {
-            // ¶ÁÈ¡ÎÄ¼ş¼Ğ£¨¼°Æä×ÓÎÄ¼ş¼Ğ£©ÏÂËùÓĞµÄ .txt ÎÄ¼ş
+            // è¯»å–æ–‡ä»¶å¤¹ï¼ˆåŠå…¶å­æ–‡ä»¶å¤¹ï¼‰ä¸‹æ‰€æœ‰çš„ .txt æ–‡ä»¶
             for (const auto& entry : fs::recursive_directory_iterator(path))
             {
                 if (entry.is_regular_file() && entry.path().extension() == ".txt")
@@ -450,11 +450,11 @@ expReal InitTexts(GMString path)
             ifstream filestream(file);
             if (!filestream)
             {
-                wstring err = L"ÎÄ¼ş (" + wstring(file) + L") ´ò¿ªÊ§°Ü¡£";
+                wstring err = L"æ–‡ä»¶ (" + wstring(file) + L") æ‰“å¼€å¤±è´¥ã€‚";
                 throw err.c_str();
             }
 
-            // ½«Õû¸öÎÄ¼ş¶¼¶ÁÈ¡µ½×Ö·û´®ÖĞ£¬¼õÉÙ I/O µ÷ÓÃ´øÀ´µÄĞÔÄÜ¿ªÏú
+            // å°†æ•´ä¸ªæ–‡ä»¶éƒ½è¯»å–åˆ°å­—ç¬¦ä¸²ä¸­ï¼Œå‡å°‘ I/O è°ƒç”¨å¸¦æ¥çš„æ€§èƒ½å¼€é”€
             string data = {
                 istreambuf_iterator<char>(filestream),
                 istreambuf_iterator<char>()
@@ -465,7 +465,7 @@ expReal InitTexts(GMString path)
 
             while (getline(strstream, line))
             {
-                // È¥µôÇ°ÃæµÄ¿Õ¸ñºÍÖÆ±í·û
+                // å»æ‰å‰é¢çš„ç©ºæ ¼å’Œåˆ¶è¡¨ç¬¦
                 size_t whitePos = line.find_first_not_of(" \t");
                 line = (whitePos == string::npos) ? "" : line.substr(whitePos);
 
@@ -566,11 +566,11 @@ expReal RegistryDeleteKey(GMString name, GMString key)
         {
             if (result == ERROR_FILE_NOT_FOUND)
             {
-                std::wstring err = L"×¢²á±íÂ·¾¶²»´æÔÚ: " + subKey;
+                std::wstring err = L"æ³¨å†Œè¡¨è·¯å¾„ä¸å­˜åœ¨: " + subKey;
                 throw err.c_str();
             }
 
-            std::wstring err = L"´ò¿ª×¢²á±íÊ§°Ü (´íÎó´úÂë: " + std::to_wstring(result) + L")";
+            std::wstring err = L"æ‰“å¼€æ³¨å†Œè¡¨å¤±è´¥ (é”™è¯¯ä»£ç : " + std::to_wstring(result) + L")";
             throw err.c_str();
         }
 
@@ -579,11 +579,11 @@ expReal RegistryDeleteKey(GMString name, GMString key)
         {
             if (result == ERROR_FILE_NOT_FOUND)
             {
-                std::wstring err = L"Öµ²»´æÔÚ: " + valueName;
+                std::wstring err = L"å€¼ä¸å­˜åœ¨: " + valueName;
                 throw err.c_str();
             }
 
-            std::wstring err = L"É¾³ıÊ§°Ü (´íÎó´úÂë: " + std::to_wstring(result) + L")";
+            std::wstring err = L"åˆ é™¤å¤±è´¥ (é”™è¯¯ä»£ç : " + std::to_wstring(result) + L")";
             throw err.c_str();
         }
 
@@ -608,7 +608,7 @@ expReal GetAllFilesInSubfolders(GMString dir, GMString starchPattern)
 
         pattern = pattern.empty() ? "*" : pattern;
 
-        // ×ª»»Í¨Åä·ûÎªÕıÔò±í´ïÊ½
+        // è½¬æ¢é€šé…ç¬¦ä¸ºæ­£åˆ™è¡¨è¾¾å¼
         std::string regexPattern;
         regexPattern.reserve(pattern.size() * 2);
 
@@ -649,7 +649,7 @@ expReal GetAllFilesInSubfolders(GMString dir, GMString starchPattern)
     {
         if (show_error)
         {
-            MessageBox(GMWindowsHandle, L"ÔÚÖ´ĞĞº¯Êı GetAllFilesInSubfolders Ê±Å×³öÒì³£¡£\nÎŞĞ§µÄÍ¨Åä·û¡£", 
+            MessageBox(GMWindowsHandle, L"åœ¨æ‰§è¡Œå‡½æ•° GetAllFilesInSubfolders æ—¶æŠ›å‡ºå¼‚å¸¸ã€‚\næ— æ•ˆçš„é€šé…ç¬¦ã€‚", 
                 L"NatureEnhance Error", MB_OK | MB_ICONERROR);
         }
         
@@ -659,7 +659,7 @@ expReal GetAllFilesInSubfolders(GMString dir, GMString starchPattern)
     {
         if (show_error)
         {
-            MessageBox(GMWindowsHandle, L"ÔÚÖ´ĞĞº¯Êı GetAllFilesInSubfolders Ê±Å×³öÒì³£¡£\nÎÄ¼şÏµÍ³´íÎó¡£",
+            MessageBox(GMWindowsHandle, L"åœ¨æ‰§è¡Œå‡½æ•° GetAllFilesInSubfolders æ—¶æŠ›å‡ºå¼‚å¸¸ã€‚\næ–‡ä»¶ç³»ç»Ÿé”™è¯¯ã€‚",
                 L"NatureEnhance Error", MB_OK | MB_ICONERROR);
         }
 
@@ -683,8 +683,8 @@ expString ReadAllText(GMString file)
         std::ifstream filestream(file, std::ios::binary);
         if (!filestream)
         {
-            std::wstring err = L"ÎÄ¼ş (" + std::wstring(std::filesystem::path(file)) +
-                L") ´ò¿ªÊ§°Ü¡£";
+            std::wstring err = L"æ–‡ä»¶ (" + std::wstring(std::filesystem::path(file)) +
+                L") æ‰“å¼€å¤±è´¥ã€‚";
             throw err.c_str();
         }
 
@@ -703,7 +703,7 @@ expReal FileIsUsing(GMString file)
     HANDLE hFile = CreateFileA(
         file,
         GENERIC_READ | GENERIC_WRITE,
-        0,  // ¶ÀÕ¼Ä£Ê½´ò¿ª
+        0,  // ç‹¬å æ¨¡å¼æ‰“å¼€
         NULL,
         OPEN_EXISTING,
         FILE_ATTRIBUTE_NORMAL,
@@ -713,12 +713,12 @@ expReal FileIsUsing(GMString file)
     if (hFile == INVALID_HANDLE_VALUE)
     {
         DWORD error = GetLastError();
-        // ¹²Ïí³åÍ»»ò¾Ü¾ø·ÃÎÊ±íÊ¾ÎÄ¼ş±»Õ¼ÓÃ
+        // å…±äº«å†²çªæˆ–æ‹’ç»è®¿é—®è¡¨ç¤ºæ–‡ä»¶è¢«å ç”¨
         return (error == ERROR_SHARING_VIOLATION || error == ERROR_ACCESS_DENIED);
     }
 
     CloseHandle(hFile);
-    return false;  // ÎÄ¼şÎ´±»Õ¼ÓÃ
+    return false;  // æ–‡ä»¶æœªè¢«å ç”¨
 }
 
 expReal ReadCBVFile(GMString filename)
@@ -728,19 +728,19 @@ expReal ReadCBVFile(GMString filename)
         std::ifstream file(filename, std::ios::binary);
         if (!file)
         {
-            std::wstring err = L"ÎÄ¼ş (" + std::wstring(std::filesystem::path(filename)) + L") ´ò¿ªÊ§°Ü¡£";
+            std::wstring err = L"æ–‡ä»¶ (" + std::wstring(std::filesystem::path(filename)) + L") æ‰“å¼€å¤±è´¥ã€‚";
             throw err.c_str();
         }
 
-        // ¼ì²âÎÄ¼ş×Ö½ÚĞòÊÇ·ñºÍÏµÍ³Ä¬ÈÏ×Ö½ÚĞòÒ»ÖÂ
+        // æ£€æµ‹æ–‡ä»¶å­—èŠ‚åºæ˜¯å¦å’Œç³»ç»Ÿé»˜è®¤å­—èŠ‚åºä¸€è‡´
         char endian_flag;
         file.read(&endian_flag, 1);
-		bool reversed = (endian_flag != 1);  // 1 ±íÊ¾Ğ¡¶Ë×Ö½ÚĞò£¬0 ±íÊ¾´ó¶Ë×Ö½ÚĞò
+		bool reversed = (endian_flag != 1);  // 1 è¡¨ç¤ºå°ç«¯å­—èŠ‚åºï¼Œ0 è¡¨ç¤ºå¤§ç«¯å­—èŠ‚åº
 
-        // ¼ÆËãÎÄ¼şÖĞ¸¡µãÊıµÄÊıÁ¿
+        // è®¡ç®—æ–‡ä»¶ä¸­æµ®ç‚¹æ•°çš„æ•°é‡
         file.seekg(0, std::ios::end);
         size_t num_floats = ((size_t)file.tellg() - 1) / 4;
-        file.seekg(1, std::ios::beg);  // Ìø¹ıÊ××Ö½Ú
+        file.seekg(1, std::ios::beg);  // è·³è¿‡é¦–å­—èŠ‚
 
         std::string info("CBV File's List: " + std::string(filename));
         int list = (int)ne_list_create(info.c_str());
@@ -749,14 +749,14 @@ expReal ReadCBVFile(GMString filename)
             char buffer[4];
             file.read(buffer, 4);
 
-            if (reversed)  // ´¦Àí×Ö½ÚĞò×ª»»
+            if (reversed)  // å¤„ç†å­—èŠ‚åºè½¬æ¢
                 std::reverse(buffer, buffer + 4);
 
-            // ½«×Ö½Ú×ª»»Îª¸¡µãÊı
+            // å°†å­—èŠ‚è½¬æ¢ä¸ºæµ®ç‚¹æ•°
             float value;
             std::memcpy(&value, buffer, sizeof(float));
 
-            // ½«¸¡µãÊıÌí¼Óµ½ÁĞ±íÖĞ
+            // å°†æµ®ç‚¹æ•°æ·»åŠ åˆ°åˆ—è¡¨ä¸­
             gm::ds_list_add(list, value);
         }
 

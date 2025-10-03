@@ -14,7 +14,7 @@ PNGDecodeFuture AsyncDecodePNG(GMString file)
         if (error)
             throw lodepng_error_text(error);
 
-        // ½« RGBA ¸ñÊ½µÄÊı¾İ×ª»»Îª D3D8 ËùĞèµÄ ARGB ¸ñÊ½
+        // å°† RGBA æ ¼å¼çš„æ•°æ®è½¬æ¢ä¸º D3D8 æ‰€éœ€çš„ ARGB æ ¼å¼
         d3dimage.resize(image.size());
         for (size_t i = 0; i < image.size(); i += 4)
         {
@@ -49,14 +49,14 @@ expReal ToBackgroundAsync(GMReal id)
         PNGDecodeFuture getFuture = std::move(future);
         auto [d3dimage, width, height] = getFuture.get();
 
-        // ĞÂ½¨ GM µÄ±³¾°×ÊÔ´²¢·µ»ØÆäÎÆÀíºÍ±íÃæ
+        // æ–°å»º GM çš„èƒŒæ™¯èµ„æºå¹¶è¿”å›å…¶çº¹ç†å’Œè¡¨é¢
         int back = gm::background_create_color(width, height, 0);
         IDirect3DTexture8* texture = gmapi->Backgrounds[back].GetTexture();
 
         IDirect3DSurface8* surf = nullptr;
         D3DCheck(texture->GetSurfaceLevel(0, &surf), 1);
 
-        // ÔØÈëÊı¾İ
+        // è½½å…¥æ•°æ®
         RECT rect = { .left = 0, .top = 0, .right = (long)width, .bottom = (long)height };
 
         D3DCheck(D3DXLoadSurfaceFromMemory(surf, nullptr, &rect, d3dimage.data(),
@@ -74,7 +74,7 @@ expReal ToBackgroundAsync(GMReal id)
     }
     catch (const char* e)
     {
-        std::wstring err = L"ÔÚ LoadPNGToBackground ÖĞ£¬¼ÓÔØ PNG ÎÄ¼şÊ§°Ü: " +
+        std::wstring err = L"åœ¨ LoadPNGToBackground ä¸­ï¼ŒåŠ è½½ PNG æ–‡ä»¶å¤±è´¥: " +
             std::wstring(e, e + strlen(e));
 
         if (show_error)
@@ -91,9 +91,9 @@ PNGDecodeFuture AsyncDecodeGMBCK(GMString file)
         GMReal buffer = gm::buffer_create();
 		bool result = (bool)gm::buffer_read_from_file(buffer, file);
         if (!result)
-			throw ("ÎŞ·¨´ò¿ªÖ¸¶¨µÄÎÄ¼ş£º" + std::string(file)).c_str();
+			throw ("æ— æ³•æ‰“å¼€æŒ‡å®šçš„æ–‡ä»¶ï¼š" + std::string(file)).c_str();
 
-        gm::buffer_set_pos(buffer, 4);  // Ìø¹ı 1234321
+        gm::buffer_set_pos(buffer, 4);  // è·³è¿‡ 1234321
 		UINT size = (UINT)gm::buffer_read_int32(buffer);
 
         GMReal data = gm::buffer_create();
@@ -102,22 +102,22 @@ PNGDecodeFuture AsyncDecodeGMBCK(GMString file)
 
         gm::buffer_zlib_uncompress(data);
 
-        // Õâ 36 ¸ö×Ö½Ú·Ö±ğÎª (4 ×Ö½Ú¶ÔÆë)£º
-		// °æ±¾ºÅ 710¡¢ÊÇ·ñ×÷ÎªÌùÍ¼Ê¹ÓÃ¡¢ÌùÍ¼¿í¡¢ÌùÍ¼¸ß¡¢´¹Ö±Î»ÒÆ¡¢Ë®Æ½Î»ÒÆ¡¢´¹Ö±²½¿í¡¢Ë®Æ½²½¿í¡¢°æ±¾ºÅ 800
-		gm::buffer_set_pos(data, sizeof(UINT) * 9);  // Ìø¹ıÍ·²¿ 36 ×Ö½Ú
+        // è¿™ 36 ä¸ªå­—èŠ‚åˆ†åˆ«ä¸º (4 å­—èŠ‚å¯¹é½)ï¼š
+		// ç‰ˆæœ¬å· 710ã€æ˜¯å¦ä½œä¸ºè´´å›¾ä½¿ç”¨ã€è´´å›¾å®½ã€è´´å›¾é«˜ã€å‚ç›´ä½ç§»ã€æ°´å¹³ä½ç§»ã€å‚ç›´æ­¥å®½ã€æ°´å¹³æ­¥å®½ã€ç‰ˆæœ¬å· 800
+		gm::buffer_set_pos(data, sizeof(UINT) * 9);  // è·³è¿‡å¤´éƒ¨ 36 å­—èŠ‚
         UINT width = (UINT)gm::buffer_read_int32(data);
         UINT height = (UINT)gm::buffer_read_int32(data);
         size = (UINT)gm::buffer_read_int32(data);
         if (size == 0)
-			throw "ÎŞĞ§µÄÍ¼Æ¬Êı¾İ¿é´óĞ¡¡£";
+			throw "æ— æ•ˆçš„å›¾ç‰‡æ•°æ®å—å¤§å°ã€‚";
 
         UCHAR* imageData = (UCHAR*)(int)gm::buffer_get_address(data, false);
         if (imageData == nullptr)
-			throw "ÎŞĞ§µÄÍ¼Æ¬Êı¾İ¿é¡£";
+			throw "æ— æ•ˆçš„å›¾ç‰‡æ•°æ®å—ã€‚";
 
-		imageData += sizeof(UINT) * 12;  // Ìø¹ıÍ·²¿Êı¾İ£¬Ö±½ÓÖ¸ÏòÍ¼Æ¬Êı¾İ
+		imageData += sizeof(UINT) * 12;  // è·³è¿‡å¤´éƒ¨æ•°æ®ï¼Œç›´æ¥æŒ‡å‘å›¾ç‰‡æ•°æ®
 
-		// Ê£ÏÂµÄÊı¾İÎª D3D8 µÄ ARGB ¸ñÊ½Êı¾İ£¬ÎŞĞè×ª»»
+		// å‰©ä¸‹çš„æ•°æ®ä¸º D3D8 çš„ ARGB æ ¼å¼æ•°æ®ï¼Œæ— éœ€è½¬æ¢
         std::vector<UCHAR> image;
 		image.resize(size);
 
@@ -143,5 +143,5 @@ expReal LoadBackgroundAsync(GMString file)
     else if (strcmp(ext, ".gmbck") == 0)
         return LoadGMBCKAsync(file);
     else
-		return -1;  // ²»Ö§³ÖµÄ¸ñÊ½
+		return -1;  // ä¸æ”¯æŒçš„æ ¼å¼
 }

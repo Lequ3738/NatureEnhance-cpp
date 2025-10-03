@@ -47,7 +47,7 @@ typedef std::variant<std::string, GMReal> dynamic;
 	{ \
 		if (show_error) \
 		{ \
-			std::wstring err = L"ÔÚÖ´ĞĞº¯Êı " + std::wstring(funcname) + L" Ê±Å×³öÒì³£¡£\n" + std::wstring(e); \
+			std::wstring err = L"åœ¨æ‰§è¡Œå‡½æ•° " + std::wstring(funcname) + L" æ—¶æŠ›å‡ºå¼‚å¸¸ã€‚\n" + std::wstring(e); \
 			MessageBox(GMWindowsHandle, err.c_str(), L"NatureEnhance Error", MB_OK | MB_ICONERROR); \
 		} \
 		return returns; \
@@ -56,7 +56,7 @@ typedef std::variant<std::string, GMReal> dynamic;
 	{ \
 		if (show_error) \
 		{ \
-			std::wstring err = L"ÔÚÖ´ĞĞº¯Êı " + std::wstring(funcname) + L" Ê±·¢ÉúÎ´Öª´íÎó¡£"; \
+			std::wstring err = L"åœ¨æ‰§è¡Œå‡½æ•° " + std::wstring(funcname) + L" æ—¶å‘ç”ŸæœªçŸ¥é”™è¯¯ã€‚"; \
 			MessageBox(GMWindowsHandle, err.c_str(), L"NatureEnhance Error", MB_OK | MB_ICONERROR); \
 		} \
 		return returns; \
