@@ -247,21 +247,16 @@ std::wstring ToWstring(GMString str)
 #pragma region Load Tiles
 std::vector<int> DrawSpritesList;
 
-expReal LoadDrawSpritesList(GMReal a, GMReal b, GMReal c, GMReal d, GMReal e, GMReal f, GMReal g, GMReal h)
+expReal ClearDrawSpritesList()
 {
-    DrawSpritesList.reserve(8);
+	DrawSpritesList.clear();
+	finish;
+}
 
-    DrawSpritesList.clear();
-    DrawSpritesList.push_back(static_cast<int>(a));
-    DrawSpritesList.push_back(static_cast<int>(b));
-    DrawSpritesList.push_back(static_cast<int>(c));
-    DrawSpritesList.push_back(static_cast<int>(d));
-    DrawSpritesList.push_back(static_cast<int>(e));
-    DrawSpritesList.push_back(static_cast<int>(f));
-    DrawSpritesList.push_back(static_cast<int>(g));
-    DrawSpritesList.push_back(static_cast<int>(h));
-
-    finish;
+expReal PushDrawSpritesList(GMReal list)
+{
+	DrawSpritesList.push_back(static_cast<int>(list));
+	finish;
 }
 
 expReal LoadRoomTiles(GMString path)
@@ -274,26 +269,31 @@ expReal LoadRoomTiles(GMString path)
         GMReal buffer = gm::buffer_create();
         gm::buffer_read_from_file(buffer, path);
 
-        GMReal version = gm::buffer_read_uint8(buffer);
+		UINT version = (UINT)gm::buffer_read_uint8(buffer);
 
-        // Tile Layer - 在非编辑模式下无用
-        int num = static_cast<int>(gm::buffer_read_uint32(buffer));
-        for (int i = 0; i < num; ++i)
-        {
-            gm::buffer_read_int32(buffer);
-            gm::buffer_read_string(buffer);
-        }
+		UINT num;
+		if (version == 0)
+		{
+			// Tile Layer - 在非编辑模式下无用
+			num = static_cast<UINT>(gm::buffer_read_uint32(buffer));
+
+			for (UINT i = 0; i < num; ++i)
+			{
+				gm::buffer_read_int32(buffer);
+				gm::buffer_read_string(buffer);
+			}
+		}
 
         std::vector<int> resList;
         std::vector<bool> resExistsList;
         std::string err = "";
 
         // Tiles
-        num = static_cast<int>(gm::buffer_read_uint32(buffer));
+        num = static_cast<UINT>(gm::buffer_read_uint32(buffer));
         resList.reserve(num);
         resExistsList.reserve(num);
 
-        for (int i = 0; i < num; ++i)
+        for (UINT i = 0; i < num; ++i)
         {
             std::string name = gm::buffer_read_string(buffer);
             int back = static_cast<int>(GetResource(name));
@@ -308,8 +308,8 @@ expReal LoadRoomTiles(GMString path)
                 resExistsList.push_back(true);
         }
 
-        num = static_cast<int>(gm::buffer_read_uint32(buffer));
-        for (int i = 0; i < num; ++i)
+        num = static_cast<UINT>(gm::buffer_read_uint32(buffer));
+        for (UINT i = 0; i < num; ++i)
         {
             int pos = static_cast<int>(gm::buffer_read_int32(buffer));
             if (!resExistsList[pos])
@@ -331,17 +331,20 @@ expReal LoadRoomTiles(GMString path)
             int tile = gm::tile_add(resList[pos], left, top, width, height, x, y, depth);
             gm::tile_set_scale(tile, xscale, yscale);
             gm::tile_set_alpha(tile, gm::buffer_read_uint8(buffer) / 255);
+
+			if (version == 1)
+				gm::tile_set_blend(tile, (int)gm::buffer_read_uint32(buffer));
         }
 
         resList.clear();
         resExistsList.clear();
 
         // Sprites
-        num = static_cast<int>(gm::buffer_read_uint32(buffer));
+        num = static_cast<UINT>(gm::buffer_read_uint32(buffer));
         resList.reserve(num);
         resExistsList.reserve(num);
 
-        for (int i = 0; i < num; ++i)
+        for (UINT i = 0; i < num; ++i)
         {
             std::string name = gm::buffer_read_string(buffer);
             int spr = static_cast<int>(GetResource(name));
@@ -356,8 +359,8 @@ expReal LoadRoomTiles(GMString path)
                 resExistsList.push_back(true);
         }
 
-        num = static_cast<int>(gm::buffer_read_uint32(buffer));
-        for (int i = 0; i < num; ++i)
+        num = static_cast<UINT>(gm::buffer_read_uint32(buffer));
+        for (UINT i = 0; i < num; ++i)
         {
             int pos = static_cast<int>(gm::buffer_read_int32(buffer));
             if (!resExistsList[pos])
@@ -378,11 +381,14 @@ expReal LoadRoomTiles(GMString path)
             gm::ds_map_add(map, "alpha", gm::buffer_read_uint8(buffer) / 255);
             gm::ds_map_add(map, "speed", gm::buffer_read_float32(buffer));
 
+			if (version == 1)
+				gm::ds_map_add(map, "blend", gm::buffer_read_uint32(buffer));
+
             if (gm::ds_map_find_value(map, "speed") != 0)
                 gm::ds_map_replace(map, "curIndex", 0);
 
-            int listPos = static_cast<int>(gm::buffer_read_uint8(buffer));
-            if (listPos > 7)
+			size_t listPos = static_cast<size_t>(gm::buffer_read_uint8(buffer));
+            if (listPos >= DrawSpritesList.size())
             {
                 err += "在 scrLoadRoomTiles() 中，层 " + std::to_string(listPos) + " 不存在。\n";
                 continue;
