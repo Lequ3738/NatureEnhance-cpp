@@ -423,6 +423,13 @@ static void StringReplaceAll(std::string& str, const std::string& from, const st
     }
 }
 
+expString string_replace_all(GMString str, GMString from, GMString to)
+{
+	std::string result(str);
+	StringReplaceAll(result, from, to);
+	return STRCPY(result.c_str());
+}
+
 expReal InitTexts(GMString path)
 {
     using namespace std;
