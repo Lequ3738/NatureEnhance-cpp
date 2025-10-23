@@ -5,6 +5,7 @@
 #include <charconv>
 #include "utf8.h"
 #include "FoxWriting.h"
+#include "linebreak.h"
 
 GMString string_to_cstr(const std::string& str)
 {
@@ -343,20 +344,48 @@ expString StringGetExt(GMString str, GMReal w, GMReal scale)
 	if (w <= 0 || scale <= 0 || *str == '\0')
 		return "In function gui_get_string_ext(): The argument is valid.";
 
-	std::string token, reselt, line;
+	size_t len = strlen(str);
+	std::vector<char> brks(len + 1);
 
-	UINT num = (UINT)StringToken(str, "", false);  // 按字符分割
-	for (UINT i = 0; i < num; i++)
+	set_linebreaks_utf8((const utf8_t*)str, len, nullptr, brks.data());
+
+	std::string token, result, line;
+
+	size_t num = (size_t)StringToken(str, "", false);
+	for (size_t i = 0; i + 1 < num; i++)
 	{
-		std::string chr = StringTokenResult[i];
-		if (chr == " ")
+		char v = brks[i + 1];
+		token += StringTokenResult[i];
+
+		if (v == LINEBREAK_ALLOWBREAK)
 		{
-			token = "";
+			if (fw::string_width((line + token).c_str()) * scale <= w)
+			{
+				line += token;
+			}
+			else
+			{
+				result += line + "\n";
+				line.clear();
+				
+				line += token;
+			}
+
+			token.clear();
 		}
-		else
+		else if (v == LINEBREAK_MUSTBREAK)
 		{
-			token += chr;
+			result += line + token;
+			line.clear();
+			token.clear();
+		}
+		else if (v == LINEBREAK_INSIDEACHAR)
+		{
+			return string_to_cstr("In function gui_get_string_ext(): "
+				"An Error has occurred in character position ("
+				+ std::to_string(i) + " - " + std::to_string(i + 1) + ").");
 		}
 	}
-	fw::string_width(str);
+
+	return string_to_cstr(result);
 }
