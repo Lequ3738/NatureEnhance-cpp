@@ -468,6 +468,9 @@
     <ClInclude Include="Librarys\utf8\cpp20.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="Librarys\FoxWriting.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -552,6 +555,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="NatureEnhance\LoadPicture.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Librarys\FoxWriting.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

@@ -4,6 +4,7 @@
 #include <vector>
 #include <charconv>
 #include "utf8.h"
+#include "FoxWriting.h"
 
 GMString string_to_cstr(const std::string& str)
 {
@@ -335,4 +336,27 @@ expReal StringTryParse(GMString str)
 	auto result = std::from_chars(s.data(), s.data() + s.size(), value);
 
 	return result.ec == std::errc() && result.ptr == s.data() + s.size();
+}
+
+expString StringGetExt(GMString str, GMReal w, GMReal scale)
+{
+	if (w <= 0 || scale <= 0 || *str == '\0')
+		return "In function gui_get_string_ext(): The argument is valid.";
+
+	std::string token, reselt, line;
+
+	UINT num = (UINT)StringToken(str, "", false);  // 按字符分割
+	for (UINT i = 0; i < num; i++)
+	{
+		std::string chr = StringTokenResult[i];
+		if (chr == " ")
+		{
+			token = "";
+		}
+		else
+		{
+			token += chr;
+		}
+	}
+	fw::string_width(str);
 }

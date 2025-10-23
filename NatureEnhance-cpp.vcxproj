@@ -313,6 +313,7 @@
     <ClInclude Include="GMAPI\GmapiResources.h" />
     <ClInclude Include="GMAPI\GmapiSounds.h" />
     <ClInclude Include="Librarys\buffer.h" />
+    <ClInclude Include="Librarys\FoxWriting.h" />
     <ClInclude Include="Librarys\iconv.h" />
     <ClInclude Include="Librarys\json.hpp" />
     <ClInclude Include="Librarys\lodepng.h" />
@@ -345,6 +346,7 @@
     <ClCompile Include="GMAPI\GmapiResources.cpp" />
     <ClCompile Include="GMAPI\GmapiSounds.cpp" />
     <ClCompile Include="Librarys\buffer.cpp" />
+    <ClCompile Include="Librarys\FoxWriting.cpp" />
     <ClCompile Include="Librarys\lodepng.cpp" />
     <ClCompile Include="Librarys\MaizeMusic.cpp" />
     <ClCompile Include="NatureEnhance\Camera.cpp" />
