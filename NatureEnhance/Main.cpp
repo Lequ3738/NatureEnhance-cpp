@@ -18,10 +18,46 @@ gm::CGMVariable GetResource(std::string res)
     return gm::execute_string("return " + res);
 }
 
+#pragma region Debug
+
 void DEBUG(std::string str)
 {
     MessageBoxA(GMWindowsHandle, str.c_str(), "DEBUG", MB_OK);
 }
+
+void console_write(const std::string& info, int mode)
+{
+	auto inst = gmapi->GetCurrentInstancePtr();
+
+	std::string name;
+	if (gm::instance_exists(inst->id))
+		name = gm::object_get_name(inst->object_index).c_str();
+	else
+		name = "<unknown>";
+	name += " Main.dll";
+
+	std::string filename(std::to_string(TimerGet()) + " " + name);
+	if (mode == msb_error)
+		filename += " Error";
+	else if (mode == msb_warning)
+		filename += " Warning";
+	filename += ".txt";
+
+	auto path(std::filesystem::current_path() / "Debug\\Log");
+	path /= filename;
+
+	auto now = std::chrono::system_clock::now();
+	std::string text("[" + std::format("{:%H:%M:%S}", now) + "] " +
+		name + ": " + info
+	);
+
+	UINT buffer = (UINT)gm::buffer_create();
+	gm::buffer_write_string(buffer, text.c_str());
+	gm::buffer_write_to_file(buffer, path.string().c_str());
+	gm::buffer_destroy(buffer);
+}
+
+#pragma endregion
 
 #pragma region GameMaker
 bool show_error = true;

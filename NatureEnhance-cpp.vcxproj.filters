@@ -471,6 +471,39 @@
     <ClInclude Include="Librarys\FoxWriting.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="Librarys\libunibreak\eastasianwidthdef.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Librarys\libunibreak\emojidef.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Librarys\libunibreak\graphemebreak.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Librarys\libunibreak\graphemebreakdef.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Librarys\libunibreak\indicconjunctbreakdef.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Librarys\libunibreak\linebreak.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Librarys\libunibreak\linebreakdef.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Librarys\libunibreak\unibreakbase.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Librarys\libunibreak\unibreakdef.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Librarys\libunibreak\wordbreak.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Librarys\libunibreak\wordbreakdef.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -574,5 +607,11 @@
     <None Include="Direct3D_8\dxsdk.inc">
       <Filter>头文件</Filter>
     </None>
+    <None Include="Librarys\libiconv2.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="Librarys\libunibreak\unibreak.lib" />
+    <Library Include="Librarys\libiconv.lib" />
+    <Library Include="GMAPICore\GMAPICore.lib" />
   </ItemGroup>
 </Project>

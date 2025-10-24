@@ -27,12 +27,13 @@ GMString STRCPY(GMString str)
 }
 
 #define utf8catch(funcname, returns) \
-	catch (const utf8::exception&) \
+	catch (const utf8::exception& ex) \
 	{ \
 		if (show_error) \
 		{ \
+			std::string what(ex.what());\
 			std::wstring err = L"在执行函数 " + std::wstring(funcname) + L" 时抛出异常。" + \
-				L"输入不合法的 UTF-8 字符串。"; \
+				L"输入不合法的 UTF-8 字符串。" + std::wstring(what.begin(), what.end()); \
 			MessageBox(GMWindowsHandle, err.c_str(), L"NatureEnhance Error", MB_OK | MB_ICONERROR); \
 		} \
 		return returns; \
@@ -281,11 +282,6 @@ expReal StringToken(GMString text, GMString sep, GMReal dontRemoveEmpty)
 				prev_it = cur_it;
 			}
 
-			// 添加最后一个字符
-			utf8::next(cur_it, end);  // 获取下一个字符
-			std::string character(prev_it, cur_it);
-			StringTokenResult.push_back(character);
-
 			return StringTokenResult.size();
 		}
 	}
@@ -344,48 +340,92 @@ expString StringGetExt(GMString str, GMReal w, GMReal scale)
 	if (w <= 0 || scale <= 0 || *str == '\0')
 		return "In function gui_get_string_ext(): The argument is valid.";
 
-	size_t len = strlen(str);
-	std::vector<char> brks(len + 1);
-
+	// 获取指定字符串的“可合法断点”列表
+	size_t len = strlen(str) + 1;
+	std::vector<char> brks(len);
 	set_linebreaks_utf8((const utf8_t*)str, len, nullptr, brks.data());
 
-	std::string token, result, line;
-
+	// 按 utf-8 字符分隔字符串
 	size_t num = (size_t)StringToken(str, "", false);
-	for (size_t i = 0; i + 1 < num; i++)
+
+	std::string token,			// 从上一个合法断点到当前处理字符的字符串
+				line,			// 从当前行开始到上一个合法断点的字符串
+				result;			// 结果字符串
+
+	// 计算要绘制的字符宽度并自动断行
+	size_t brk_pos = 0;
+	for (size_t i = 0; i < num; i++)
 	{
-		char v = brks[i + 1];
+		// 将基于字节的“可合法断点”列表由基于字符的模式读取
+		size_t chr_len = StringTokenResult[i].length();
+		if (chr_len == 0)
+		{
+			return "In function gui_get_string_ext():"
+				"An Error has occurred in function StringToken().";
+		}
+
+		brk_pos += chr_len;
+		char br = brks[brk_pos - 1];
+
 		token += StringTokenResult[i];
 
-		if (v == LINEBREAK_ALLOWBREAK)
-		{
-			if (fw::string_width((line + token).c_str()) * scale <= w)
-			{
-				line += token;
-			}
-			else
-			{
-				result += line + "\n";
-				line.clear();
-				
-				line += token;
-			}
-
-			token.clear();
-		}
-		else if (v == LINEBREAK_MUSTBREAK)
-		{
-			result += line + token;
-			line.clear();
-			token.clear();
-		}
-		else if (v == LINEBREAK_INSIDEACHAR)
+		// 遇到库标记出错（断在字符内部）
+		if (br == LINEBREAK_INSIDEACHAR)
 		{
 			return string_to_cstr("In function gui_get_string_ext(): "
 				"An Error has occurred in character position ("
 				+ std::to_string(i) + " - " + std::to_string(i + 1) + ").");
 		}
+
+		// 当到达可断点、必须断点或字符串末尾时处理 token
+		if (br == LINEBREAK_ALLOWBREAK || br == LINEBREAK_MUSTBREAK || i == num - 1)
+		{
+			if (br == LINEBREAK_MUSTBREAK)
+			{
+				result += line + token;
+
+				// 若 token 没有显式的换行符，加上换行符
+				if (!token.empty() && token.back() != '\n' && token.back() != '\r')
+					result += "\n";
+
+				line.clear();
+				token.clear();
+			}
+			else  // ALLOWBREAK 或到达字符串末尾
+			{
+				// 计算合并后的宽度
+				std::string candidate = line + token;
+				double width = fw::string_width(candidate.c_str()) * scale;
+
+				if (width <= w)  // 若放得下，合并到当前行
+					line = std::move(candidate);
+				else  // 若放不下，需要把当前行写出并开始新行
+				{
+					if (!line.empty())
+					{
+						result += line + "\n";
+						line = token;
+					}
+					else  // 当前行为空，即单个 token 超过宽度的情形
+					{
+						result += token;
+						if (i != num - 1)
+							result += "\n";
+
+						line.clear();
+					}
+				}
+				
+				token.clear();
+			}
+		}
 	}
+
+	// 将残余内容加入结果（如果有）
+	if (!line.empty())
+		result += line;
+	else if (!token.empty())
+		result += token;
 
 	return string_to_cstr(result);
 }

@@ -62,7 +62,12 @@ typedef std::variant<std::string, GMReal> dynamic;
 		return returns; \
 	}
 
+#define msb_none 0
+#define msb_error 1
+#define msb_warning 2
+
 void DEBUG(std::string str);
+void console_write(const std::string& info, int mode = msb_none);
 
 expReal BufferToTexture(GMReal buffer, GMReal gmtex, GMReal w, GMReal h);
 expReal TimerGet();

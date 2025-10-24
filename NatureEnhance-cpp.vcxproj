@@ -71,16 +71,16 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>C:\Project\GMK\NatureEnhance-cpp\Librarys;C:\Project\GMK\NatureEnhance-cpp\NatureEnhance;C:\Project\GMK\NatureEnhance-cpp\GMAPI;$(IncludePath)</IncludePath>
+    <IncludePath>Librarys;Librarys\libunibreak;NatureEnhance;GMAPI;$(IncludePath);Direct3D_8</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>Librarys;NatureEnhance;GMAPI;$(IncludePath);Direct3D_8</IncludePath>
+    <IncludePath>Librarys;Librarys\libunibreak;NatureEnhance;GMAPI;$(IncludePath);Direct3D_8</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>C:\Project\GMK\NatureEnhance-cpp\Librarys;C:\Project\GMK\NatureEnhance-cpp\NatureEnhance;C:\Project\GMK\NatureEnhance-cpp\GMAPI;$(IncludePath)</IncludePath>
+    <IncludePath>Librarys;Librarys\libunibreak;NatureEnhance;GMAPI;$(IncludePath);Direct3D_8</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>C:\Project\GMK\NatureEnhance-cpp\Librarys;C:\Project\GMK\NatureEnhance-cpp\NatureEnhance;C:\Project\GMK\NatureEnhance-cpp\GMAPI;$(IncludePath)</IncludePath>
+    <IncludePath>Librarys;Librarys\libunibreak;NatureEnhance;GMAPI;$(IncludePath);Direct3D_8</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -99,9 +99,10 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
-      <AdditionalLibraryDirectories>C:\Project\GMK\NatureEnhance-cpp\Librarys;C:\Project\GMK\NatureEnhance-cpp\GMAPICore;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>GMAPICore.lib;libiconv.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>Direct3D_8;Librarys;Librarys\libunibreak;GMAPICore;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>legacy_stdio_definitions.lib;GMAPICore.lib;libiconv.lib;unibreak.lib;d3d8.lib;d3dx8.lib;DxErr8.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalOptions>/nodefaultlib:libci /SAFESEH:NO %(AdditionalOptions)</AdditionalOptions>
+      <ShowProgress>NotSet</ShowProgress>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -124,9 +125,10 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
-      <AdditionalLibraryDirectories>Direct3D_8;Librarys;GMAPICore;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>legacy_stdio_definitions.lib;GMAPICore.lib;libiconv.lib;d3d8.lib;d3dx8.lib;DxErr8.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>Direct3D_8;Librarys;Librarys\libunibreak;GMAPICore;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>legacy_stdio_definitions.lib;GMAPICore.lib;libiconv.lib;unibreak.lib;d3d8.lib;d3dx8.lib;DxErr8.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalOptions>/nodefaultlib:libci /SAFESEH:NO %(AdditionalOptions)</AdditionalOptions>
+      <ShowProgress>NotSet</ShowProgress>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -146,9 +148,10 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
-      <AdditionalLibraryDirectories>C:\Project\GMK\NatureEnhance-cpp\Librarys;C:\Project\GMK\NatureEnhance-cpp\GMAPICore;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>GMAPICore.lib;libiconv.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>Direct3D_8;Librarys;Librarys\libunibreak;GMAPICore;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>legacy_stdio_definitions.lib;GMAPICore.lib;libiconv.lib;unibreak.lib;d3d8.lib;d3dx8.lib;DxErr8.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalOptions>/nodefaultlib:libci /SAFESEH:NO %(AdditionalOptions)</AdditionalOptions>
+      <ShowProgress>NotSet</ShowProgress>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -171,9 +174,10 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
-      <AdditionalLibraryDirectories>C:\Project\GMK\NatureEnhance-cpp\Librarys;C:\Project\GMK\NatureEnhance-cpp\GMAPICore;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>GMAPICore.lib;libiconv.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>Direct3D_8;Librarys;Librarys\libunibreak;GMAPICore;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>legacy_stdio_definitions.lib;GMAPICore.lib;libiconv.lib;unibreak.lib;d3d8.lib;d3dx8.lib;DxErr8.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalOptions>/nodefaultlib:libci /SAFESEH:NO %(AdditionalOptions)</AdditionalOptions>
+      <ShowProgress>NotSet</ShowProgress>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -316,6 +320,17 @@
     <ClInclude Include="Librarys\FoxWriting.h" />
     <ClInclude Include="Librarys\iconv.h" />
     <ClInclude Include="Librarys\json.hpp" />
+    <ClInclude Include="Librarys\libunibreak\eastasianwidthdef.h" />
+    <ClInclude Include="Librarys\libunibreak\emojidef.h" />
+    <ClInclude Include="Librarys\libunibreak\graphemebreak.h" />
+    <ClInclude Include="Librarys\libunibreak\graphemebreakdef.h" />
+    <ClInclude Include="Librarys\libunibreak\indicconjunctbreakdef.h" />
+    <ClInclude Include="Librarys\libunibreak\linebreak.h" />
+    <ClInclude Include="Librarys\libunibreak\linebreakdef.h" />
+    <ClInclude Include="Librarys\libunibreak\unibreakbase.h" />
+    <ClInclude Include="Librarys\libunibreak\unibreakdef.h" />
+    <ClInclude Include="Librarys\libunibreak\wordbreak.h" />
+    <ClInclude Include="Librarys\libunibreak\wordbreakdef.h" />
     <ClInclude Include="Librarys\lodepng.h" />
     <ClInclude Include="Librarys\MaizeMusic.h" />
     <ClInclude Include="Librarys\utf8.h" />
@@ -371,6 +386,12 @@
     <None Include="Direct3D_8\d3dx8math.inl" />
     <None Include="Direct3D_8\d3dxmath.inl" />
     <None Include="Direct3D_8\dxsdk.inc" />
+    <None Include="Librarys\libiconv2.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="GMAPICore\GMAPICore.lib" />
+    <Library Include="Librarys\libiconv.lib" />
+    <Library Include="Librarys\libunibreak\unibreak.lib" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
