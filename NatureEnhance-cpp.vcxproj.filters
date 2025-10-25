@@ -504,6 +504,9 @@
     <ClInclude Include="Librarys\libunibreak\wordbreakdef.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="Librarys\xxhash.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">

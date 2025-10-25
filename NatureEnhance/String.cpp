@@ -335,22 +335,26 @@ expReal StringTryParse(GMString str)
 	return result.ec == std::errc() && result.ptr == s.data() + s.size();
 }
 
-expString StringGetExt(GMString str, GMReal w, GMReal scale)
+std::string string_get_ext(GMString str, GMReal w, GMString lang)
 {
-	if (w <= 0 || scale <= 0 || *str == '\0')
+	if (w <= 0 || *str == '\0')
 		return "In function gui_get_string_ext(): The argument is valid.";
+
+	GMString l = lang;
+	if (lang != nullptr && *lang == '\0')
+		l = nullptr;
 
 	// 获取指定字符串的“可合法断点”列表
 	size_t len = strlen(str) + 1;
 	std::vector<char> brks(len);
-	set_linebreaks_utf8((const utf8_t*)str, len, nullptr, brks.data());
+	set_linebreaks_utf8((const utf8_t*)str, len, l, brks.data());
 
 	// 按 utf-8 字符分隔字符串
 	size_t num = (size_t)StringToken(str, "", false);
 
 	std::string token,			// 从上一个合法断点到当前处理字符的字符串
-				line,			// 从当前行开始到上一个合法断点的字符串
-				result;			// 结果字符串
+		line,			// 从当前行开始到上一个合法断点的字符串
+		result;			// 结果字符串
 
 	// 计算要绘制的字符宽度并自动断行
 	size_t brk_pos = 0;
@@ -372,9 +376,9 @@ expString StringGetExt(GMString str, GMReal w, GMReal scale)
 		// 遇到库标记出错（断在字符内部）
 		if (br == LINEBREAK_INSIDEACHAR)
 		{
-			return string_to_cstr("In function gui_get_string_ext(): "
+			return "In function gui_get_string_ext(): "
 				"An Error has occurred in character position ("
-				+ std::to_string(i) + " - " + std::to_string(i + 1) + ").");
+				+ std::to_string(i) + " - " + std::to_string(i + 1) + ").";
 		}
 
 		// 当到达可断点、必须断点或字符串末尾时处理 token
@@ -395,7 +399,7 @@ expString StringGetExt(GMString str, GMReal w, GMReal scale)
 			{
 				// 计算合并后的宽度
 				std::string candidate = line + token;
-				double width = fw::string_width(candidate.c_str()) * scale;
+				double width = fw::string_width(candidate.c_str());
 
 				if (width <= w)  // 若放得下，合并到当前行
 					line = std::move(candidate);
@@ -415,7 +419,7 @@ expString StringGetExt(GMString str, GMReal w, GMReal scale)
 						line.clear();
 					}
 				}
-				
+
 				token.clear();
 			}
 		}
@@ -427,5 +431,11 @@ expString StringGetExt(GMString str, GMReal w, GMReal scale)
 	else if (!token.empty())
 		result += token;
 
+	return std::move(result);
+}
+
+expString StringGetExt(GMString str, GMReal w, GMString lang)
+{
+	std::string result = string_get_ext(str, w, lang);
 	return string_to_cstr(result);
 }
