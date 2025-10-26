@@ -55,20 +55,28 @@ namespace fw
 	{
 		std::string text;
 		GMReal w = 0;
+		int font = -1;
 	};
 
 	using HashMap = std::unordered_map<xxh::hash64_t, Data>;
 	HashMap ProcessedText;
+	int CurrentFont = -1;
 
 	std::string& get_text(GMString str, GMReal w)
 	{
 		std::string string(str);
 		xxh::hash64_t hash = xxh::xxhash3<64>(string);
+
+#define SET_TEXT ProcessedText[hash] = { \
+		.text = string_get_ext(str, w), .w = w, .font = CurrentFont \
+		}
 		
 		if (!ProcessedText.contains(hash))
-			ProcessedText[hash] = { .text = string_get_ext(str, w), .w = w };
-		else if (ProcessedText[hash].w != w)
-			ProcessedText[hash] = { .text = string_get_ext(str, w), .w = w };
+			SET_TEXT;
+		else if (ProcessedText[hash].w != w || ProcessedText[hash].font != CurrentFont)
+			SET_TEXT;
+
+#undef SET_TEXT
 		
 		return ProcessedText[hash].text;
 	}
@@ -181,5 +189,11 @@ expReal FWStringHeightExt(GMString str, GMReal sep, GMReal w)
 expReal FWTextCleanup()
 {
 	fw::cleanup();
+	finish;
+}
+
+expReal FWSetCurrentFont(GMReal font)
+{
+	fw::CurrentFont = (int)font;
 	finish;
 }
