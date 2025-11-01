@@ -65,7 +65,13 @@ namespace fw
 	std::string& get_text(GMString str, GMReal w)
 	{
 		std::string string(str);
-		xxh::hash64_t hash = xxh::xxhash3<64>(string);
+
+		xxh::hash_state_t<64> hs;
+		hs.update(&string, string.size());
+		hs.update(&w, sizeof(GMReal));
+		hs.update(&CurrentFont, sizeof(int));
+
+		xxh::hash64_t hash = hs.digest();
 
 #define SET_TEXT ProcessedText[hash] = { \
 		.text = string_get_ext(str, w), .w = w, .font = CurrentFont \
