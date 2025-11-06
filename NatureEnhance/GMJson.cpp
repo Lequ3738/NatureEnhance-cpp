@@ -1,7 +1,6 @@
 #include "Main.h"
 #include "json.hpp"
 #include <stack>
-#include <map>
 #include <vector>
 
 using Json = nlohmann::json;
@@ -154,6 +153,7 @@ expReal JsonDestroy(GMReal rootNode)
 	try
 	{
 		TreeNode* treeRoot = JsonDataMap.at((int)rootNode);
+		JsonDataMap.erase((int)rootNode);
 		
 		if (treeRoot == nullptr)
 			throw runtime_error("传入的 ds_map 引用无效。");
