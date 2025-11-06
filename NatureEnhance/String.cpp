@@ -26,6 +26,27 @@ GMString STRCPY(GMString str)
 	return nstr;
 }
 
+expString StringChangeCoding(GMString str, GMString in, GMString out)
+{
+	char* input = toUpperAscii(in);
+	char* output = toUpperAscii(out);
+
+	GMString result = ChangeCoding(str, input, output);
+	if (result == nullptr)
+	{
+		if (show_error)
+		{
+			std::wstring errorMsg = L"函数 StringChangeCoding 出现编码转换错误：\n"
+				L"请检查输入编码和输出编码是否正确。";
+			MessageBox(GMWindowsHandle, errorMsg.c_str(), L"NatureEnhance Error",
+				MB_OK | MB_ICONERROR);
+		}
+		return "";
+	}
+
+	return result;
+}
+
 #define utf8catch(funcname, returns) \
 	catch (const utf8::exception& ex) \
 	{ \

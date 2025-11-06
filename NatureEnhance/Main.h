@@ -42,24 +42,17 @@ extern IDirect3DDevice8* Device;
 
 typedef std::variant<std::string, GMReal> dynamic;
 
-#define simplecatch(funcname, returns) \
-	catch (const wchar_t* e) \
-	{ \
-		if (show_error) \
-		{ \
-			std::wstring err = L"在执行函数 " + std::wstring(funcname) + L" 时抛出异常。\n" + std::wstring(e); \
-			MessageBox(GMWindowsHandle, err.c_str(), L"NatureEnhance Error", MB_OK | MB_ICONERROR); \
-		} \
-		return returns; \
-	} \
-	catch (...) \
-	{ \
-		if (show_error) \
-		{ \
-			std::wstring err = L"在执行函数 " + std::wstring(funcname) + L" 时发生未知错误。"; \
-			MessageBox(GMWindowsHandle, err.c_str(), L"NatureEnhance Error", MB_OK | MB_ICONERROR); \
-		} \
-		return returns; \
+void ShowMessage(std::string&& str, std::string&& caption, UINT type);
+
+#define simplecatch(funcname, returns)													\
+	catch (const std::exception& e)														\
+	{																					\
+		if (show_error)																	\
+		{																				\
+			ShowMessage("在执行函数 " funcname " 出现错误：\n" + std::string(e.what()),	\
+				"NatureEnhance Error", MB_OK | MB_ICONERROR);							\
+		}																				\
+		return returns;																	\
 	}
 
 #define msb_none 0

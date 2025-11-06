@@ -18,6 +18,20 @@ gm::CGMVariable GetResource(std::string res)
     return gm::execute_string("return " + res);
 }
 
+void ShowMessage(std::string&& str, std::string&& caption, UINT type)
+{
+	int str_size = MultiByteToWideChar(CP_UTF8, 0, str.c_str(), (int)str.size(), nullptr, 0);
+	int caption_size = MultiByteToWideChar(CP_UTF8, 0, caption.c_str(), (int)caption.size(), nullptr, 0);
+
+	std::wstring wstr(str_size, L'\0');
+	std::wstring wcaption(caption_size, L'\0');
+
+	MultiByteToWideChar(CP_UTF8, 0, str.c_str(), (int)str.size(), wstr.data(), str_size);
+	MultiByteToWideChar(CP_UTF8, 0, caption.c_str(), (int)caption.size(), wcaption.data(), caption_size);
+
+	MessageBox(GMWindowsHandle, wstr.c_str(), wcaption.c_str(), type);
+}
+
 #pragma region Debug
 
 void DEBUG(std::string str)
