@@ -270,7 +270,7 @@ expString GetString(GMReal num, GMString format, GMString country)
 				"{0:" + std::string(format) + "}", std::make_format_args(num)));
 		}
 	}
-	simplecatch(L"GetString", "")
+	simplecatch("GetString", "")
 }
 
 std::vector<std::string> StringTokenResult;

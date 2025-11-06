@@ -16,7 +16,7 @@ expReal ne_list_destroy(GMReal id)
 	try
 	{
 		if (!ds_exists(id, ds_type_list))
-			throw L"试图销毁未从 ne_list_create() 创建的 ds_list。";
+			throw std::runtime_error("试图销毁未从 ne_list_create() 创建的 ds_list。");
 
 		int i = static_cast<int>(id);
 
@@ -27,7 +27,7 @@ expReal ne_list_destroy(GMReal id)
 
 		finish;
 	}
-	simplecatch(L"ne_list_destroy", 0)
+	simplecatch("ne_list_destroy", 0)
 }
 
 expReal ne_map_create(GMString info)
@@ -45,7 +45,7 @@ expReal ne_map_destroy(GMReal id)
 	try
 	{
 		if (!ds_exists(id, ds_type_map))
-			throw L"试图销毁未从 ne_map_create() 创建的 ds_map。";
+			throw std::runtime_error("试图销毁未从 ne_map_create() 创建的 ds_map。");
 
 		int i = static_cast<int>(id);
 
@@ -56,7 +56,7 @@ expReal ne_map_destroy(GMReal id)
 
 		finish;
 	}
-	simplecatch(L"ne_map_destroy", 0)
+	simplecatch("ne_map_destroy", 0)
 }
 
 expReal ne_stack_create(GMString info)
@@ -74,7 +74,7 @@ expReal ne_stack_destroy(GMReal id)
 	try
 	{
 		if (!ds_exists(id, ds_type_stack))
-			throw L"试图销毁未从 ne_stack_create() 创建的 ds_stack。";
+			throw std::runtime_error("试图销毁未从 ne_stack_create() 创建的 ds_stack。");
 
 		int i = static_cast<int>(id);
 
@@ -85,7 +85,7 @@ expReal ne_stack_destroy(GMReal id)
 
 		finish;
 	}
-	simplecatch(L"ne_stack_destroy", 0)
+	simplecatch("ne_stack_destroy", 0)
 }
 
 expReal ne_queue_create(GMString info)
@@ -103,7 +103,7 @@ expReal ne_queue_destroy(GMReal id)
 	try
 	{
 		if (!ds_exists(id, ds_type_queue))
-			throw L"试图销毁未从 ne_queue_create() 创建的 ds_queue。";
+			throw std::runtime_error("试图销毁未从 ne_queue_create() 创建的 ds_queue。");
 
 		int i = static_cast<int>(id);
 
@@ -114,7 +114,7 @@ expReal ne_queue_destroy(GMReal id)
 
 		finish;
 	}
-	simplecatch(L"ne_queue_destroy", 0)
+	simplecatch("ne_queue_destroy", 0)
 }
 
 expReal ne_grid_create(GMReal w, GMReal h, GMString info)
@@ -132,7 +132,7 @@ expReal ne_grid_destroy(GMReal id)
 	try
 	{
 		if (!ds_exists(id, ds_type_grid))
-			throw L"试图销毁未从 ne_grid_create() 创建的 ds_grid。";
+			throw std::runtime_error("试图销毁未从 ne_grid_create() 创建的 ds_grid。");
 
 		int i = static_cast<int>(id);
 
@@ -143,7 +143,7 @@ expReal ne_grid_destroy(GMReal id)
 
 		finish;
 	}
-	simplecatch(L"ne_queue_destroy", 0)
+	simplecatch("ne_queue_destroy", 0)
 }
 
 expReal ne_priority_create(GMString info)
@@ -161,7 +161,7 @@ expReal ne_priority_destroy(GMReal id)
 	try
 	{
 		if (!ds_exists(id, ds_type_priority))
-			throw L"试图销毁未从 ne_priority_create() 创建的 ds_priority。";
+			throw std::runtime_error("试图销毁未从 ne_priority_create() 创建的 ds_priority。");
 
 		int i = static_cast<int>(id);
 
@@ -172,7 +172,7 @@ expReal ne_priority_destroy(GMReal id)
 
 		finish;
 	}
-	simplecatch(L"ne_priority_destroy", 0)
+	simplecatch("ne_priority_destroy", 0)
 }
 
 expReal ne_list_read_buffer(GMReal list, GMReal buffer, GMReal types)
@@ -183,7 +183,7 @@ expReal ne_list_read_buffer(GMReal list, GMReal buffer, GMReal types)
 		int typeSize = gm::ds_list_size((int)types);
 
 		if (listSize % typeSize != 0)
-			throw L"被 buffer 记载的 list 的大小不能被 types 的大小整除。";
+			throw std::runtime_error("被 buffer 记载的 list 的大小不能被 types 的大小整除。");
 
 		gm::ds_list_clear((int)list);
 		for (int i = 0; i < listSize; ++i)
@@ -200,7 +200,7 @@ expReal ne_list_read_buffer(GMReal list, GMReal buffer, GMReal types)
 		ne_list_destroy(types);
 		finish;
 	}
-	simplecatch(L"ne_list_read_buffer", 0)
+	simplecatch("ne_list_read_buffer", 0)
 }
 
 expReal ne_list_write_buffer(GMReal list, GMReal buffer, GMReal types)
@@ -211,7 +211,7 @@ expReal ne_list_write_buffer(GMReal list, GMReal buffer, GMReal types)
 		int typeSize = gm::ds_list_size((int)types);
 
 		if (listSize % typeSize != 0)
-			throw L"传入的 list 的大小不能被 types 的大小整除。";
+			throw std::runtime_error("传入的 list 的大小不能被 types 的大小整除。");
 
 		gm::buffer_write_uint32(buffer, listSize);
 		for (int i = 0; i < listSize; ++i)
@@ -228,7 +228,7 @@ expReal ne_list_write_buffer(GMReal list, GMReal buffer, GMReal types)
 		ne_list_destroy(types);
 		finish;
 	}
-	simplecatch(L"ne_list_write_buffer", 0)
+	simplecatch("ne_list_write_buffer", 0)
 }
 
 expReal ds_exists(GMReal id, GMReal type)

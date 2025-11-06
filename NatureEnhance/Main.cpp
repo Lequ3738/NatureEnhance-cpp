@@ -108,7 +108,7 @@ expReal BinToDec(GMString bin)
         while (*bin)
         {
             if (*bin != '0' && *bin != '1')
-                throw L"不合法的二进制字符串字面量。";
+                throw std::runtime_error("不合法的二进制字符串字面量。");
 
             value = (value << 1) | (*bin - '0');
             ++bin;
@@ -116,7 +116,7 @@ expReal BinToDec(GMString bin)
 
         return value;
     }
-    simplecatch(L"BinToDec", -1)
+    simplecatch("BinToDec", -1)
 }
 
 typedef void (WINAPI* GetVersionPtr)(LPDWORD, LPDWORD, LPDWORD);
@@ -287,9 +287,13 @@ GMString ChangeCoding(GMString str, GMString inputCoding, GMString outputCoding)
 
 std::wstring ToWstring(GMString str)
 {
-    GMString utf8_str = ChangeCoding(str, "GB2312", "UTF-8");
-    std::string stdstr(utf8_str);
-    return std::wstring(stdstr.begin(), stdstr.end());
+	int len = strlen(str);
+	int str_size = MultiByteToWideChar(CP_ACP, 0, str, len, nullptr, 0);
+
+	std::wstring wstr(str_size, L'\0');
+	MultiByteToWideChar(CP_ACP, 0, str, len, wstr.data(), str_size);
+
+    return std::move(wstr);
 }
 
 #pragma endregion
@@ -450,11 +454,11 @@ expReal LoadRoomTiles(GMString path)
         gm::buffer_destroy(buffer);
 
         if (err != "")
-            throw std::wstring(err.begin(), err.end()).c_str();
+            throw std::runtime_error(err);
 
         finish;
     }
-    simplecatch(L"scrLoadRoomTiles()", 0)
+    simplecatch("scrLoadRoomTiles()", 0)
 }
 
 #pragma endregion
@@ -488,11 +492,7 @@ expReal InitTexts(GMString path)
     try
     {
         if (!fs::exists(path))
-        {
-            string errpath = path;
-            wstring err = L"文件夹路径 (" + wstring(errpath.begin(), errpath.end()) + L") 不存在。";
-            throw err.c_str();
-        }
+            throw std::runtime_error("文件夹路径 (" + string(path) + ") 不存在。");
 
         vector<fs::path> textFilePath;
 
@@ -512,10 +512,7 @@ expReal InitTexts(GMString path)
         {
             ifstream filestream(file);
             if (!filestream)
-            {
-                wstring err = L"文件 (" + wstring(file) + L") 打开失败。";
-                throw err.c_str();
-            }
+                throw std::runtime_error("文件 (" + file.string() + ") 打开失败。");
 
             // 将整个文件都读取到字符串中，减少 I/O 调用带来的性能开销
             string data = {
@@ -570,7 +567,7 @@ expReal InitTexts(GMString path)
 
         finish;
     }
-    simplecatch(L"InitTexts", 0)
+    simplecatch("InitTexts", 0)
 }
 
 #pragma endregion
@@ -628,32 +625,24 @@ expReal RegistryDeleteKey(GMString name, GMString key)
         if (result != ERROR_SUCCESS)
         {
             if (result == ERROR_FILE_NOT_FOUND)
-            {
-                std::wstring err = L"注册表路径不存在: " + subKey;
-                throw err.c_str();
-            }
+                throw std::runtime_error("注册表路径不存在: " + std::string(name));
 
-            std::wstring err = L"打开注册表失败 (错误代码: " + std::to_wstring(result) + L")";
-            throw err.c_str();
+            throw std::runtime_error("打开注册表失败 (错误代码: " + std::to_string(result) + ")");
         }
 
         result = RegDeleteValue(hkey, valueName.c_str());
         if (result != ERROR_SUCCESS)
         {
             if (result == ERROR_FILE_NOT_FOUND)
-            {
-                std::wstring err = L"值不存在: " + valueName;
-                throw err.c_str();
-            }
+                throw std::runtime_error("值不存在: " + std::string(key));
 
-            std::wstring err = L"删除失败 (错误代码: " + std::to_wstring(result) + L")";
-            throw err.c_str();
+            throw std::runtime_error("删除失败 (错误代码: " + std::to_string(result) + ")");
         }
 
         RegCloseKey(hkey);
         finish;
     }
-    simplecatch(L"RegistryDeleteKey", 0)
+    simplecatch("RegistryDeleteKey", 0)
 }
 
 std::vector<GMString> MatchedFiles;
@@ -708,27 +697,7 @@ expReal GetAllFilesInSubfolders(GMString dir, GMString starchPattern)
 
         return MatchedFiles.size();
     }
-    catch (const std::regex_error&)
-    {
-        if (show_error)
-        {
-            MessageBox(GMWindowsHandle, L"在执行函数 GetAllFilesInSubfolders 时抛出异常。\n无效的通配符。", 
-                L"NatureEnhance Error", MB_OK | MB_ICONERROR);
-        }
-        
-        return -1;
-    }
-    catch (const fs::filesystem_error&)
-    {
-        if (show_error)
-        {
-            MessageBox(GMWindowsHandle, L"在执行函数 GetAllFilesInSubfolders 时抛出异常。\n文件系统错误。",
-                L"NatureEnhance Error", MB_OK | MB_ICONERROR);
-        }
-
-        return -1;
-    }
-    simplecatch(L"GetAllFilesInSubfolders", -1)
+    simplecatch("GetAllFilesInSubfolders", -1)
 }
 
 expString GetAllFilesDir(GMReal num)
@@ -745,11 +714,7 @@ expString ReadAllText(GMString file)
     {
         std::ifstream filestream(file, std::ios::binary);
         if (!filestream)
-        {
-            std::wstring err = L"文件 (" + std::wstring(std::filesystem::path(file)) +
-                L") 打开失败。";
-            throw err.c_str();
-        }
+            throw std::runtime_error("文件 (" + std::string(file) + ") 打开失败。");
 
         std::string data = {
             std::istreambuf_iterator<char>(filestream),
@@ -758,7 +723,7 @@ expString ReadAllText(GMString file)
 
         return string_to_cstr(data);
     }
-    simplecatch(L"ReadAllText", "")
+    simplecatch("ReadAllText", "")
 }
 
 expReal FileIsUsing(GMString file)
@@ -790,10 +755,7 @@ expReal ReadCBVFile(GMString filename)
     {
         std::ifstream file(filename, std::ios::binary);
         if (!file)
-        {
-            std::wstring err = L"文件 (" + std::wstring(std::filesystem::path(filename)) + L") 打开失败。";
-            throw err.c_str();
-        }
+            throw std::runtime_error("文件 (" + std::string(filename) + ") 打开失败。");
 
         // 检测文件字节序是否和系统默认字节序一致
         char endian_flag;
@@ -825,7 +787,7 @@ expReal ReadCBVFile(GMString filename)
 
         return list;
     }
-    simplecatch(L"ReadCBVFile", -1)
+    simplecatch("ReadCBVFile", -1)
 }
 #pragma endregion
 

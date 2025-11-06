@@ -12,7 +12,7 @@ PNGDecodeFuture AsyncDecodePNG(GMString file)
         UINT width, height;
         UINT error = lodepng::decode(image, width, height, file);
         if (error)
-            throw lodepng_error_text(error);
+            throw std::runtime_error(lodepng_error_text(error));
 
         // 将 RGBA 格式的数据转换为 D3D8 所需的 ARGB 格式
         d3dimage.resize(image.size());
@@ -72,17 +72,7 @@ expReal ToBackgroundAsync(GMReal id)
     {
         return -2;
     }
-    catch (const char* e)
-    {
-        std::wstring err = L"在 LoadPNGToBackground 中，加载 PNG 文件失败: " +
-            std::wstring(e, e + strlen(e));
-
-        if (show_error)
-            MessageBox(GMWindowsHandle, err.c_str(), L"NatureEnhance Error", MB_OK | MB_ICONERROR);
-
-        return gm::noone;
-    }
-    simplecatch(L"LoadPNGToBackground", gm::noone)
+    simplecatch("ToBackgroundAsync", gm::noone)
 }
 
 PNGDecodeFuture AsyncDecodeGMBCK(GMString file)
@@ -91,7 +81,7 @@ PNGDecodeFuture AsyncDecodeGMBCK(GMString file)
         GMReal buffer = gm::buffer_create();
 		bool result = (bool)gm::buffer_read_from_file(buffer, file);
         if (!result)
-			throw ("无法打开指定的文件：" + std::string(file)).c_str();
+			throw std::runtime_error("无法打开指定的文件：" + std::string(file));
 
         gm::buffer_set_pos(buffer, 4);  // 跳过 1234321
 		UINT size = (UINT)gm::buffer_read_int32(buffer);
@@ -109,11 +99,11 @@ PNGDecodeFuture AsyncDecodeGMBCK(GMString file)
         UINT height = (UINT)gm::buffer_read_int32(data);
         size = (UINT)gm::buffer_read_int32(data);
         if (size == 0)
-			throw "无效的图片数据块大小。";
+			throw std::runtime_error("无效的图片数据块大小。");
 
         UCHAR* imageData = (UCHAR*)(int)gm::buffer_get_address(data, false);
         if (imageData == nullptr)
-			throw "无效的图片数据块。";
+			throw std::runtime_error("无效的图片数据块。");
 
 		imageData += sizeof(UINT) * 12;  // 跳过头部数据，直接指向图片数据
 

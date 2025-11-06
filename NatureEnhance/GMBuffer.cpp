@@ -6,8 +6,7 @@ void D3DCheck(HRESULT result, int pos)
     if (SUCCEEDED(result))
         return;
 
-    std::wstring err = L"位置" + std::to_wstring(pos) + L": " + DXGetErrorDescription8(result);
-    throw err.c_str();
+	throw std::runtime_error("位置" + std::to_string(pos) + ": " + DXGetErrorDescription8A(result));
 }
 
 expReal TextureToBuffer(GMReal buffer, GMReal gmtex, GMReal w, GMReal h)
@@ -37,14 +36,14 @@ expReal TextureToBuffer(GMReal buffer, GMReal gmtex, GMReal w, GMReal h)
 
         // 传入的 buffer 直接操作其指向的内存，提高效率
         if (!gm::buffer_exists(buffer))
-            throw L"传入无效的 buffer 引用。";
+            throw std::runtime_error("传入无效的 buffer 引用。");
 
         gm::buffer_set_size(buffer, width * height * 4);
         gm::buffer_set_pos(buffer, 0);
         char* dest = (char*)(int)gm::buffer_get_address(buffer, false);
 
         if (dest == nullptr)
-            throw L"传入无效的 buffer 引用。";
+            throw std::runtime_error("传入无效的 buffer 引用。");
 
         // 复制纹理信息到 buffer 中。因为该纹理是非压缩纹理，所以要按行复制
         UINT srcPos = 0, destPos = 0, bufferStride = width * 4;
@@ -62,7 +61,7 @@ expReal TextureToBuffer(GMReal buffer, GMReal gmtex, GMReal w, GMReal h)
 
         finish;
     }
-    simplecatch(L"TextureToBuffer", 0.0)
+    simplecatch("TextureToBuffer", 0.0)
 }
 
 expReal SurfaceToBuffer(GMReal buffer, GMReal surface)
@@ -81,7 +80,7 @@ expReal BufferToTexture(GMReal buffer, GMReal gmtex, GMReal w, GMReal h)
         UINT width = (UINT)w, height = (UINT)h;
         char* src = (char*)(int)gm::buffer_get_address(buffer, false);
         if (src == nullptr)
-            throw L"传入无效的 buffer 引用。";
+            throw std::runtime_error("传入无效的 buffer 引用。");
 
         IDirect3DTexture8* texture = gm::CGMAPI::GetTextureArray()[(int)gmtex].texture;
 
@@ -98,7 +97,7 @@ expReal BufferToTexture(GMReal buffer, GMReal gmtex, GMReal w, GMReal h)
 
         finish;
     }
-    simplecatch(L"BufferToTexture", 0.0)
+    simplecatch("BufferToTexture", 0.0)
 }
 
 expReal BufferToSurface(GMReal buffer, GMReal surface)

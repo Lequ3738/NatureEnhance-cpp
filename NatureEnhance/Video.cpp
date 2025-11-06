@@ -62,10 +62,10 @@ expReal VideoPlay(GMString path, GMReal loop, GMReal interframe)
 		VideoFree();
 
 		if (!fs::exists(path))
-			throw (L"尝试打开不存在的文件：" + std::wstring(path, path + strlen(path))).c_str();
+			throw std::runtime_error("尝试打开不存在的文件：" + std::string(path));
 
 		if (GMTempPath == nullptr)
-			throw L"请先调用 VideoInit()。";
+			throw std::runtime_error("请先调用 VideoInit()。");
 
 		Buffer = gm::buffer_create();
 		FrameBuffer = gm::buffer_create();
@@ -77,7 +77,9 @@ expReal VideoPlay(GMString path, GMReal loop, GMReal interframe)
 		{
 			gm::buffer_destroy(Buffer);
 			gm::buffer_destroy(FrameBuffer);
-			throw L"该文件似乎不是Rav编解码器数据块。";
+			
+			throw std::runtime_error("该文件 (" + std::string(path) + 
+				") 似乎不是Rav编解码器数据块。");
 		}
 
 		// 加载音频数据块
@@ -96,7 +98,7 @@ expReal VideoPlay(GMString path, GMReal loop, GMReal interframe)
 			gm::buffer_write_to_file(FrameBuffer, tempFile.c_str());
 			Soundtrack = mm::load_music(tempFile.c_str(), 0);
 			if (Soundtrack < 0x80000000)
-				throw L"加载音频数据块失败。";
+				throw std::runtime_error("加载音频数据块失败。");
 
 			SoundtrackLength = mm::get_length(Soundtrack);
 
@@ -136,7 +138,7 @@ expReal VideoPlay(GMString path, GMReal loop, GMReal interframe)
 
 		finish;
 	}
-	simplecatch(L"VideoOpen", 0)
+	simplecatch("VideoOpen", 0)
 }
 
 expReal VideoReset()
@@ -211,10 +213,10 @@ expReal VideoUpdate()
 			GMReal cursize = gm::buffer_get_size(FrameBuffer);
 			if (cursize != size)
 			{
-				std::wstring err = L"视频数据块大小不正确。\n视频帧：" + std::to_wstring(VideoCurrent) + 
-					L"/" + std::to_wstring(VideoTotal) + L"\n读取到的数据大小：" + 
-					std::to_wstring(cursize) + L"\n应读取的数据大小：" + std::to_wstring(size);
-				throw err.c_str();
+				throw std::runtime_error("视频数据块大小不正确。\n视频帧：" + 
+					std::to_string(VideoCurrent) + "/" + std::to_string(VideoTotal) + 
+					"\n读取到的数据大小：" + std::to_string(cursize) + "\n应读取的数据大小：" + 
+					std::to_string(size));
 			}
 
 			if (!gm::surface_exists(VideoExportSurface))
@@ -268,7 +270,7 @@ expReal VideoUpdate()
 		
 		finish;
 	}
-	simplecatch(L"VideoUpdate", 0)
+	simplecatch("VideoUpdate", 0)
 }
 
 expReal VideoPause()

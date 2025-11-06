@@ -13,12 +13,11 @@ namespace fw
 	int argument_list;
 }
 
-#define load(var, name, type) \
-	var = (type)GetProcAddress(FoxWritingDLL, name); \
-	if (var == nullptr) {\
-		std::wstring wname(name, name + strlen(name)); \
-		std::wstring err = L"加载 FoxWriting.dll 时获取函数 (" + wname + L") 失败。"; \
-		throw err.c_str(); \
+#define load(var, name) \
+	var = (decltype(var))GetProcAddress(FoxWritingDLL, name);			\
+	if (var == nullptr) {												\
+		throw std::runtime_error("加载 FoxWriting.dll 时获取函数 ( " +		\
+			std::string(name) + ") 失败。");								\
 	}
 
 expReal ImportFoxWritingModule(GMString name, GMReal argList)
@@ -28,25 +27,22 @@ expReal ImportFoxWritingModule(GMString name, GMReal argList)
 		std::wstring wname(name, name + strlen(name));
 		FoxWritingDLL = GetModuleHandle(wname.c_str());
 		if (FoxWritingDLL == nullptr)
-		{
-			std::wstring err = L"加载 " + wname + L" 失败。";
-			throw err.c_str();
-		}
+			throw std::runtime_error("加载 " + std::string(name) + " 失败。");
 
 		fw::argument_list = (int)argList;
 
-		load(fw::string_width, "FWStringWidth", r_s);
-		load(fw::string_height, "FWStringHeight", r_s);
-		load(fw::string_width_ext, "FWStringWidthEx", r_srr);
-		load(fw::string_height_ext, "FWStringHeightEx", r_srr);
-		load(fw::draw_text, "FWDrawText", r_rrs);
-		load(fw::draw_text_transformed, "FWDrawTextTransformed", r_rrs);
-		load(fw::draw_text_color, "FWDrawTextColor", r_rrs);
-		load(fw::draw_text_transformed_color, "FWDrawTextTransformedColor", r_rrs);
+		load(fw::string_width, "FWStringWidth");
+		load(fw::string_height, "FWStringHeight");
+		load(fw::string_width_ext, "FWStringWidthEx");
+		load(fw::string_height_ext, "FWStringHeightEx");
+		load(fw::draw_text, "FWDrawText");
+		load(fw::draw_text_transformed, "FWDrawTextTransformed");
+		load(fw::draw_text_color, "FWDrawTextColor");
+		load(fw::draw_text_transformed_color, "FWDrawTextTransformedColor");
 
 		finish;
 	}
-	simplecatch(L"ImportFoxWritingModule", 0)
+	simplecatch("ImportFoxWritingModule", 0)
 }
 
 namespace fw
@@ -140,7 +136,7 @@ expReal FWDrawTextExt(GMReal x, GMReal y, GMString str)
 		fw::draw_text(x, y, fw::get_text(str, w).c_str());
 		finish;
 	}
-	simplecatch(L"FWDrawTextExt", 0)
+	simplecatch("FWDrawTextExt", 0)
 }
 
 expReal FWDrawTextExtTransformed(GMReal x, GMReal y, GMString str)
@@ -153,7 +149,7 @@ expReal FWDrawTextExtTransformed(GMReal x, GMReal y, GMString str)
 		fw::draw_text_transformed(x, y, fw::get_text(str, w).c_str());
 		finish;
 	}
-	simplecatch(L"FWDrawTextExtTransformed", 0)
+	simplecatch("FWDrawTextExtTransformed", 0)
 }
 
 expReal FWDrawTextExtColor(GMReal x, GMReal y, GMString str)
@@ -166,7 +162,7 @@ expReal FWDrawTextExtColor(GMReal x, GMReal y, GMString str)
 		fw::draw_text_color(x, y, fw::get_text(str, w).c_str());
 		finish;
 	}
-	simplecatch(L"FWDrawTextExtColor", 0)
+	simplecatch("FWDrawTextExtColor", 0)
 }
 
 expReal FWDrawTextExtTransformedColor(GMReal x, GMReal y, GMString str)
@@ -179,7 +175,7 @@ expReal FWDrawTextExtTransformedColor(GMReal x, GMReal y, GMString str)
 		fw::draw_text_transformed_color(x, y, fw::get_text(str, w).c_str());
 		finish;
 	}
-	simplecatch(L"FWDrawTextExtTransformedColor", 0)
+	simplecatch("FWDrawTextExtTransformedColor", 0)
 }
 
 expReal FWStringWidthExt(GMString str, GMReal sep, GMReal w)

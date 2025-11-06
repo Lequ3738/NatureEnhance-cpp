@@ -45,20 +45,11 @@ expReal CameraInit(GMReal mode, GMReal playerX, GMReal playerY, GMReal playerSca
             ViewY = CameraY - (viewHeight / 2);
         }
         else
-            throw L"未定义此运动模式";
+            throw std::runtime_error("未定义此运动模式");
 
         finish;
     }
-    catch (const wchar_t* e)
-    {
-        if (show_error)
-        {
-            std::wstring err = L"在执行函数 CameraInit 时抛出异常。\n" + std::wstring(e);
-            MessageBox(GMWindowsHandle, err.c_str(), L"NatureEnhance Error", MB_OK | MB_ICONERROR);
-        }
-
-        fail;
-    };
+	simplecatch("CameraInit", 0)
 }
 
 expReal CameraMove(GMReal playerX, GMReal playerY, GMReal playerScale)
@@ -153,20 +144,11 @@ expReal CameraMove(GMReal playerX, GMReal playerY, GMReal playerScale)
             ViewY = CameraY - (ViewHeight / 2);
         }
         else
-            throw L"未定义此运动模式";
+            throw std::runtime_error("未定义此运动模式");
 
         finish;
     }
-    catch (const wchar_t* e)
-    {
-        if (show_error)
-        {
-            std::wstring err = L"在执行函数 CameraInit 时抛出异常。\n" + std::wstring(e);
-            MessageBox(GMWindowsHandle, err.c_str(), L"NatureEnhance Error", MB_OK | MB_ICONERROR);
-        }
-
-        fail;
-    };
+	simplecatch("CameraMove", 0)
 }
 
 expReal CameraSetOffset(GMReal offsetX, GMReal offsetY)
