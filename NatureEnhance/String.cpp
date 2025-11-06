@@ -204,19 +204,28 @@ expString StringInsert(GMString substr, GMString str, GMReal index)
 	return string_to_cstr(result);
 }
 
-expString TimeString(GMReal time)
+expString TimeString(GMReal time, GMReal bit)
 {
 	std::string timeString;
 
-	timeString = std::to_string((int)floor(time / 3600)) + ":";
-	time = fmod(time, 3600);
-	timeString += std::to_string((int)floor(time / 600));
-	time = fmod(time, 600);
-	timeString += std::to_string((int)floor(time / 60)) + ":";
-	time = fmod(time, 60);
-	timeString += std::to_string((int)floor(time / 10));
-	time = fmod(time, 10);
-	timeString += std::to_string((int)floor(time));
+	if (bit >= 3)
+	{
+		timeString = std::to_string((int)floor(time / 3600)) + ":";
+		time = fmod(time, 3600);
+	}
+	if (bit >= 2)
+	{
+		timeString += std::to_string((int)floor(time / 600));
+		time = fmod(time, 600);
+		timeString += std::to_string((int)floor(time / 60)) + ":";
+		time = fmod(time, 60);
+	}
+	if (bit >= 1)
+	{
+		timeString += std::to_string((int)floor(time / 10));
+		time = fmod(time, 10);
+		timeString += std::to_string((int)floor(time));
+	}
 
 	return string_to_cstr(timeString);
 }

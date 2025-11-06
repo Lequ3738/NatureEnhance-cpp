@@ -596,6 +596,9 @@
     <ClCompile Include="Librarys\FoxWriting.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="NatureEnhance\Json.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Direct3D_8\d3dvec.inl">
