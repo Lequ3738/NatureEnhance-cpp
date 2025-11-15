@@ -6,6 +6,12 @@
 using Json = nlohmann::json;
 using namespace std;
 
+struct TreeNode;
+
+unordered_map<int, TreeNode*> JsonDataMap;  // 存放所有由 JsonDecode 创建的树结构根节点
+// 存放所有由 JsonDecode 创建的树结构的所有节点
+unordered_map<int, TreeNode*> JsonNodeListMap, JsonNodeMapMap;
+
 struct TreeNode
 {
 	bool ismap;
@@ -13,20 +19,35 @@ struct TreeNode
 	vector<TreeNode*> children;
 	int data = gm::noone;
 
+	vector<char> typeList;
+	unordered_map<string, char> typeMap;
+
 	TreeNode(bool is_map) : parent(nullptr), ismap(is_map)
 	{
 		if (is_map)
+		{
 			data = gm::ds_map_create();
+			JsonNodeMapMap[data] = this;
+		}
 		else
+		{
 			data = gm::ds_list_create();
+			JsonNodeListMap[data] = this;
+		}
 	}
 
 	~TreeNode()
 	{
 		if (ismap)
+		{
 			gm::ds_map_destroy(data);
+			JsonNodeMapMap.erase(data);
+		}
 		else
+		{
 			gm::ds_list_destroy(data);
+			JsonNodeListMap.erase(data);
+		}
 
 		for (TreeNode* child : children)
 			delete child;
@@ -60,8 +81,6 @@ struct StackItem
 	TreeNode* tree;
 };
 
-unordered_map<int, TreeNode*> JsonDataMap;
-
 bool contains(const vector<int>& vec, int target)
 {
 	return find(vec.begin(), vec.end(), target) != vec.end();
@@ -75,12 +94,18 @@ expReal JsonFree()
 	finish;
 }
 
-void AddToParent(const StackItem& item, const gm::CGMVariable& value)
+void AddToParent(const StackItem& item, const gm::CGMVariable& value, char type)
 {
 	if (holds_alternative<string>(item.key))
+	{
 		gm::ds_map_add(item.tree->data, get<string>(item.key), value);
+		item.tree->typeMap[get<string>(item.key)] = type;
+	}
 	else
+	{
 		gm::ds_list_add(item.tree->data, value);
+		item.tree->typeList.push_back(type);
+	}
 }
 
 expReal JsonDecode(GMString jsonstr)
@@ -108,7 +133,7 @@ expReal JsonDecode(GMString jsonstr)
 				for (auto i = curr->rbegin(); i != curr->rend(); ++i)
 					jsonStack.push({ .json = &i.value(), .key = i.key(), .tree = tree });
 
-				AddToParent(item, tree->data);
+				AddToParent(item, tree->data, (char)ds_type_map);
 			}
 			else if (curr->is_array())
 			{
@@ -118,16 +143,16 @@ expReal JsonDecode(GMString jsonstr)
 				for (auto i = curr->rbegin(); i != curr->rend(); ++i, ++num)
 					jsonStack.push({ .json = &i.value(), .key = (GMReal)num, .tree = tree });
 
-				AddToParent(item, tree->data);
+				AddToParent(item, tree->data, (char)ds_type_list);
 			}
 			else if (curr->is_number())
-				AddToParent(item, curr->get<GMReal>());
+				AddToParent(item, curr->get<GMReal>(), -1);
 			else if (curr->is_string())
-				AddToParent(item, curr->get<std::string>());
+				AddToParent(item, curr->get<std::string>(), -2);
 			else if (curr->is_boolean())
-				AddToParent(item, static_cast<GMReal>(curr->get<bool>()));
+				AddToParent(item, static_cast<GMReal>(curr->get<bool>()), -3);
 			else if (curr->is_null())
-				AddToParent(item, gm::noone);
+				AddToParent(item, gm::noone, -4);
 			else
 				throw runtime_error("不支持的 JSON 数据类型。");
 		}
@@ -164,4 +189,24 @@ expReal JsonDestroy(GMReal rootNode)
 		finish;
 	}
 	simplecatch("JsonDestroy", false)
+}
+
+expReal JsonGetTypeList(GMReal list, GMReal pos)
+{
+	try
+	{
+		TreeNode* node = JsonNodeListMap.at((int)list);
+		return node->typeList.at((int)pos);
+	}
+	simplecatch("JsonGetTypeList", -5)
+}
+
+expReal JsonGetTypeMap(GMReal map, GMString key)
+{
+	try
+	{
+		TreeNode* node = JsonNodeMapMap.at((int)map);
+		return node->typeMap.at(key);
+	}
+	simplecatch("JsonGetTypeMap", -5)
 }

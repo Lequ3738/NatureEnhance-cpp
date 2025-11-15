@@ -63,7 +63,7 @@ namespace fw
 		std::string string(str);
 
 		xxh::hash_state_t<64> hs;
-		hs.update(&string, string.size());
+		hs.update(string.data(), string.size());
 		hs.update(&w, sizeof(GMReal));
 		hs.update(&CurrentFont, sizeof(int));
 
