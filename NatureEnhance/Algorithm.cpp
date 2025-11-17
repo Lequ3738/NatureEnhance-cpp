@@ -56,6 +56,9 @@ bool IsGroup(int id)
 	return id < 10000;
 }
 
+/// <summary>
+/// 对结果向量进行拼接，生成字符串 key 以便去重
+/// </summary>
 static std::string join_vec(const std::vector<int>& v, const std::string& sep = "|")
 {
 	std::string out;
