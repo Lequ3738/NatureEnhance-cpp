@@ -365,6 +365,7 @@
     <ClCompile Include="Librarys\FoxWriting.cpp" />
     <ClCompile Include="Librarys\lodepng.cpp" />
     <ClCompile Include="Librarys\MaizeMusic.cpp" />
+    <ClCompile Include="NatureEnhance\Algorithm.cpp" />
     <ClCompile Include="NatureEnhance\Camera.cpp" />
     <ClCompile Include="NatureEnhance\DataStruct.cpp" />
     <ClCompile Include="NatureEnhance\GameMakerMath.cpp" />
