@@ -148,7 +148,7 @@ expReal ExpandIngredientList(GMReal ingreList, GMReal ingreTypeMap)
 				keep_elements[g] = false; // 默认折叠
 			
 			// 根据掩码，将 有两种展开选择的项目 进行展开选择
-			for (int i = 0; i < two_choice_groups.size(); ++i)
+			for (int i = 0; i < (int)two_choice_groups.size(); ++i)
 				keep_elements[two_choice_groups[i]] = ((mask >> i) & 1) != 0;
 
 			std::unordered_map<int, bool> emitted_group_once;
