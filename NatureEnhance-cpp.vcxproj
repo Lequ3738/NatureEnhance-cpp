@@ -343,6 +343,7 @@
     <ClInclude Include="Librarys\xxhash.hpp" />
     <ClInclude Include="NatureEnhance\DataStruct.h" />
     <ClInclude Include="NatureEnhance\GameMakerMath.h" />
+    <ClInclude Include="NatureEnhance\GUIDraw.h" />
     <ClInclude Include="NatureEnhance\Main.h" />
     <ClInclude Include="pch.h" />
   </ItemGroup>
@@ -370,6 +371,7 @@
     <ClCompile Include="NatureEnhance\DataStruct.cpp" />
     <ClCompile Include="NatureEnhance\GameMakerMath.cpp" />
     <ClCompile Include="NatureEnhance\GMJson.cpp" />
+    <ClCompile Include="NatureEnhance\GUIDraw.cpp" />
     <ClCompile Include="NatureEnhance\LoadPicture.cpp" />
     <ClCompile Include="NatureEnhance\Main.cpp" />
     <ClCompile Include="NatureEnhance\GMBuffer.cpp" />
