@@ -313,12 +313,12 @@ expReal PushDrawSpritesList(GMReal list)
 	finish;
 }
 
-expReal LoadRoomTiles(GMString path)
+expReal LoadRoomTiles(GMString path, GMReal tileLayerList)
 {
     try
     {
-        if (!std::filesystem::exists(path))
-            return 0.0;
+		if (!std::filesystem::exists(path))
+			fail;
 
         GMReal buffer = gm::buffer_create();
         gm::buffer_read_from_file(buffer, path);
@@ -328,7 +328,6 @@ expReal LoadRoomTiles(GMString path)
 		UINT num;
 		if (version == 0)
 		{
-			// Tile Layer - 在非编辑模式下无用
 			num = static_cast<UINT>(gm::buffer_read_uint32(buffer));
 
 			for (UINT i = 0; i < num; ++i)
@@ -336,6 +335,15 @@ expReal LoadRoomTiles(GMString path)
 				gm::buffer_read_int32(buffer);
 				gm::buffer_read_string(buffer);
 			}
+		}
+		else if (version == 2)
+		{
+			num = static_cast<UINT>(gm::buffer_read_uint16(buffer));
+			int layerList = static_cast<int>(tileLayerList);
+
+			gm::ds_list_clear(layerList);
+			for (UINT i = 0; i < num; ++i)
+				gm::ds_list_add(layerList, gm::buffer_read_int32(buffer));
 		}
 
         std::vector<int> resList;
@@ -386,7 +394,7 @@ expReal LoadRoomTiles(GMString path)
             gm::tile_set_scale(tile, xscale, yscale);
             gm::tile_set_alpha(tile, gm::buffer_read_uint8(buffer) / 255);
 
-			if (version == 1)
+			if (version >= 1)
 				gm::tile_set_blend(tile, (int)gm::buffer_read_uint32(buffer));
         }
 
@@ -435,7 +443,7 @@ expReal LoadRoomTiles(GMString path)
             gm::ds_map_add(map, "alpha", gm::buffer_read_uint8(buffer) / 255);
             gm::ds_map_add(map, "speed", gm::buffer_read_float32(buffer));
 
-			if (version == 1)
+			if (version >= 1)
 				gm::ds_map_add(map, "blend", gm::buffer_read_uint32(buffer));
 
             if (gm::ds_map_find_value(map, "speed") != 0)
