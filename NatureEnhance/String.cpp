@@ -307,7 +307,8 @@ expReal StringToken(GMString text, GMString sep, GMReal dontRemoveEmpty)
 				utf8::next(cur_it, end);  // 获取下一个字符
 
 				std::string character(prev_it, cur_it);
-				StringTokenResult.push_back(character);
+				if (!character.empty())
+					StringTokenResult.push_back(character);
 
 				prev_it = cur_it;
 			}
@@ -382,7 +383,7 @@ std::string string_get_ext(GMString str, GMReal w, GMString lang)
 	// 按 utf-8 字符分隔字符串
 	size_t num = (size_t)StringToken(str, "", false);
 
-	std::string token,			// 从上一个合法断点到当前处理字符的字符串
+	std::string token,	// 从上一个合法断点到当前处理字符的字符串
 		line,			// 从当前行开始到上一个合法断点的字符串
 		result;			// 结果字符串
 
@@ -414,43 +415,68 @@ std::string string_get_ext(GMString str, GMReal w, GMString lang)
 		// 当到达可断点、必须断点或字符串末尾时处理 token
 		if (br == LINEBREAK_ALLOWBREAK || br == LINEBREAK_MUSTBREAK || i == num - 1)
 		{
+			std::string candidate = line + token;
+			double width = fw::string_width(candidate.c_str());
+
+			if (width <= w)  // 放得下，直接合并
+				line = std::move(candidate);
+			else  // 放不下，需要换行
+			{
+				if (!line.empty())
+				{
+					result += line + "\n";
+					line = token;
+				}
+
+				// 检查新起的这一行（原本的 token）是否依然超宽
+				// 如果 token 本身极长，这里需要强制拆分
+				if (fw::string_width(line.c_str()) > w)
+				{
+					std::string remain_line = "";
+					std::string temp_token = line;
+					line.clear();
+
+					auto tok_end = temp_token.end();
+					auto tok_it = temp_token.begin();
+					auto tok_prev = tok_it;
+
+					while (tok_it != tok_end)
+					{
+						utf8::next(tok_it, tok_end);
+						std::string character(tok_prev, tok_it);
+
+						if (!character.empty())
+						{
+							// 尝试加入字符
+							if (fw::string_width((remain_line + character).c_str()) > w)
+							{
+								// 加上这个字就超了 -> 输出前面的 safe 部分
+								result += remain_line + "\n";
+								remain_line = character; // 当前字变为下一行开头
+							}
+							else
+							{
+								remain_line += character;
+							}
+						}
+						tok_prev = tok_it;
+					}
+					// 剩下的部分留在 line 中，等待后续处理
+					line = remain_line;
+				}
+			}
+
+			token.clear();
+
 			if (br == LINEBREAK_MUSTBREAK)
 			{
-				result += line + token;
+				result += line;
 
-				// 若 token 没有显式的换行符，加上换行符
-				if (!token.empty() && token.back() != '\n' && token.back() != '\r')
+				// 如果 line 结尾不是换行符，则手动添加
+				if (line.empty() || (line.back() != '\n' && line.back() != '\r'))
 					result += "\n";
 
 				line.clear();
-				token.clear();
-			}
-			else  // ALLOWBREAK 或到达字符串末尾
-			{
-				// 计算合并后的宽度
-				std::string candidate = line + token;
-				double width = fw::string_width(candidate.c_str());
-
-				if (width <= w)  // 若放得下，合并到当前行
-					line = std::move(candidate);
-				else  // 若放不下，需要把当前行写出并开始新行
-				{
-					if (!line.empty())
-					{
-						result += line + "\n";
-						line = token;
-					}
-					else  // 当前行为空，即单个 token 超过宽度的情形
-					{
-						result += token;
-						if (i != num - 1)
-							result += "\n";
-
-						line.clear();
-					}
-				}
-
-				token.clear();
 			}
 		}
 	}
@@ -461,7 +487,7 @@ std::string string_get_ext(GMString str, GMReal w, GMString lang)
 	else if (!token.empty())
 		result += token;
 
-	return std::move(result);
+	return result;
 }
 
 expString StringGetExt(GMString str, GMReal w, GMString lang)
