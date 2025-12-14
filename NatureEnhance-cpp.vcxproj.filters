@@ -510,6 +510,12 @@
     <ClInclude Include="NatureEnhance\GUIDraw.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\Users\Lequ\Downloads\base64.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Librarys\base64.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -603,6 +609,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="NatureEnhance\GUIDraw.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="NatureEnhance\Base64.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

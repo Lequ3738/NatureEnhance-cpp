@@ -181,6 +181,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\Users\Lequ\Downloads\base64.hpp" />
     <ClInclude Include="Direct3D_8\activecf.h" />
     <ClInclude Include="Direct3D_8\amaudio.h" />
     <ClInclude Include="Direct3D_8\amparse.h" />
@@ -316,6 +317,7 @@
     <ClInclude Include="GMAPI\GmapiPopups.h" />
     <ClInclude Include="GMAPI\GmapiResources.h" />
     <ClInclude Include="GMAPI\GmapiSounds.h" />
+    <ClInclude Include="Librarys\base64.hpp" />
     <ClInclude Include="Librarys\buffer.h" />
     <ClInclude Include="Librarys\FoxWriting.h" />
     <ClInclude Include="Librarys\iconv.h" />
@@ -367,6 +369,7 @@
     <ClCompile Include="Librarys\lodepng.cpp" />
     <ClCompile Include="Librarys\MaizeMusic.cpp" />
     <ClCompile Include="NatureEnhance\Algorithm.cpp" />
+    <ClCompile Include="NatureEnhance\Base64.cpp" />
     <ClCompile Include="NatureEnhance\Camera.cpp" />
     <ClCompile Include="NatureEnhance\DataStruct.cpp" />
     <ClCompile Include="NatureEnhance\GameMakerMath.cpp" />
