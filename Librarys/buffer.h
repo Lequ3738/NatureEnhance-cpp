@@ -36,6 +36,7 @@ namespace gm
 
 	void buffer_write(int id, int type, dynamic value);
 	dynamic buffer_read(int id, int type, int len = 0);
+	void buffer_jump(GMReal id, int offset);
 }
 
 constexpr int buffer_int8 = 0;

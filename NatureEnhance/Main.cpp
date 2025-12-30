@@ -1,12 +1,12 @@
-#include "Main.h"
 #include "buffer.h"
-#include "iconv.h"
 #include "DataStruct.h"
+#include "iconv.h"
+#include "Main.h"
 #include <filesystem>
-#include <vector>
 #include <fstream>
-#include <regex>
 #include <psapi.h>
+#include <regex>
+#include <vector>
 
 gm::CGMVariable GetResource(GMString res)
 {
@@ -296,6 +296,30 @@ std::wstring ToWstring(GMString str)
     return std::move(wstr);
 }
 
+void instance_set_scale(int id, GMReal xscale, GMReal yscale)
+{
+	gm::PGMINSTANCE inst = gmapi->GetInstancePtr(id);
+	inst->image_xscale = xscale;
+	inst->image_yscale = yscale;
+	
+	int mask = inst->mask_index;
+	if (mask < 0)
+		mask = inst->sprite_index;
+
+	GMReal mask_w = static_cast<GMReal>(gm::sprite_get_bbox_right(mask) -
+		gm::sprite_get_bbox_left(mask)) * xscale;
+	GMReal mask_h = static_cast<GMReal>(gm::sprite_get_bbox_bottom(mask) -
+		gm::sprite_get_bbox_top(mask)) * yscale;
+
+	inst->bbox_right = inst->bbox_left + static_cast<int>(mask_w);
+	inst->bbox_bottom = inst->bbox_top + static_cast<int>(mask_h);
+
+	if (inst->bbox_right < inst->bbox_left)
+		std::swap(inst->bbox_right, inst->bbox_left);
+	if (inst->bbox_bottom < inst->bbox_top)
+		std::swap(inst->bbox_bottom, inst->bbox_top);
+}
+
 #pragma endregion
 
 #pragma region Load Tiles
@@ -336,7 +360,7 @@ expReal LoadRoomTiles(GMString path, GMReal tileLayerList)
 				gm::buffer_read_string(buffer);
 			}
 		}
-		else if (version == 2)
+		else if (version >= 2)
 		{
 			num = static_cast<UINT>(gm::buffer_read_uint16(buffer));
 			int layerList = static_cast<int>(tileLayerList);
@@ -376,7 +400,10 @@ expReal LoadRoomTiles(GMString path, GMReal tileLayerList)
             int pos = static_cast<int>(gm::buffer_read_int32(buffer));
             if (!resExistsList[pos])
             {
-                gm::buffer_set_pos(buffer, gm::buffer_get_pos(buffer) + 9 * 4 + 1);
+				gm::buffer_jump(buffer, 9 * 4 + 1);
+				if (version >= 1)
+					gm::buffer_jump(buffer, 4);
+				
                 continue;
             }
 
@@ -427,7 +454,10 @@ expReal LoadRoomTiles(GMString path, GMReal tileLayerList)
             int pos = static_cast<int>(gm::buffer_read_int32(buffer));
             if (!resExistsList[pos])
             {
-                gm::buffer_set_pos(buffer, gm::buffer_get_pos(buffer) + 8 * 4 + 2);
+				gm::buffer_jump(buffer, 8 * 4 + 2);
+				if (version >= 1)
+					gm::buffer_jump(buffer, 4);
+
                 continue;
             }
 
@@ -458,6 +488,62 @@ expReal LoadRoomTiles(GMString path, GMReal tileLayerList)
 
             gm::ds_list_add(DrawSpritesList[listPos], map);
         }
+
+		resList.clear();
+		resExistsList.clear();
+
+		// Objects
+		if (version >= 3)
+		{
+			num = static_cast<UINT>(gm::buffer_read_uint32(buffer));
+			resList.reserve(num);
+			resExistsList.reserve(num);
+
+			for (UINT i = 0; i < num; ++i)
+			{
+				std::string name = gm::buffer_read_string(buffer);
+				int obj = static_cast<int>(GetResource(name));
+				resList.push_back(obj);
+
+				if (!gm::object_exists(obj))
+				{
+					err += "在 scrLoadRoomTiles() 中，Object (" + name + ") 不存在。\n";
+					resExistsList.push_back(false);
+				}
+				else
+					resExistsList.push_back(true);
+			}
+
+			std::string code;
+
+			num = static_cast<UINT>(gm::buffer_read_uint32(buffer));
+			for (UINT i = 0; i < num; ++i)
+			{
+				int pos = static_cast<int>(gm::buffer_read_int32(buffer));
+				if (!resExistsList[pos])
+				{
+					gm::buffer_jump(buffer, 4 * 4);
+					gm::buffer_read_string(buffer);
+					gm::buffer_read_string(buffer);
+					continue;
+				}
+
+				GMReal x = gm::buffer_read_int32(buffer);
+				GMReal y = gm::buffer_read_int32(buffer);
+				GMReal xscale = gm::buffer_read_float32(buffer);
+				GMReal yscale = gm::buffer_read_float32(buffer);
+				std::string uid = gm::buffer_read_string(buffer);
+				std::string icc = gm::buffer_read_string(buffer);
+
+				int id = gm::instance_create(x, y, resList[pos]);
+				instance_set_scale(id, xscale, yscale);
+
+				if (!icc.empty())
+					code += "with " + std::to_string(id) + " {\n" + icc + "\n}\n";
+			}
+
+			gm::execute_string(code);
+		}
 
         gm::buffer_destroy(buffer);
 

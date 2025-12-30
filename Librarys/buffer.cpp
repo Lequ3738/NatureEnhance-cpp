@@ -181,3 +181,8 @@ dynamic gm::buffer_read(int id, int type, int len)
 
 	return -4.0;
 }
+
+void gm::buffer_jump(GMReal id, int offset)
+{
+	gm::buffer_set_pos(id, gm::buffer_get_pos(id) + offset);
+}

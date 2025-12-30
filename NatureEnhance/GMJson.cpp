@@ -170,7 +170,16 @@ expReal JsonDecode(GMString jsonstr)
 		
 		return result;
 	}
-	simplecatch("JsonDecode", gm::noone)
+	catch (const std::exception& e)
+	{
+		if (show_error)
+		{
+			ShowMessage("在执行函数 JsonDecode 出现错误：\n" + std::string(jsonstr) + "\n" + 
+				std::string(e.what()), "NatureEnhance Error", MB_OK | MB_ICONERROR);
+		}
+
+		return gm::noone;
+	}
 }
 
 expReal JsonDestroy(GMReal rootNode)

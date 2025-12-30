@@ -181,7 +181,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\Users\Lequ\Downloads\base64.hpp" />
     <ClInclude Include="Direct3D_8\activecf.h" />
     <ClInclude Include="Direct3D_8\amaudio.h" />
     <ClInclude Include="Direct3D_8\amparse.h" />
