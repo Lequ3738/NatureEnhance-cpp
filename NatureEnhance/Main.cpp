@@ -32,6 +32,17 @@ void ShowMessage(std::string&& str, std::string&& caption, UINT type)
 	MessageBox(GMWindowsHandle, wstr.c_str(), wcaption.c_str(), type);
 }
 
+std::wstring ToWstring(GMString str)
+{
+	int len = strlen(str);
+	int str_size = MultiByteToWideChar(CP_ACP, 0, str, len, nullptr, 0);
+
+	std::wstring wstr(str_size, L'\0');
+	MultiByteToWideChar(CP_ACP, 0, str, len, wstr.data(), str_size);
+
+	return wstr;
+}
+
 #pragma region Debug
 
 void DEBUG(std::string str)
@@ -249,6 +260,41 @@ expReal WindowSetFocus()
     finish;
 }
 
+static PROCESS_INFORMATION pi;
+static int process_running = 0;
+
+expReal execute_program_async(GMString command)
+{
+	if (process_running) return 75;
+
+	STARTUPINFOW si = { sizeof(si) };
+
+	std::wstring wcommand = ToWstring(command);
+
+	bool proc = static_cast<bool>(CreateProcessW(0, wcommand.data(), nullptr, nullptr, 
+		true, 0x08000000, nullptr, nullptr, &si, &pi));
+	process_running = 1;
+
+	return proc;
+}
+
+expReal execute_program_async_result()
+{
+	if (!process_running) return 75;
+	DWORD ret;
+
+	GetExitCodeProcess(pi.hProcess, &ret);
+
+	if (ret == 259) return 259;
+
+	CloseHandle(pi.hProcess);
+	CloseHandle(pi.hThread);
+
+	process_running = 0;
+
+	return (double)ret;
+}
+
 expReal GetFunctionAddress(GMString name)
 {
     return (double)(int)gm::CGMAPI::GetGMFunctionAddress(name);
@@ -285,39 +331,49 @@ GMString ChangeCoding(GMString str, GMString inputCoding, GMString outputCoding)
     return output;
 }
 
-std::wstring ToWstring(GMString str)
-{
-	int len = strlen(str);
-	int str_size = MultiByteToWideChar(CP_ACP, 0, str, len, nullptr, 0);
-
-	std::wstring wstr(str_size, L'\0');
-	MultiByteToWideChar(CP_ACP, 0, str, len, wstr.data(), str_size);
-
-    return std::move(wstr);
-}
-
 void instance_set_scale(int id, GMReal xscale, GMReal yscale)
 {
 	gm::PGMINSTANCE inst = gmapi->GetInstancePtr(id);
+	if (!inst) return;
+
 	inst->image_xscale = xscale;
 	inst->image_yscale = yscale;
 	
 	int mask = inst->mask_index;
 	if (mask < 0)
 		mask = inst->sprite_index;
+	if (mask < 0)
+		return;
 
-	GMReal mask_w = static_cast<GMReal>(gm::sprite_get_bbox_right(mask) -
-		gm::sprite_get_bbox_left(mask)) * xscale;
-	GMReal mask_h = static_cast<GMReal>(gm::sprite_get_bbox_bottom(mask) -
-		gm::sprite_get_bbox_top(mask)) * yscale;
+	GMReal origin_x = static_cast<GMReal>(gm::sprite_get_xoffset(mask));
+	GMReal origin_y = static_cast<GMReal>(gm::sprite_get_yoffset(mask));
 
-	inst->bbox_right = inst->bbox_left + static_cast<int>(mask_w);
-	inst->bbox_bottom = inst->bbox_top + static_cast<int>(mask_h);
+	GMReal raw_left = static_cast<double>(gm::sprite_get_bbox_left(mask)) - origin_x;
+	GMReal raw_right = static_cast<double>(gm::sprite_get_bbox_right(mask)) + 1.0 - origin_x;
+	GMReal raw_top = static_cast<double>(gm::sprite_get_bbox_top(mask)) - origin_y;
+	GMReal raw_bottom = static_cast<double>(gm::sprite_get_bbox_bottom(mask)) + 1.0 - origin_y;
 
-	if (inst->bbox_right < inst->bbox_left)
-		std::swap(inst->bbox_right, inst->bbox_left);
-	if (inst->bbox_bottom < inst->bbox_top)
-		std::swap(inst->bbox_bottom, inst->bbox_top);
+	if (xscale >= 0)
+	{
+		inst->bbox_left = static_cast<int>(std::floor(inst->x + raw_left * xscale));
+		inst->bbox_right = static_cast<int>(std::ceil(inst->x + raw_right * xscale)) - 1;
+	}
+	else
+	{
+		inst->bbox_left = static_cast<int>(std::floor(inst->x + raw_right * xscale));
+		inst->bbox_right = static_cast<int>(std::floor(inst->x + raw_left * xscale)) - 1;
+	}
+
+	if (yscale >= 0)
+	{
+		inst->bbox_top = static_cast<int>(std::floor(inst->y + raw_top * yscale));
+		inst->bbox_bottom = static_cast<int>(std::ceil(inst->y + raw_bottom * yscale)) - 1;
+	}
+	else
+	{
+		inst->bbox_top = static_cast<int>(std::floor(inst->y + raw_bottom * yscale));
+		inst->bbox_bottom = static_cast<int>(std::floor(inst->y + raw_top * yscale)) - 1;
+	}
 }
 
 #pragma endregion
