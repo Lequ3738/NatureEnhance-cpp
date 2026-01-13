@@ -44,7 +44,10 @@ expString StringChangeCoding(GMString str, GMString in, GMString out)
 		return "";
 	}
 
-	return result;
+	GMReturnString = result;
+	delete[] result;
+
+	return GMReturnString.c_str();
 }
 
 #define utf8catch(funcname, returns) \
@@ -124,7 +127,8 @@ expString StringCopy(GMString str, GMReal index, GMReal count)
 	}
 	utf8catch(L"StringCopy", "");
 
-	return string_to_cstr(std::string(start_it, fin_it));
+	GMReturnString = std::string(start_it, fin_it);
+	return GMReturnString.c_str();
 }
 
 expString StringCharAt(GMString str, GMReal index)
@@ -142,7 +146,9 @@ expString StringCharAt(GMString str, GMReal index)
 		utf8::advance(begin_it, max(0, (size_t)index - 1), end_it);
 		auto next_it = begin_it;
 		utf8::next(next_it, end_it);
-		return string_to_cstr(std::string(begin_it, next_it));
+
+		GMReturnString = std::string(begin_it, next_it);
+		return GMReturnString.c_str();
 	}
 	catch (const utf8::not_enough_room&)
 	{
@@ -188,7 +194,8 @@ expString StringDelete(GMString str, GMReal index, GMReal count)
 	result.append(begin_it, start_it);
 	result.append(fin_it, end_it);
 
-	return string_to_cstr(result);
+	GMReturnString = std::move(result);
+	return GMReturnString.c_str();
 }
 
 expString StringInsert(GMString substr, GMString str, GMReal index)
@@ -222,7 +229,8 @@ expString StringInsert(GMString substr, GMString str, GMReal index)
 	result.append(substring);
 	result.append(insert_it, end_it);
 
-	return string_to_cstr(result);
+	GMReturnString = std::move(result);
+	return GMReturnString.c_str();
 }
 
 expString TimeString(GMReal time, GMReal bit)
@@ -248,7 +256,8 @@ expString TimeString(GMReal time, GMReal bit)
 		timeString += std::to_string((int)floor(time));
 	}
 
-	return string_to_cstr(timeString);
+	GMReturnString = std::move(timeString);
+	return GMReturnString.c_str();
 }
 
 expString GetString(GMReal num, GMString format, GMString country)
@@ -257,18 +266,20 @@ expString GetString(GMReal num, GMString format, GMString country)
 	{
 		if (*format == '\0' && *country == '\0')
 		{
-			return string_to_cstr(std::format("{}", num));
+			GMReturnString = std::format("{}", num);
 		}
 		else if (*country == '\0')
 		{
-			return string_to_cstr(std::vformat("{:" + std::string(format) + "}", 
-				std::make_format_args(num)));
+			GMReturnString = std::vformat("{:" + std::string(format) + "}",
+				std::make_format_args(num));
 		}
 		else
 		{
-			return string_to_cstr(std::vformat(std::locale(country), 
-				"{0:" + std::string(format) + "}", std::make_format_args(num)));
+			GMReturnString = std::vformat(std::locale(country),
+				"{0:" + std::string(format) + "}", std::make_format_args(num));
 		}
+
+		return GMReturnString.c_str();
 	}
 	simplecatch("GetString", "")
 }
@@ -344,7 +355,7 @@ expString StringGetToken(GMReal num)
 	if (num < 0 || num > StringTokenResult.size() - 1)
 		return "";
 
-	return string_to_cstr(StringTokenResult[(int)num]);
+	return StringTokenResult[(int)num].c_str();
 }
 
 expReal StringTryParse(GMString str)
@@ -492,6 +503,27 @@ std::string string_get_ext(GMString str, GMReal w, GMString lang)
 
 expString StringGetExt(GMString str, GMReal w, GMString lang)
 {
-	std::string result = string_get_ext(str, w, lang);
-	return string_to_cstr(result);
+	GMReturnString = string_get_ext(str, w, lang);
+	return GMReturnString.c_str();
+}
+
+void StringReplaceAll(std::string& str, const std::string& from, const std::string& to)
+{
+	if (from.empty()) return; // 避免空子串导致死循环
+
+	size_t start_pos = 0;
+	while ((start_pos = str.find(from, start_pos)) != std::string::npos)
+	{
+		str.replace(start_pos, from.length(), to);
+		start_pos += to.length();
+	}
+}
+
+expString string_replace_all(GMString str, GMString from, GMString to)
+{
+	std::string result(str);
+	StringReplaceAll(result, from, to);
+
+	GMReturnString = std::move(result);
+	return GMReturnString.c_str();
 }

@@ -377,6 +377,7 @@
     <ClCompile Include="NatureEnhance\LoadPicture.cpp" />
     <ClCompile Include="NatureEnhance\Main.cpp" />
     <ClCompile Include="NatureEnhance\GMBuffer.cpp" />
+    <ClCompile Include="NatureEnhance\Room.cpp" />
     <ClCompile Include="NatureEnhance\RopeCalculate.cpp" />
     <ClCompile Include="NatureEnhance\String.cpp" />
     <ClCompile Include="NatureEnhance\Video.cpp" />

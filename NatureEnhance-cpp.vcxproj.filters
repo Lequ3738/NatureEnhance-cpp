@@ -611,6 +611,9 @@
     <ClCompile Include="NatureEnhance\Base64.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="NatureEnhance\Room.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Direct3D_8\d3dvec.inl">

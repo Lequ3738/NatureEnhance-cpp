@@ -5,7 +5,8 @@ expString base64_encode(GMString data)
 {
 	try
 	{
-		return string_to_cstr(base64::to_base64(data));
+		GMReturnString = base64::to_base64(data);
+		return GMReturnString.c_str();
 	}
 	simplecatch("base64_encode", "");
 }
@@ -14,7 +15,8 @@ expString base64_decode(GMString base64Text)
 {
 	try
 	{
-		return string_to_cstr(base64::from_base64(base64Text));
+		GMReturnString = base64::from_base64(base64Text);
+		return GMReturnString.c_str();
 	}
 	simplecatch("base64_decode", "");
 }
