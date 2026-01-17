@@ -50,11 +50,12 @@ namespace fw
 	struct Data
 	{
 		std::string text;
+		std::string raw;
 		GMReal w = 0;
 		int font = -1;
 	};
 
-	using HashMap = std::unordered_map<xxh::hash64_t, Data>;
+	using HashMap = std::unordered_map<xxh::hash64_t, std::vector<Data>>;
 	HashMap ProcessedText;
 	int CurrentFont = -1;
 
@@ -69,18 +70,25 @@ namespace fw
 
 		xxh::hash64_t hash = hs.digest();
 
-#define SET_TEXT ProcessedText[hash] = { \
-		.text = string_get_ext(str, w), .w = w, .font = CurrentFont \
+		auto it_map = ProcessedText.find(hash);
+		if (it_map != ProcessedText.end())
+		{
+			for (auto& entry : it_map->second)
+			{
+				if (entry.w == w && entry.font == CurrentFont && entry.raw == string)
+					return entry.text;
+			}
 		}
 		
-		if (!ProcessedText.contains(hash))
-			SET_TEXT;
-		else if (ProcessedText[hash].w != w || ProcessedText[hash].font != CurrentFont)
-			SET_TEXT;
-
-#undef SET_TEXT
+		Data data = {
+			.text = string_get_ext(str, w),
+			.raw = std::move(string),
+			.w = w,
+			.font = CurrentFont
+		};
 		
-		return ProcessedText[hash].text;
+		ProcessedText[hash].push_back(data);
+		return ProcessedText[hash].back().text;
 	}
 
 	void draw_text_ext(GMReal x, GMReal y, GMString str, GMReal w)
