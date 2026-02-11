@@ -345,6 +345,7 @@
     <ClInclude Include="NatureEnhance\DataStruct.h" />
     <ClInclude Include="NatureEnhance\GameMakerMath.h" />
     <ClInclude Include="NatureEnhance\GUIDraw.h" />
+    <ClInclude Include="NatureEnhance\LoadPicture.h" />
     <ClInclude Include="NatureEnhance\Main.h" />
     <ClInclude Include="pch.h" />
   </ItemGroup>

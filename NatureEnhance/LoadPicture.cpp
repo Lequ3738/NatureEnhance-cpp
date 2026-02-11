@@ -1,9 +1,4 @@
-#include "Main.h"
-#include "lodepng.h"
-#include "buffer.h"
-#include <future>
-
-typedef std::future<std::tuple<std::vector<UCHAR>, UINT, UINT>> PNGDecodeFuture;
+#include "LoadPicture.h"
 
 PNGDecodeFuture AsyncDecodePNG(GMString file)
 {

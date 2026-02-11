@@ -9,12 +9,14 @@ namespace mm
 	r_r free_music, play, pause, resume, stop, get_active, get_pos, get_length;
 }
 
-#define load(var, name)													\
-	var = (decltype(var))GetProcAddress(MaizeMusicDLL, name);			\
-	if (var == nullptr) {												\
-		throw std::runtime_error("加载 MaizeMusic.dll 时获取函数 ( " +		\
-			std::string(name) + ") 失败。");								\
+template<typename T> void load(T& var, GMString name)
+{
+	var = (T)GetProcAddress(MaizeMusicDLL, name);
+	if (var == nullptr) {
+		throw std::runtime_error("加载 Http.dll 时获取函数 ( " +
+			std::string(name) + ") 失败。");
 	}
+}
 
 expReal ImportMaizeMusicModule(GMString name)
 {

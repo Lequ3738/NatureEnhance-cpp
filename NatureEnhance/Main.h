@@ -11,7 +11,6 @@ typedef const char* GMString;
 
 #define expReal extern "C" __declspec(dllexport) GMReal _cdecl
 #define expString extern "C" __declspec(dllexport) GMString _cdecl
-#define innerCall void __fastcall
 
 #define fnReal GMReal _cdecl
 #define fnString GMString _cdecl

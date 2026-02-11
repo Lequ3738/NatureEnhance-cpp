@@ -513,6 +513,9 @@
     <ClInclude Include="Librarys\base64.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="NatureEnhance\LoadPicture.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
