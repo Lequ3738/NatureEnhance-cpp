@@ -75,10 +75,15 @@ namespace fw
 		auto it_map = ProcessedText.find(hash);
 		if (it_map != ProcessedText.end())
 		{
-			for (auto& entry : it_map->second)
+			if (it_map->second.size() == 1)
+				return it_map->second[0].text;
+			else
 			{
-				if (entry.w == w && entry.font == CurrentFont && entry.raw == string)
-					return entry.text;
+				for (auto& entry : it_map->second)
+				{
+					if (entry.w == w && entry.font == CurrentFont && entry.raw == string)
+						return entry.text;
+				}
 			}
 		}
 		
@@ -89,7 +94,7 @@ namespace fw
 			.font = CurrentFont
 		};
 		
-		ProcessedText[hash].push_back(data);
+		ProcessedText[hash].push_back(std::move(data));
 		return ProcessedText[hash].back().text;
 	}
 
