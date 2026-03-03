@@ -42,6 +42,8 @@ expReal ToBackgroundAsync(GMReal id)
             return -1;
 
         PNGDecodeFuture getFuture = std::move(future);
+		AsyncDecodePNGList.erase((UINT)id);
+
         auto [d3dimage, width, height] = getFuture.get();
 
         // 新建 GM 的背景资源并返回其纹理和表面
@@ -60,7 +62,6 @@ expReal ToBackgroundAsync(GMReal id)
         D3DCheck(texture->AddDirtyRect(&rect), 3);
         surf->Release();
 
-        AsyncDecodePNGList.erase((UINT)id);
         return back;
     }
     catch (const std::out_of_range)

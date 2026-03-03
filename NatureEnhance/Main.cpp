@@ -409,7 +409,7 @@ expReal InitTexts(GMString path)
         for (auto& file : textFilePath)
         {
             ifstream filestream(file);
-            if (!filestream)
+            if (!filestream.is_open())
                 throw std::runtime_error("文件 (" + file.string() + ") 打开失败。");
 
             // 将整个文件都读取到字符串中，减少 I/O 调用带来的性能开销
