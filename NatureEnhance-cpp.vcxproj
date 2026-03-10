@@ -71,16 +71,16 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>Librarys;Librarys\libunibreak;NatureEnhance;GMAPI;$(IncludePath);Direct3D_8</IncludePath>
+    <IncludePath>Librarys;NatureEnhance;GMAPI;$(IncludePath);Direct3D_8</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>Librarys;Librarys\libunibreak;NatureEnhance;GMAPI;$(IncludePath);Direct3D_8</IncludePath>
+    <IncludePath>Librarys;NatureEnhance;GMAPI;$(IncludePath);Direct3D_8</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>Librarys;Librarys\libunibreak;NatureEnhance;GMAPI;$(IncludePath);Direct3D_8</IncludePath>
+    <IncludePath>Librarys;NatureEnhance;GMAPI;$(IncludePath);Direct3D_8</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>Librarys;Librarys\libunibreak;NatureEnhance;GMAPI;$(IncludePath);Direct3D_8</IncludePath>
+    <IncludePath>Librarys;NatureEnhance;GMAPI;$(IncludePath);Direct3D_8</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -99,8 +99,8 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
-      <AdditionalLibraryDirectories>Direct3D_8;Librarys;Librarys\libunibreak;GMAPICore;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>legacy_stdio_definitions.lib;GMAPICore.lib;libiconv.lib;unibreak.lib;d3d8.lib;d3dx8.lib;DxErr8.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>Direct3D_8;Librarys;GMAPICore;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>legacy_stdio_definitions.lib;GMAPICore.lib;libiconv.lib;d3d8.lib;d3dx8.lib;DxErr8.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalOptions>/nodefaultlib:libci /SAFESEH:NO %(AdditionalOptions)</AdditionalOptions>
       <ShowProgress>NotSet</ShowProgress>
     </Link>
@@ -125,8 +125,8 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
-      <AdditionalLibraryDirectories>Direct3D_8;Librarys;Librarys\libunibreak;GMAPICore;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>legacy_stdio_definitions.lib;GMAPICore.lib;libiconv.lib;unibreak.lib;d3d8.lib;d3dx8.lib;DxErr8.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>Direct3D_8;Librarys;GMAPICore;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>legacy_stdio_definitions.lib;GMAPICore.lib;libiconv.lib;d3d8.lib;d3dx8.lib;DxErr8.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalOptions>/nodefaultlib:libci /SAFESEH:NO %(AdditionalOptions)</AdditionalOptions>
       <ShowProgress>NotSet</ShowProgress>
     </Link>
@@ -148,8 +148,8 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
-      <AdditionalLibraryDirectories>Direct3D_8;Librarys;Librarys\libunibreak;GMAPICore;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>legacy_stdio_definitions.lib;GMAPICore.lib;libiconv.lib;unibreak.lib;d3d8.lib;d3dx8.lib;DxErr8.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>Direct3D_8;Librarys;GMAPICore;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>legacy_stdio_definitions.lib;GMAPICore.lib;libiconv.lib;d3d8.lib;d3dx8.lib;DxErr8.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalOptions>/nodefaultlib:libci /SAFESEH:NO %(AdditionalOptions)</AdditionalOptions>
       <ShowProgress>NotSet</ShowProgress>
     </Link>
@@ -174,8 +174,8 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
-      <AdditionalLibraryDirectories>Direct3D_8;Librarys;Librarys\libunibreak;GMAPICore;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>legacy_stdio_definitions.lib;GMAPICore.lib;libiconv.lib;unibreak.lib;d3d8.lib;d3dx8.lib;DxErr8.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>Direct3D_8;Librarys;GMAPICore;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>legacy_stdio_definitions.lib;GMAPICore.lib;libiconv.lib;d3d8.lib;d3dx8.lib;DxErr8.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalOptions>/nodefaultlib:libci /SAFESEH:NO %(AdditionalOptions)</AdditionalOptions>
       <ShowProgress>NotSet</ShowProgress>
     </Link>
@@ -318,20 +318,8 @@
     <ClInclude Include="GMAPI\GmapiSounds.h" />
     <ClInclude Include="Librarys\base64.hpp" />
     <ClInclude Include="Librarys\buffer.h" />
-    <ClInclude Include="Librarys\FoxWriting.h" />
     <ClInclude Include="Librarys\iconv.h" />
     <ClInclude Include="Librarys\json.hpp" />
-    <ClInclude Include="Librarys\libunibreak\eastasianwidthdef.h" />
-    <ClInclude Include="Librarys\libunibreak\emojidef.h" />
-    <ClInclude Include="Librarys\libunibreak\graphemebreak.h" />
-    <ClInclude Include="Librarys\libunibreak\graphemebreakdef.h" />
-    <ClInclude Include="Librarys\libunibreak\indicconjunctbreakdef.h" />
-    <ClInclude Include="Librarys\libunibreak\linebreak.h" />
-    <ClInclude Include="Librarys\libunibreak\linebreakdef.h" />
-    <ClInclude Include="Librarys\libunibreak\unibreakbase.h" />
-    <ClInclude Include="Librarys\libunibreak\unibreakdef.h" />
-    <ClInclude Include="Librarys\libunibreak\wordbreak.h" />
-    <ClInclude Include="Librarys\libunibreak\wordbreakdef.h" />
     <ClInclude Include="Librarys\lodepng.h" />
     <ClInclude Include="Librarys\MaizeMusic.h" />
     <ClInclude Include="Librarys\utf8.h" />
@@ -341,10 +329,8 @@
     <ClInclude Include="Librarys\utf8\cpp17.h" />
     <ClInclude Include="Librarys\utf8\cpp20.h" />
     <ClInclude Include="Librarys\utf8\unchecked.h" />
-    <ClInclude Include="Librarys\xxhash.hpp" />
     <ClInclude Include="NatureEnhance\DataStruct.h" />
     <ClInclude Include="NatureEnhance\GameMakerMath.h" />
-    <ClInclude Include="NatureEnhance\GUIDraw.h" />
     <ClInclude Include="NatureEnhance\LoadPicture.h" />
     <ClInclude Include="NatureEnhance\Main.h" />
     <ClInclude Include="pch.h" />
@@ -365,7 +351,6 @@
     <ClCompile Include="GMAPI\GmapiResources.cpp" />
     <ClCompile Include="GMAPI\GmapiSounds.cpp" />
     <ClCompile Include="Librarys\buffer.cpp" />
-    <ClCompile Include="Librarys\FoxWriting.cpp" />
     <ClCompile Include="Librarys\lodepng.cpp" />
     <ClCompile Include="Librarys\MaizeMusic.cpp" />
     <ClCompile Include="NatureEnhance\Algorithm.cpp" />
@@ -374,7 +359,6 @@
     <ClCompile Include="NatureEnhance\DataStruct.cpp" />
     <ClCompile Include="NatureEnhance\GameMakerMath.cpp" />
     <ClCompile Include="NatureEnhance\GMJson.cpp" />
-    <ClCompile Include="NatureEnhance\GUIDraw.cpp" />
     <ClCompile Include="NatureEnhance\LoadPicture.cpp" />
     <ClCompile Include="NatureEnhance\Main.cpp" />
     <ClCompile Include="NatureEnhance\GMBuffer.cpp" />
@@ -399,7 +383,6 @@
   <ItemGroup>
     <Library Include="GMAPICore\GMAPICore.lib" />
     <Library Include="Librarys\libiconv.lib" />
-    <Library Include="Librarys\libunibreak\unibreak.lib" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
