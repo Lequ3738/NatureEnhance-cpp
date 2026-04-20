@@ -65,7 +65,6 @@ void console_write(const std::string& info, int mode = msb_none);
 
 expReal BufferToTexture(GMReal buffer, GMReal gmtex, GMReal w, GMReal h);
 expReal TimerGet();
-std::string string_get_ext(GMString str, GMReal w, GMString lang = nullptr);
 void StringReplaceAll(std::string & str, const std::string& from, const std::string& to);
 
 void instance_set_scale(int id, GMReal xscale, GMReal yscale);
