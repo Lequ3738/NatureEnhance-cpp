@@ -202,13 +202,13 @@ expReal JsonParse(GMReal objID)
 {
 	try
 	{
-		int rawIDInt = static_cast<int>(objID);
-		if (!JsonObjMap.contains(rawIDInt))
+		int id = static_cast<int>(objID);
+		if (!JsonObjMap.contains(id))
 			throw std::runtime_error("无效的 JSON 对象 ID。");
 
-		Json& json = JsonObjMap[rawIDInt];
+		Json& json = JsonObjMap[id];
 		int result = ConvertJsonToDS(&json);
-		JsonObjToDSMap[rawIDInt] = result; // 关联 json 对象 ID 与 DS ID
+		JsonObjToDSMap[id] = result; // 关联 json 对象 ID 与 DS ID
 		
 		return result;
 	}
@@ -279,23 +279,22 @@ expReal JsonGetTypeMap(GMReal map, GMString key)
 	simplecatch("JsonGetTypeMap", -5)
 }
 
-expReal JsonQuery(GMReal rawID, GMString pointerStr)
+expReal JsonQuery(GMReal objID, GMString pointerStr)
 {
 	try
 	{
-		int rawIDInt = static_cast<int>(rawID);
-		if (!JsonObjMap.contains(rawIDInt))
+		JsonQueryResultType = -5;
+		int id = static_cast<int>(objID);
+		if (!JsonObjMap.contains(id))
 		{
 			JsonQueryResultType = -5;
 			throw std::runtime_error("无效的 JSON 对象 ID。");
 		}
 
-		Json& json = JsonObjMap[rawIDInt];
+		Json& json = JsonObjMap[id];
 		Json::json_pointer ptr(pointerStr);
 		Json& target = json.at(ptr);
 
-		JsonQueryResultType = -5;
-		
 		if (target.is_number())
 		{
 			JsonQueryResult = target.get<GMReal>();
@@ -323,21 +322,12 @@ expReal JsonQuery(GMReal rawID, GMString pointerStr)
 			JsonQueryResultType = target.is_object() ? (int)ds_type_map : (int)ds_type_list;
 		}
 		else
-		{
 			JsonQueryResultType = -5;
-			throw std::runtime_error("不支持的 JSON 类型。");
-		}
 
 		return JsonQueryResultType;
 	}
-	catch (const std::exception& e)
+	catch (...)
 	{
-		if (show_error)
-		{
-			ShowMessage("JsonQuery 错误：\n路径：" + std::string(pointerStr) + "\n" + e.what(),
-				"NatureEnhance Error", MB_OK | MB_ICONERROR);
-		}
-		JsonQueryResultType = -5;
 		return -5;
 	}
 }
@@ -362,17 +352,17 @@ expString JsonQueryGetString()
 	return "";
 }
 
-expReal JsonToBuffer(GMReal rawID, GMReal bufferID)
+expReal JsonToBuffer(GMReal objID, GMReal bufferID)
 {
 	try
 	{
-		int rawIDInt = static_cast<int>(rawID);
-		if (!JsonObjMap.contains(rawIDInt))
+		int id = static_cast<int>(objID);
+		if (!JsonObjMap.contains(id))
 			throw std::runtime_error("无效的 JSON 对象 ID。");
 		if (!gm::buffer_exists(bufferID))
 			throw std::runtime_error("无效的 Buffer ID。");
 
-		const Json& json = JsonObjMap[rawIDInt];
+		const Json& json = JsonObjMap[id];
 		vector<uint8_t> binData = Json::to_msgpack(json); // 序列化为MessagePack
 
 		// 写入Buffer
@@ -416,38 +406,38 @@ expReal BufferToJson(GMReal bufferID)
 	simplecatch("BufferToJson", gm::noone)
 }
 
-expReal JsonFlatten(GMReal rawID)
+expReal JsonFlatten(GMReal objID)
 {
 	try
 	{
-		int rawIDInt = static_cast<int>(rawID);
-		if (!JsonObjMap.contains(rawIDInt))
+		int id = static_cast<int>(objID);
+		if (!JsonObjMap.contains(id))
 			throw std::runtime_error("无效的 JSON 对象 ID。");
 
-		Json& json = JsonObjMap[rawIDInt];
+		Json& json = JsonObjMap[id];
 		Json flatJson = json.flatten();
 
-		int rawID = JsonObjIDCounter++;
-		JsonObjMap[rawID] = flatJson;
-		return rawID;
+		id = JsonObjIDCounter++;
+		JsonObjMap[id] = flatJson;
+		return id;
 	}
 	simplecatch("JsonFlatten", gm::noone)
 }
 
-expReal JsonUnflatten(GMReal rawID)
+expReal JsonUnflatten(GMReal objID)
 {
 	try
 	{
-		int rawIDInt = static_cast<int>(rawID);
-		if (!JsonObjMap.contains(rawIDInt))
+		int id = static_cast<int>(objID);
+		if (!JsonObjMap.contains(id))
 			throw std::runtime_error("无效的 JSON 对象 ID。");
 
-		Json& json = JsonObjMap[rawIDInt];
+		Json& json = JsonObjMap[id];
 		Json flatJson = json.unflatten();
 
-		int rawID = JsonObjIDCounter++;
-		JsonObjMap[rawID] = flatJson;
-		return rawID;
+		id = JsonObjIDCounter++;
+		JsonObjMap[id] = flatJson;
+		return id;
 	}
 	simplecatch("JsonUnflatten", gm::noone)
 }
