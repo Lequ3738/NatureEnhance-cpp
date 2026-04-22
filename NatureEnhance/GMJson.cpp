@@ -112,6 +112,9 @@ static void AddToParent(const StackItem& item, const gm::CGMVariable& value, cha
 
 static int ConvertJsonToDS(Json* jsonObj)
 {
+	if (!jsonObj->is_object() && !jsonObj->is_array())
+		throw runtime_error("JSON 顶层必须为对象或数组，不支持数字/字符串/布尔/null 作为顶层值。");
+
 	TreeNode* treeRoot = new TreeNode(true);  // 存放数据结构的节点树
 	stack<StackItem> jsonStack;
 	jsonStack.push({ .json = jsonObj, .key = "", .tree = treeRoot });
@@ -215,6 +218,15 @@ expReal JsonParse(GMReal objID)
 	simplecatch("JsonParse", gm::noone)
 }
 
+expReal JsonGetDS(GMReal objID)
+{
+	int id = static_cast<int>(objID);
+	if (JsonObjToDSMap.contains(id))
+		return JsonObjToDSMap[id];
+
+	return gm::noone;
+}
+
 expReal JsonDSClear(GMReal rootNode)
 {
 	try
@@ -259,7 +271,7 @@ expReal JsonDestroy(GMReal objID)
 	simplecatch("JsonDestroy", 0.0)
 }
 
-expReal JsonGetTypeList(GMReal list, GMReal pos)
+expReal JsonGetDSTypeList(GMReal list, GMReal pos)
 {
 	try
 	{
@@ -269,7 +281,7 @@ expReal JsonGetTypeList(GMReal list, GMReal pos)
 	simplecatch("JsonGetTypeList", -5)
 }
 
-expReal JsonGetTypeMap(GMReal map, GMString key)
+expReal JsonGetDSTypeMap(GMReal map, GMString key)
 {
 	try
 	{
@@ -277,6 +289,26 @@ expReal JsonGetTypeMap(GMReal map, GMString key)
 		return node->typeMap.at(key);
 	}
 	simplecatch("JsonGetTypeMap", -5)
+}
+
+expReal JsonGetType(GMReal objID)
+{
+	try
+	{
+		int id = static_cast<int>(objID);
+		if (!JsonObjMap.contains(id))
+			throw std::runtime_error("无效的 JSON 对象 ID。");
+
+		Json& json = JsonObjMap[id];
+		if (json.is_number()) return -1;
+		else if (json.is_string()) return -2;
+		else if (json.is_boolean()) return -3;
+		else if (json.is_null()) return -4;
+		else if (json.is_object()) return ds_type_map;
+		else if (json.is_array()) return ds_type_list;
+		else return -5;
+	}
+	simplecatch("JsonGetType", -5)
 }
 
 expReal JsonQuery(GMReal objID, GMString pointerStr)
@@ -418,7 +450,7 @@ expReal JsonFlatten(GMReal objID)
 		Json flatJson = json.flatten();
 
 		id = JsonObjIDCounter++;
-		JsonObjMap[id] = flatJson;
+		JsonObjMap[id] = move(flatJson);
 		return id;
 	}
 	simplecatch("JsonFlatten", gm::noone)
@@ -436,8 +468,139 @@ expReal JsonUnflatten(GMReal objID)
 		Json flatJson = json.unflatten();
 
 		id = JsonObjIDCounter++;
-		JsonObjMap[id] = flatJson;
+		JsonObjMap[id] = move(flatJson);
 		return id;
 	}
 	simplecatch("JsonUnflatten", gm::noone)
+}
+
+expReal JsonFromDSMap(GMReal mapID)
+{
+	try
+	{
+		int map = static_cast<int>(mapID);
+		Json json = Json::object();
+
+		gm::CGMVariable key = gm::ds_map_find_first(map);
+		for (int i = 0; i < gm::ds_map_size(map); ++i)
+		{
+			if (key.IsString())
+			{
+				gm::CGMVariable value = gm::ds_map_find_value(map, key);
+				if (value.IsString())
+					json[key.c_str()] = value.c_str();
+				else
+					json[key.c_str()] = value.real();
+			}
+
+			key = gm::ds_map_find_next(map, key);
+		}
+
+		int id = JsonObjIDCounter++;
+		JsonObjMap[id] = move(json);
+		return id;
+	}
+	simplecatch("JsonFromDSMap", gm::noone)
+}
+
+expReal JsonFromDSList(GMReal listID)
+{
+	try
+	{
+		int list = static_cast<int>(listID);
+		Json json = Json::array();
+
+		for (int i = 0; i < gm::ds_list_size(list); ++i)
+		{
+			gm::CGMVariable value = gm::ds_list_find_value(list, i);
+			if (value.IsString())
+				json.push_back(value.c_str());
+			else
+				json.push_back(value.real());
+		}
+
+		int id = JsonObjIDCounter++;
+		JsonObjMap[id] = move(json);
+		return id;
+	}
+	simplecatch("JsonFromDSList", gm::noone)
+}
+
+expReal JsonDiff(GMReal objID1, GMReal objID2)
+{
+	try
+	{
+		int id1 = static_cast<int>(objID1);
+		int id2 = static_cast<int>(objID2);
+
+		if (!JsonObjMap.contains(id1))
+			throw runtime_error("无效的 JSON 对象1 ID：" + to_string(id1));
+		if (!JsonObjMap.contains(id2))
+			throw runtime_error("无效的 JSON 对象2 ID：" + to_string(id2));
+
+		const Json& json1 = JsonObjMap[id1];
+		const Json& json2 = JsonObjMap[id2];
+		Json patch = Json::diff(json1, json2);
+
+		int patchID = JsonObjIDCounter++;
+		JsonObjMap[patchID] = move(patch);
+		return patchID;
+	}
+	simplecatch("JsonDiff", gm::noone)
+}
+
+expReal JsonPatch(GMReal objID, GMReal patchObjID)
+{
+	try
+	{
+		int id = static_cast<int>(objID);
+		int patchID = static_cast<int>(patchObjID);
+
+		if (!JsonObjMap.contains(id))
+			throw runtime_error("无效的目标 JSON 对象 ID：" + to_string(id));
+		if (!JsonObjMap.contains(patchID))
+			throw runtime_error("无效的 Patch JSON 对象 ID：" + to_string(patchID));
+
+		Json& json = JsonObjMap[id];
+		const Json& patch = JsonObjMap[patchID];
+		json.patch_inplace(patch);
+
+		finish;
+	}
+	simplecatch("JsonPatch", 0.0)
+}
+
+expReal JsonMergePatch(GMReal objID, GMReal patchObjID)
+{
+	try
+	{
+		int id = static_cast<int>(objID);
+		int patchID = static_cast<int>(patchObjID);
+
+		if (!JsonObjMap.contains(id))
+			throw runtime_error("无效的目标 JSON 对象 ID：" + to_string(id));
+		if (!JsonObjMap.contains(patchID))
+			throw runtime_error("无效的 Patch JSON 对象 ID：" + to_string(patchID));
+
+		Json& json = JsonObjMap[id];
+		const Json& patch = JsonObjMap[patchID];
+		json.merge_patch(patch);
+
+		finish;
+	}
+	simplecatch("JsonPatch", 0.0)
+}
+
+expString JsonToString(GMReal objID, GMReal indent, GMReal indentChar, GMReal ensureASCII)
+{
+	try
+	{
+		int id = static_cast<int>(objID);
+		if (!JsonObjMap.contains(id))
+			throw runtime_error("无效的 JSON 对象 ID：" + to_string(id));
+
+		GMReturnString = JsonObjMap[id].dump((int)indent, (char)indentChar, (bool)ensureASCII);
+		return GMReturnString.c_str();
+	}
+	simplecatch("JsonToString", "")
 }

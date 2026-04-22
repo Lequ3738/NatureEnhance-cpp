@@ -3,7 +3,7 @@ import subprocess
 import shutil
 
 def main():
-    source_exe = r"C:\Project\GMK\NatureEnhance-cpp\Release\NatureEnhance-cpp.dll"
+    source_exe = r"NatureEnhance-cpp.dll"
     new_name = "Main.dll"
     
     directory = os.path.dirname(source_exe)
