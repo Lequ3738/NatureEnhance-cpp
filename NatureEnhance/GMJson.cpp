@@ -249,22 +249,22 @@ expReal JsonDestroy(GMReal objID)
 {
 	try
 	{
-		int rawIDInt = static_cast<int>(objID);
+		int id = static_cast<int>(objID);
 
 		// 级联删除关联的 DS 结构
-		if (JsonObjToDSMap.contains(rawIDInt))
+		if (JsonObjToDSMap.contains(id))
 		{
-			int dsRootID = JsonObjToDSMap[rawIDInt];
+			int dsRootID = JsonObjToDSMap[id];
 			if (JsonDataMap.contains(dsRootID))
 				JsonDSClear(dsRootID);
 
-			JsonObjToDSMap.erase(rawIDInt);
+			JsonObjToDSMap.erase(id);
 		}
 
 		// 删除 JSON 对象
-		if (!JsonObjMap.contains(rawIDInt))
+		if (!JsonObjMap.contains(id))
 			throw std::runtime_error("无效的 JSON 对象 ID。");
-		JsonObjMap.erase(rawIDInt);
+		JsonObjMap.erase(id);
 
 		finish;
 	}
@@ -603,4 +603,17 @@ expString JsonToString(GMReal objID, GMReal indent, GMReal indentChar, GMReal en
 		return GMReturnString.c_str();
 	}
 	simplecatch("JsonToString", "")
+}
+
+expReal JsonSize(GMReal objID)
+{
+	try
+	{
+		int id = static_cast<int>(objID);
+		if (!JsonObjMap.contains(id))
+			throw runtime_error("无效的 JSON 对象 ID：" + to_string(id));
+
+		return JsonObjMap[id].size();
+	}
+	simplecatch("JsonEmpty", 0)
 }
