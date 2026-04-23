@@ -2,7 +2,7 @@
 #include "json.hpp"
 #include <stack>
 #include <vector>
-#include <buffer.h>
+#include "buffer.h"
 
 using Json = nlohmann::json;
 using namespace std;
@@ -19,6 +19,7 @@ int JsonQueryResultType = -5;
 
 unordered_map<int, vector<int>> JsonRootToChildrenMap;  // 根ID -> 子引用ID列表
 unordered_map<int, int> JsonChildToRootMap;             // 子引用ID -> 根ID
+unordered_map<int, unordered_map<string, int>> JsonPathCacheMap;  // 子引用路径缓存
 
 // --------------------- TreeNode 容器 ---------------------
 struct TreeNode;
@@ -222,6 +223,7 @@ expReal JsonFree()
 	JsonDataMap.clear();
 	JsonNodeListMap.clear();
 	JsonNodeMapMap.clear();
+	JsonPathCacheMap.clear();
 
 	finish;
 }
@@ -269,9 +271,6 @@ expReal JsonGetDS(GMReal objID)
 {
 	int id = static_cast<int>(objID);
 	if (!JsonObjToDSMap.contains(id))
-		return gm::noone;
-
-	if (!JsonIsRootMap.contains(id) || !JsonIsRootMap[id])
 		return gm::noone;
 
 	return JsonObjToDSMap[id];
@@ -329,6 +328,9 @@ expReal JsonDestroy(GMReal objID)
 			JsonRootToChildrenMap.erase(id);
 		}
 
+		// 清理路径缓存
+		JsonPathCacheMap.erase(id);
+
 		// 清理根ID关联的DS结构
 		if (JsonObjToDSMap.contains(id))
 		{
@@ -358,7 +360,7 @@ expReal JsonGetDSTypeList(GMReal list, GMReal pos)
 		TreeNode* node = JsonNodeListMap.at((int)list);
 		return node->typeList.at((int)pos);
 	}
-	simplecatch("JsonGetTypeList", -5)
+	simplecatch("JsonGetDSTypeList", -5)
 }
 
 expReal JsonGetDSTypeMap(GMReal map, GMString key)
@@ -368,7 +370,7 @@ expReal JsonGetDSTypeMap(GMReal map, GMString key)
 		TreeNode* node = JsonNodeMapMap.at((int)map);
 		return node->typeMap.at(key);
 	}
-	simplecatch("JsonGetTypeMap", -5)
+	simplecatch("JsonGetDSTypeMap", -5)
 }
 
 expReal JsonGetType(GMReal objID)
@@ -453,14 +455,34 @@ expReal JsonQuery(GMReal objID, GMString pointerStr)
 				fullPointerStr = JsonRefMap[id].second + pointerStr;
 			}
 
-			// 分配子引用ID
-			int childID = JsonObjIDCounter++;
-			// 存储子引用信息（根ID + 完整路径）
-			JsonRefMap[childID] = { rootID, fullPointerStr };
-			JsonIsRootMap[childID] = false;
-			// 记录父子关系
-			JsonRootToChildrenMap[rootID].push_back(childID);
-			JsonChildToRootMap[childID] = rootID;
+			int childID = -1;
+			// 检查缓存中是否已存在该路径
+			if (JsonPathCacheMap.contains(rootID) && JsonPathCacheMap[rootID].contains(fullPointerStr))
+			{
+				// 缓存命中：直接返回缓存的ID
+				childID = JsonPathCacheMap[rootID][fullPointerStr];
+				// 额外检查：确保缓存的ID仍然有效
+				if (!JsonRefMap.contains(childID))
+				{
+					// 缓存失效：移除失效缓存，继续生成新ID
+					JsonPathCacheMap[rootID].erase(fullPointerStr);
+					childID = -1;
+				}
+			}
+
+			// 缓存未命中或失效：生成新的子引用ID
+			if (childID == -1)
+			{
+				childID = JsonObjIDCounter++;
+				// 存储子引用信息（根ID + 完整路径）
+				JsonRefMap[childID] = { rootID, fullPointerStr };
+				JsonIsRootMap[childID] = false;
+				// 记录父子关系
+				JsonRootToChildrenMap[rootID].push_back(childID);
+				JsonChildToRootMap[childID] = rootID;
+				// 加入路径缓存
+				JsonPathCacheMap[rootID][fullPointerStr] = childID;
+			}
 
 			// 结果存储子引用ID，保持返回值兼容
 			JsonQueryResult = static_cast<GMReal>(childID);
@@ -587,6 +609,7 @@ expReal JsonUnflatten(GMReal objID)
 
 		id = JsonObjIDCounter++;
 		JsonObjMap[id] = move(flatJson);
+		JsonIsRootMap[id] = true;
 		return id;
 	}
 	simplecatch("JsonUnflatten", gm::noone)
@@ -666,6 +689,7 @@ expReal JsonDiff(GMReal objID1, GMReal objID2)
 
 		int patchID = JsonObjIDCounter++;
 		JsonObjMap[patchID] = move(patch);
+		JsonIsRootMap[patchID] = true;
 		return patchID;
 	}
 	simplecatch("JsonDiff", gm::noone)
@@ -714,7 +738,7 @@ expReal JsonMergePatch(GMReal objID, GMReal patchObjID)
 
 		finish;
 	}
-	simplecatch("JsonPatch", 0.0)
+	simplecatch("JsonMergePatch", 0.0)
 }
 
 expString JsonToString(GMReal objID, GMReal indent, GMReal indentChar, GMReal ensureASCII)
@@ -743,5 +767,89 @@ expReal JsonSize(GMReal objID)
 
 		return jsonOpt->get().size();
 	}
-	simplecatch("JsonEmpty", 0)
+	simplecatch("JsonSize", 0)
+}
+
+expString JsonFindFirstKey(GMReal objID)
+{
+	try
+	{
+		int id = static_cast<int>(objID);
+		auto jsonOpt = GetJsonRef(id);
+		if (!jsonOpt.has_value())
+			throw runtime_error("无效的 JSON 对象 ID。");
+		Json& target = jsonOpt->get();
+
+		if (!target.is_object() || target.empty())
+			return "";
+
+		GMReturnString = target.begin().key();
+		return GMReturnString.c_str();
+	}
+	simplecatch("JsonFindFirstKey", "")
+}
+
+expString JsonFindNextKey(GMReal objID, GMString key)
+{
+	try
+	{
+		int id = static_cast<int>(objID);
+		auto jsonOpt = GetJsonRef(id);
+		if (!jsonOpt.has_value())
+			throw runtime_error("无效的 JSON 对象 ID。");
+		Json& target = jsonOpt->get();
+
+		if (!target.is_object() || target.empty())
+			return "";
+
+		auto it = target.find(key);
+		if (it == target.end() || ++it == target.end())
+			return "";
+
+		GMReturnString = it.key();
+		return GMReturnString.c_str();
+	}
+	simplecatch("JsonFindNextKey", "")
+}
+
+expString JsonFindPrevKey(GMReal objID, GMString key)
+{
+	try
+	{
+		int id = static_cast<int>(objID);
+		auto jsonOpt = GetJsonRef(id);
+		if (!jsonOpt.has_value())
+			throw runtime_error("无效的 JSON 对象 ID。");
+		Json& target = jsonOpt->get();
+
+		if (!target.is_object() || target.empty())
+			return "";
+
+		auto it = target.find(key);
+		if (it == target.end() || it == target.begin())
+			return "";
+
+		GMReturnString = (--it).key();
+		return GMReturnString.c_str();
+	}
+	simplecatch("JsonFindPrevKey", "")
+}
+
+expString JsonFindLastKey(GMReal objID)
+{
+	try
+	{
+		int id = static_cast<int>(objID);
+		auto jsonOpt = GetJsonRef(id);
+		if (!jsonOpt.has_value())
+			throw runtime_error("无效的 JSON 对象 ID。");
+		Json& target = jsonOpt->get();
+
+		if (!target.is_object() || target.empty())
+			return "";
+
+		GMReturnString = (--target.end()).key();
+		return GMReturnString.c_str();
+	}
+	simplecatch("JsonFindLastKey", "")
 }
