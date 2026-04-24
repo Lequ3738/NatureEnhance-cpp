@@ -256,7 +256,7 @@ expReal JsonParse(GMReal objID)
 		int id = static_cast<int>(objID);
 		auto jsonOpt = GetJsonRef(id);
 		if (!jsonOpt.has_value())
-			throw std::runtime_error("无效的 JSON 对象 ID。");
+			throw std::runtime_error("无效的 JSON 对象 ID：" + std::to_string(id));
 
 		Json& json = jsonOpt->get();
 		int result = ConvertJsonToDS(&json);
@@ -380,7 +380,7 @@ expReal JsonGetType(GMReal objID)
 		int id = static_cast<int>(objID);
 		auto jsonOpt = GetJsonRef(id);
 		if (!jsonOpt.has_value())
-			throw std::runtime_error("无效的 JSON 对象 ID。");
+			throw std::runtime_error("无效的 JSON 对象 ID：" + to_string(id));
 
 		Json& json = jsonOpt->get();
 		if (json.is_number()) return -1;
@@ -406,7 +406,7 @@ expReal JsonQuery(GMReal objID, GMString pointerStr)
 		if (!jsonOpt.has_value())
 		{
 			JsonQueryResultType = -5;
-			throw std::runtime_error("无效的 JSON 对象 ID。");
+			throw std::runtime_error("无效的 JSON 对象 ID：" + to_string(id));
 		}
 		Json& json = jsonOpt->get();
 
@@ -441,7 +441,7 @@ expReal JsonQuery(GMReal objID, GMString pointerStr)
 			if (!JsonIsRootMap[id])
 			{
 				if (!JsonChildToRootMap.contains(id))
-					throw runtime_error("无效的子引用 ID。");
+					throw runtime_error("无效的子引用 ID：" + to_string(id));
 				rootID = JsonChildToRootMap[id];
 			}
 
@@ -451,7 +451,7 @@ expReal JsonQuery(GMReal objID, GMString pointerStr)
 			{
 				// 如果当前是子引用，拼接父路径
 				if (!JsonRefMap.contains(id))
-					throw runtime_error("无效的子引用 ID。");
+					throw runtime_error("无效的子引用 ID：" + to_string(id));
 				fullPointerStr = JsonRefMap[id].second + pointerStr;
 			}
 
@@ -526,9 +526,9 @@ expReal JsonToBuffer(GMReal objID, GMReal bufferID)
 		int id = static_cast<int>(objID);
 		auto jsonOpt = GetJsonRef(id);
 		if (!jsonOpt.has_value())
-			throw std::runtime_error("无效的 JSON 对象 ID。");
+			throw std::runtime_error("无效的 JSON 对象 ID：" + to_string(id));
 		if (!gm::buffer_exists(bufferID))
-			throw std::runtime_error("无效的 Buffer ID。");
+			throw std::runtime_error("无效的 Buffer ID：" + to_string(bufferID));
 
 		const Json& json = jsonOpt->get();
 		vector<uint8_t> binData = Json::to_msgpack(json); // 序列化为MessagePack
@@ -552,7 +552,7 @@ expReal BufferToJson(GMReal bufferID)
 	try
 	{
 		if (!gm::buffer_exists(bufferID))
-			throw std::runtime_error("无效的 Buffer ID。");
+			throw std::runtime_error("无效的 Buffer ID：" + to_string(bufferID));
 
 		GMReal bufferSize = gm::buffer_get_size(bufferID);
 		if (bufferSize <= 0)
@@ -582,7 +582,7 @@ expReal JsonFlatten(GMReal objID)
 		int id = static_cast<int>(objID);
 		auto jsonOpt = GetJsonRef(id);
 		if (!jsonOpt.has_value())
-			throw std::runtime_error("无效的 JSON 对象 ID。");
+			throw std::runtime_error("无效的 JSON 对象 ID：" + to_string(id));
 
 		Json& json = jsonOpt->get();
 		Json flatJson = json.flatten();
@@ -602,7 +602,7 @@ expReal JsonUnflatten(GMReal objID)
 		int id = static_cast<int>(objID);
 		auto jsonOpt = GetJsonRef(id);
 		if (!jsonOpt.has_value())
-			throw std::runtime_error("无效的 JSON 对象 ID。");
+			throw std::runtime_error("无效的 JSON 对象 ID：" + to_string(id));
 
 		Json& json = jsonOpt->get();
 		Json flatJson = json.unflatten();
@@ -777,7 +777,7 @@ expString JsonFindFirstKey(GMReal objID)
 		int id = static_cast<int>(objID);
 		auto jsonOpt = GetJsonRef(id);
 		if (!jsonOpt.has_value())
-			throw runtime_error("无效的 JSON 对象 ID。");
+			throw runtime_error("无效的 JSON 对象 ID：" + to_string(id));
 		Json& target = jsonOpt->get();
 
 		if (!target.is_object() || target.empty())
@@ -796,7 +796,7 @@ expString JsonFindNextKey(GMReal objID, GMString key)
 		int id = static_cast<int>(objID);
 		auto jsonOpt = GetJsonRef(id);
 		if (!jsonOpt.has_value())
-			throw runtime_error("无效的 JSON 对象 ID。");
+			throw runtime_error("无效的 JSON 对象 ID：" + to_string(id));
 		Json& target = jsonOpt->get();
 
 		if (!target.is_object() || target.empty())
@@ -819,7 +819,7 @@ expString JsonFindPrevKey(GMReal objID, GMString key)
 		int id = static_cast<int>(objID);
 		auto jsonOpt = GetJsonRef(id);
 		if (!jsonOpt.has_value())
-			throw runtime_error("无效的 JSON 对象 ID。");
+			throw runtime_error("无效的 JSON 对象 ID：" + to_string(id));
 		Json& target = jsonOpt->get();
 
 		if (!target.is_object() || target.empty())
@@ -842,7 +842,7 @@ expString JsonFindLastKey(GMReal objID)
 		int id = static_cast<int>(objID);
 		auto jsonOpt = GetJsonRef(id);
 		if (!jsonOpt.has_value())
-			throw runtime_error("无效的 JSON 对象 ID。");
+			throw runtime_error("无效的 JSON 对象 ID：" + to_string(id));
 		Json& target = jsonOpt->get();
 
 		if (!target.is_object() || target.empty())
