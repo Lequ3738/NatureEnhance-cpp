@@ -853,3 +853,37 @@ expString JsonFindLastKey(GMReal objID)
 	}
 	simplecatch("JsonFindLastKey", "")
 }
+
+expReal JsonSetString(GMReal objID, GMString path, GMString value)
+{
+	try
+	{
+		int id = static_cast<int>(objID);
+		auto jsonOpt = GetJsonRef(id);
+		if (!jsonOpt.has_value())
+			throw runtime_error("无效的 JSON 对象 ID：" + to_string(id));
+		Json& json = jsonOpt->get();
+
+		Json::json_pointer ptr(path);
+		json[ptr] = value;
+		finish;
+	}
+	simplecatch("JsonSetString", 0.0)
+}
+
+expReal JsonSetReal(GMReal objID, GMString path, GMReal value)
+{
+	try
+	{
+		int id = static_cast<int>(objID);
+		auto jsonOpt = GetJsonRef(id);
+		if (!jsonOpt.has_value())
+			throw runtime_error("无效的 JSON 对象 ID：" + to_string(id));
+		Json& json = jsonOpt->get();
+
+		Json::json_pointer ptr(path);
+		json[ptr] = value;
+		finish;
+	}
+	simplecatch("JsonSetReal", 0.0)
+}
