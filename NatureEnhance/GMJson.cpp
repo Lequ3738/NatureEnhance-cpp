@@ -944,3 +944,23 @@ expReal JsonSetObjectOrArray(GMReal objID, GMString path, GMReal valueObjID)
 	}
 	simplecatch("JsonSetObjectOrArray", 0.0)
 }
+
+expReal JsonCopy(GMReal objID)
+{
+	try
+	{
+		uint64_t id = static_cast<uint64_t>(objID);
+		auto jsonOpt = GetJsonRef(id);
+		if (!jsonOpt.has_value())
+			throw runtime_error("无效的 JSON 对象 ID：" + to_string(id));
+		Json& json = jsonOpt->get();
+
+		Json jsonCopy = json;
+		uint64_t copyID = JsonObjIDCounter++;
+		JsonObjMap[copyID] = move(jsonCopy);
+		JsonIsRootMap[copyID] = true;
+
+		return static_cast<GMReal>(copyID);
+	}
+	simplecatch("JsonCopy", gm::noone)
+}
