@@ -8,22 +8,22 @@ using Json = nlohmann::json;
 using namespace std;
 
 // --------------------- 全局容器 ---------------------
-static int JsonObjIDCounter = 10000000;
-unordered_map<int, Json> JsonObjMap;
-unordered_map<int, pair<int, string>> JsonRefMap;		// 子引用ID -> {根ID, JSON Pointer路径}
-unordered_map<int, bool> JsonIsRootMap;					// ID -> 是否为根ID（快速判断）
-unordered_map<int, int> JsonObjToDSMap;					// JSON ID -> 解析后的DS根ID映射
+static uint64_t JsonObjIDCounter = 900000000000000;
+unordered_map<uint64_t, Json> JsonObjMap;
+unordered_map<uint64_t, pair<uint64_t, string>> JsonRefMap;		// 子引用ID -> {根ID, JSON Pointer路径}
+unordered_map<uint64_t, bool> JsonIsRootMap;			// ID -> 是否为根ID（快速判断）
+unordered_map<uint64_t, int> JsonObjToDSMap;					// JSON ID -> 解析后的DS根ID映射
 
 dynamic JsonQueryResult;								// JSON Pointer 查询全局结果
 int JsonQueryResultType = -5;
 
-unordered_map<int, vector<int>> JsonRootToChildrenMap;  // 根ID -> 子引用ID列表
-unordered_map<int, int> JsonChildToRootMap;             // 子引用ID -> 根ID
-unordered_map<int, unordered_map<string, int>> JsonPathCacheMap;  // 子引用路径缓存
+unordered_map<uint64_t, vector<uint64_t>> JsonRootToChildrenMap;  // 根ID -> 子引用ID列表
+unordered_map<uint64_t, uint64_t> JsonChildToRootMap;             // 子引用ID -> 根ID
+unordered_map<uint64_t, unordered_map<string, uint64_t>> JsonPathCacheMap;  // 子引用路径缓存
 
 // --------------------- TreeNode 容器 ---------------------
 struct TreeNode;
-unordered_map<int, TreeNode*> JsonDataMap;  // 存放所有由 JsonParse 创建的树结构根节点
+unordered_map<uint64_t, TreeNode*> JsonDataMap;  // 存放所有由 JsonParse 创建的树结构根节点
 // 存放所有由 JsonParse 创建的树结构的所有节点
 unordered_map<int, TreeNode*> JsonNodeListMap, JsonNodeMapMap;
 
@@ -116,7 +116,7 @@ static void AddToParent(const StackItem& item, const gm::CGMVariable& value, cha
 	}
 }
 
-static optional<reference_wrapper<Json>> GetJsonRef(int id)
+static optional<reference_wrapper<Json>> GetJsonRef(uint64_t id)
 {
 	if (!JsonIsRootMap.contains(id))
 		return nullopt;
@@ -233,16 +233,16 @@ expReal StringToJson(GMString jsonstr)
 	try
 	{
 		Json json = Json::parse(jsonstr, nullptr, true, true);
-		int objID = JsonObjIDCounter++;
+		uint64_t objID = JsonObjIDCounter++;
 		JsonObjMap[objID] = move(json);
 		JsonIsRootMap[objID] = true;
-		return objID;
+		return static_cast<GMReal>(objID);
 	}
 	catch (const std::exception& e)
 	{
 		if (show_error)
 		{
-			ShowMessage("在执行函数 StringToJson 出现错误：\n" + std::string(jsonstr) + "\n" + 
+			ShowMessage("在执行函数 StringToJson 出现错误：\n" + std::string(jsonstr) + "\n" +
 				e.what(), "NatureEnhance Error", MB_OK | MB_ICONERROR);
 		}
 		return gm::noone;
@@ -253,7 +253,7 @@ expReal JsonParse(GMReal objID)
 {
 	try
 	{
-		int id = static_cast<int>(objID);
+		uint64_t id = static_cast<uint64_t>(objID);
 		auto jsonOpt = GetJsonRef(id);
 		if (!jsonOpt.has_value())
 			throw std::runtime_error("无效的 JSON 对象 ID：" + std::to_string(id));
@@ -261,7 +261,7 @@ expReal JsonParse(GMReal objID)
 		Json& json = jsonOpt->get();
 		int result = ConvertJsonToDS(&json);
 		JsonObjToDSMap[id] = result; // 关联 json 对象 ID 与 DS ID
-		
+
 		return result;
 	}
 	simplecatch("JsonParse", gm::noone)
@@ -269,7 +269,7 @@ expReal JsonParse(GMReal objID)
 
 expReal JsonGetDS(GMReal objID)
 {
-	int id = static_cast<int>(objID);
+	uint64_t id = static_cast<uint64_t>(objID);
 	if (!JsonObjToDSMap.contains(id))
 		return gm::noone;
 
@@ -280,9 +280,9 @@ expReal JsonDSClear(GMReal rootNode)
 {
 	try
 	{
-		TreeNode* treeRoot = JsonDataMap.at((int)rootNode);
-		JsonDataMap.erase((int)rootNode);
-		
+		TreeNode* treeRoot = JsonDataMap.at(static_cast<uint64_t>(rootNode));
+		JsonDataMap.erase(static_cast<uint64_t>(rootNode));
+
 		if (treeRoot == nullptr)
 			throw runtime_error("传入的 ds_map 引用无效。");
 		else if (treeRoot->parent != nullptr)
@@ -298,7 +298,7 @@ expReal JsonDestroy(GMReal objID)
 {
 	try
 	{
-		int id = static_cast<int>(objID);
+		uint64_t id = static_cast<uint64_t>(objID);
 
 		if (!JsonIsRootMap.contains(id) || !JsonIsRootMap[id])
 			throw runtime_error("仅根 JSON 对象 ID 可被删除，子引用 ID 无法独立删除。");
@@ -306,7 +306,7 @@ expReal JsonDestroy(GMReal objID)
 		// 清理所有关联的子引用
 		if (JsonRootToChildrenMap.contains(id))
 		{
-			for (int childID : JsonRootToChildrenMap[id])
+			for (uint64_t childID : JsonRootToChildrenMap[id])
 			{
 				// 清理子引用的所有映射
 				JsonRefMap.erase(childID);
@@ -377,7 +377,7 @@ expReal JsonGetType(GMReal objID)
 {
 	try
 	{
-		int id = static_cast<int>(objID);
+		uint64_t id = static_cast<uint64_t>(objID);
 		auto jsonOpt = GetJsonRef(id);
 		if (!jsonOpt.has_value())
 			throw std::runtime_error("无效的 JSON 对象 ID：" + to_string(id));
@@ -399,7 +399,7 @@ expReal JsonQuery(GMReal objID, GMString pointerStr)
 	try
 	{
 		JsonQueryResultType = -5;
-		int id = static_cast<int>(objID);
+		uint64_t id = static_cast<uint64_t>(objID);
 
 		// 获取原JSON的引用（可以是根ID或子引用ID）
 		auto jsonOpt = GetJsonRef(id);
@@ -437,7 +437,7 @@ expReal JsonQuery(GMReal objID, GMString pointerStr)
 		else if (target.is_object() || target.is_array())
 		{
 			// 找到当前ID对应的根ID
-			int rootID = id;
+			uint64_t rootID = id;
 			if (!JsonIsRootMap[id])
 			{
 				if (!JsonChildToRootMap.contains(id))
@@ -455,7 +455,7 @@ expReal JsonQuery(GMReal objID, GMString pointerStr)
 				fullPointerStr = JsonRefMap[id].second + pointerStr;
 			}
 
-			int childID = -1;
+			uint64_t childID = -1;
 			// 检查缓存中是否已存在该路径
 			if (JsonPathCacheMap.contains(rootID) && JsonPathCacheMap[rootID].contains(fullPointerStr))
 			{
@@ -523,7 +523,7 @@ expReal JsonToBuffer(GMReal objID, GMReal bufferID)
 {
 	try
 	{
-		int id = static_cast<int>(objID);
+		uint64_t id = static_cast<uint64_t>(objID);
 		auto jsonOpt = GetJsonRef(id);
 		if (!jsonOpt.has_value())
 			throw std::runtime_error("无效的 JSON 对象 ID：" + to_string(id));
@@ -567,10 +567,10 @@ expReal BufferToJson(GMReal bufferID)
 			reinterpret_cast<uint8_t*>(src) + static_cast<size_t>(bufferSize));
 		Json json = Json::from_msgpack(binData);
 
-		int rawID = JsonObjIDCounter++;
+		uint64_t rawID = JsonObjIDCounter++;
 		JsonObjMap[rawID] = json;
 		JsonIsRootMap[rawID] = true;
-		return rawID;
+		return static_cast<GMReal>(rawID);
 	}
 	simplecatch("BufferToJson", gm::noone)
 }
@@ -579,7 +579,7 @@ expReal JsonFlatten(GMReal objID)
 {
 	try
 	{
-		int id = static_cast<int>(objID);
+		uint64_t id = static_cast<uint64_t>(objID);
 		auto jsonOpt = GetJsonRef(id);
 		if (!jsonOpt.has_value())
 			throw std::runtime_error("无效的 JSON 对象 ID：" + to_string(id));
@@ -590,7 +590,7 @@ expReal JsonFlatten(GMReal objID)
 		id = JsonObjIDCounter++;
 		JsonObjMap[id] = move(flatJson);
 		JsonIsRootMap[id] = true;
-		return id;
+		return static_cast<GMReal>(id);
 	}
 	simplecatch("JsonFlatten", gm::noone)
 }
@@ -599,7 +599,7 @@ expReal JsonUnflatten(GMReal objID)
 {
 	try
 	{
-		int id = static_cast<int>(objID);
+		uint64_t id = static_cast<uint64_t>(objID);
 		auto jsonOpt = GetJsonRef(id);
 		if (!jsonOpt.has_value())
 			throw std::runtime_error("无效的 JSON 对象 ID：" + to_string(id));
@@ -610,7 +610,7 @@ expReal JsonUnflatten(GMReal objID)
 		id = JsonObjIDCounter++;
 		JsonObjMap[id] = move(flatJson);
 		JsonIsRootMap[id] = true;
-		return id;
+		return static_cast<GMReal>(id);
 	}
 	simplecatch("JsonUnflatten", gm::noone)
 }
@@ -637,10 +637,10 @@ expReal JsonFromDSMap(GMReal mapID)
 			key = gm::ds_map_find_next(map, key);
 		}
 
-		int id = JsonObjIDCounter++;
+		uint64_t id = JsonObjIDCounter++;
 		JsonObjMap[id] = move(json);
 		JsonIsRootMap[id] = true;
-		return id;
+		return static_cast<GMReal>(id);
 	}
 	simplecatch("JsonFromDSMap", gm::noone)
 }
@@ -661,10 +661,10 @@ expReal JsonFromDSList(GMReal listID)
 				json.push_back(value.real());
 		}
 
-		int id = JsonObjIDCounter++;
+		uint64_t id = JsonObjIDCounter++;
 		JsonObjMap[id] = move(json);
 		JsonIsRootMap[id] = true;
-		return id;
+		return static_cast<GMReal>(id);
 	}
 	simplecatch("JsonFromDSList", gm::noone)
 }
@@ -673,8 +673,8 @@ expReal JsonDiff(GMReal objID1, GMReal objID2)
 {
 	try
 	{
-		int id1 = static_cast<int>(objID1);
-		int id2 = static_cast<int>(objID2);
+		uint64_t id1 = static_cast<uint64_t>(objID1);
+		uint64_t id2 = static_cast<uint64_t>(objID2);
 		auto jsonOpt1 = GetJsonRef(id1);
 		auto jsonOpt2 = GetJsonRef(id2);
 
@@ -687,10 +687,10 @@ expReal JsonDiff(GMReal objID1, GMReal objID2)
 		const Json& json2 = jsonOpt2->get();
 		Json patch = Json::diff(json1, json2);
 
-		int patchID = JsonObjIDCounter++;
+		uint64_t patchID = JsonObjIDCounter++;
 		JsonObjMap[patchID] = move(patch);
 		JsonIsRootMap[patchID] = true;
-		return patchID;
+		return static_cast<GMReal>(patchID);
 	}
 	simplecatch("JsonDiff", gm::noone)
 }
@@ -699,8 +699,8 @@ expReal JsonPatch(GMReal objID, GMReal patchObjID)
 {
 	try
 	{
-		int id = static_cast<int>(objID);
-		int patchID = static_cast<int>(patchObjID);
+		uint64_t id = static_cast<uint64_t>(objID);
+		uint64_t patchID = static_cast<uint64_t>(patchObjID);
 		auto jsonOpt = GetJsonRef(id);
 		auto patchOpt = GetJsonRef(patchID);
 
@@ -722,8 +722,8 @@ expReal JsonMergePatch(GMReal objID, GMReal patchObjID)
 {
 	try
 	{
-		int id = static_cast<int>(objID);
-		int patchID = static_cast<int>(patchObjID);
+		uint64_t id = static_cast<uint64_t>(objID);
+		uint64_t patchID = static_cast<uint64_t>(patchObjID);
 		auto jsonOpt = GetJsonRef(id);
 		auto patchOpt = GetJsonRef(patchID);
 
@@ -745,7 +745,7 @@ expString JsonToString(GMReal objID, GMReal indent, GMReal indentChar, GMReal en
 {
 	try
 	{
-		int id = static_cast<int>(objID);
+		uint64_t id = static_cast<uint64_t>(objID);
 		auto jsonOpt = GetJsonRef(id);
 		if (!jsonOpt.has_value())
 			throw runtime_error("无效的 JSON 对象 ID：" + to_string(id));
@@ -760,7 +760,7 @@ expReal JsonSize(GMReal objID)
 {
 	try
 	{
-		int id = static_cast<int>(objID);
+		uint64_t id = static_cast<uint64_t>(objID);
 		auto jsonOpt = GetJsonRef(id);
 		if (!jsonOpt.has_value())
 			throw runtime_error("无效的 JSON 对象 ID：" + to_string(id));
@@ -774,7 +774,7 @@ expString JsonFindFirstKey(GMReal objID)
 {
 	try
 	{
-		int id = static_cast<int>(objID);
+		uint64_t id = static_cast<uint64_t>(objID);
 		auto jsonOpt = GetJsonRef(id);
 		if (!jsonOpt.has_value())
 			throw runtime_error("无效的 JSON 对象 ID：" + to_string(id));
@@ -793,7 +793,7 @@ expString JsonFindNextKey(GMReal objID, GMString key)
 {
 	try
 	{
-		int id = static_cast<int>(objID);
+		uint64_t id = static_cast<uint64_t>(objID);
 		auto jsonOpt = GetJsonRef(id);
 		if (!jsonOpt.has_value())
 			throw runtime_error("无效的 JSON 对象 ID：" + to_string(id));
@@ -816,7 +816,7 @@ expString JsonFindPrevKey(GMReal objID, GMString key)
 {
 	try
 	{
-		int id = static_cast<int>(objID);
+		uint64_t id = static_cast<uint64_t>(objID);
 		auto jsonOpt = GetJsonRef(id);
 		if (!jsonOpt.has_value())
 			throw runtime_error("无效的 JSON 对象 ID：" + to_string(id));
@@ -839,7 +839,7 @@ expString JsonFindLastKey(GMReal objID)
 {
 	try
 	{
-		int id = static_cast<int>(objID);
+		uint64_t id = static_cast<uint64_t>(objID);
 		auto jsonOpt = GetJsonRef(id);
 		if (!jsonOpt.has_value())
 			throw runtime_error("无效的 JSON 对象 ID：" + to_string(id));
@@ -858,7 +858,7 @@ expReal JsonSetString(GMReal objID, GMString path, GMString value)
 {
 	try
 	{
-		int id = static_cast<int>(objID);
+		uint64_t id = static_cast<uint64_t>(objID);
 		auto jsonOpt = GetJsonRef(id);
 		if (!jsonOpt.has_value())
 			throw runtime_error("无效的 JSON 对象 ID：" + to_string(id));
@@ -875,7 +875,7 @@ expReal JsonSetReal(GMReal objID, GMString path, GMReal value)
 {
 	try
 	{
-		int id = static_cast<int>(objID);
+		uint64_t id = static_cast<uint64_t>(objID);
 		auto jsonOpt = GetJsonRef(id);
 		if (!jsonOpt.has_value())
 			throw runtime_error("无效的 JSON 对象 ID：" + to_string(id));
@@ -886,4 +886,61 @@ expReal JsonSetReal(GMReal objID, GMString path, GMReal value)
 		finish;
 	}
 	simplecatch("JsonSetReal", 0.0)
+}
+
+expReal JsonSetBool(GMReal objID, GMString path, GMReal value)
+{
+	try
+	{
+		uint64_t id = static_cast<uint64_t>(objID);
+		auto jsonOpt = GetJsonRef(id);
+		if (!jsonOpt.has_value())
+			throw runtime_error("无效的 JSON 对象 ID：" + to_string(id));
+		Json& json = jsonOpt->get();
+
+		Json::json_pointer ptr(path);
+		json[ptr] = static_cast<bool>(value);
+		finish;
+	}
+	simplecatch("JsonSetBool", 0.0)
+}
+
+expReal JsonSetNull(GMReal objID, GMString path)
+{
+	try
+	{
+		uint64_t id = static_cast<uint64_t>(objID);
+		auto jsonOpt = GetJsonRef(id);
+		if (!jsonOpt.has_value())
+			throw runtime_error("无效的 JSON 对象 ID：" + to_string(id));
+		Json& json = jsonOpt->get();
+		Json::json_pointer ptr(path);
+		json[ptr] = nullptr;
+		finish;
+	}
+	simplecatch("JsonSetNull", 0.0)
+}
+
+expReal JsonSetObjectOrArray(GMReal objID, GMString path, GMReal valueObjID)
+{
+	try
+	{
+		uint64_t id = static_cast<uint64_t>(objID);
+		uint64_t valueID = static_cast<uint64_t>(valueObjID);
+		auto jsonOpt = GetJsonRef(id);
+		auto valueOpt = GetJsonRef(valueID);
+
+		if (!jsonOpt.has_value())
+			throw runtime_error("无效的 JSON 对象 ID：" + to_string(id));
+		if (!valueOpt.has_value())
+			throw runtime_error("无效的 JSON 对象 ID：" + to_string(valueID));
+
+		Json& json = jsonOpt->get();
+		Json& value = valueOpt->get();
+
+		Json::json_pointer ptr(path);
+		json[ptr] = value;
+		finish;
+	}
+	simplecatch("JsonSetObjectOrArray", 0.0)
 }
