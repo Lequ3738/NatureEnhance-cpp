@@ -52,6 +52,14 @@ expReal VideoFree()
 
 	VideoPlaying = false;
 
+	Buffer = gm::noone;
+	FrameBuffer = gm::noone;
+	VideoExportSurface = gm::noone;
+	VideoScratchSurface = gm::noone;
+	VideoTempSurface1 = gm::noone;
+	VideoTempSurface2 = gm::noone;
+	Soundtrack = gm::noone;
+
 	finish;
 }
 
