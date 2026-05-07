@@ -196,7 +196,7 @@ expReal VideoUpdate()
 			}
 			else
 			{
-				GMReal p = min(1, mm::get_pos(Soundtrack) / SoundtrackLength) * VideoTotal;
+				GMReal p = std::min(1.0, mm::get_pos(Soundtrack) / SoundtrackLength) * VideoTotal;
 				FrameOffset = fmod(p, 1.0);  // 取 p 的小数部分
 				pos = (int)p;  // 取 p 的整数部分
 			}
