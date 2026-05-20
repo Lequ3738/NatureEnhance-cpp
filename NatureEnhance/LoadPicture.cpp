@@ -1,4 +1,140 @@
 #include "LoadPicture.h"
+#include <algorithm>
+
+struct image_rect
+{
+	int left;
+	int top;
+	int right;
+	int bottom;
+};
+
+static image_rect crop_blank_area(std::vector<UCHAR>& image, uint width, uint height)
+{
+	int top = 0, bottom = 0, left = 0, right = 0;
+	
+	for (int y = 0; y < (int)height; ++y)
+	{
+		for (int x = 0; x < (int)width; ++x)
+		{
+			uint idx = (y * width + x) * 4;
+			if (image[idx + 3] > 0)
+			{
+				top = y;
+				goto calc_bottom;
+			}
+		}
+	}
+	return { 0, 0, 0, 0 };
+
+calc_bottom:
+	for (int y = (int)height - 1; y >= top; --y)
+	{
+		for (int x = 0; x < (int)width; ++x)
+		{
+			uint idx = (y * width + x) * 4;
+			if (image[idx + 3] > 0)
+			{
+				bottom = y;
+				goto calc_left;
+			}
+		}
+	}
+calc_left:
+	for (int x = 0; x < (int)width; ++x)
+	{
+		for (int y = top; y <= bottom; ++y)
+		{
+			uint idx = (y * width + x) * 4;
+			if (image[idx + 3] > 0)
+			{
+				left = x;
+				goto calc_right;
+			}
+		}
+	}
+calc_right:
+	for (int x = (int)width - 1; x >= left; --x)
+	{
+		for (int y = top; y <= bottom; ++y)
+		{
+			uint idx = (y * width + x) * 4;
+			if (image[idx + 3] > 0)
+			{
+				right = x;
+				goto calc_end;
+			}
+		}
+	}
+calc_end:
+	return { left, top, right, bottom };
+}
+
+static void apply_color_bleeding(std::vector<UCHAR>& image_data, uint width, uint height)
+{
+	image_rect cropped_rect = crop_blank_area(image_data, width, height);
+	if (cropped_rect.right < cropped_rect.left || cropped_rect.bottom < cropped_rect.top)
+		return;
+
+	std::vector<UCHAR> buffer = image_data;
+
+	int process_left = cropped_rect.left - 1;
+	int process_top = cropped_rect.top - 1;
+	int process_right = cropped_rect.right + 1;
+	int process_bottom = cropped_rect.bottom + 1;
+
+	process_left = std::max(process_left, 0);
+	process_top = std::max(process_top, 0);
+	process_right = std::min(process_right, (int)width - 1);
+	process_bottom = std::min(process_bottom, (int)height - 1);
+
+	for (int y = process_top; y <= process_bottom; ++y)
+	{
+		for (int x = process_left; x <= process_right; ++x)
+		{
+			uint idx = (y * (int)width + x) * 4;
+			UCHAR a = buffer[idx + 3];
+
+			if (a == 0)
+			{
+				int b_sum = 0, g_sum = 0, r_sum = 0;
+				int count = 0;
+
+				for (int dy = -1; dy <= 1; ++dy)
+				{
+					for (int dx = -1; dx <= 1; ++dx)
+					{
+						if (dx == 0 && dy == 0) continue;
+
+						int nx = x + dx;
+						int ny = y + dy;
+
+						if (nx >= 0 && nx < (int)width && ny >= 0 && ny < (int)height)
+						{
+							uint n_idx = (ny * (int)width + nx) * 4;
+							UCHAR n_a = buffer[n_idx + 3];
+
+							if (n_a > 0)
+							{
+								b_sum += buffer[n_idx];
+								g_sum += buffer[n_idx + 1];
+								r_sum += buffer[n_idx + 2];
+								count++;
+							}
+						}
+					}
+				}
+
+				if (count > 0)
+				{
+					image_data[idx] = (UCHAR)(b_sum / count);
+					image_data[idx + 1] = (UCHAR)(g_sum / count);
+					image_data[idx + 2] = (UCHAR)(r_sum / count);
+				}
+			}
+		}
+	}
+}
 
 PNGDecodeFuture AsyncDecodePNG(GMString file)
 {
@@ -18,6 +154,8 @@ PNGDecodeFuture AsyncDecodePNG(GMString file)
             d3dimage[i + 2] = image[i];     // B -> R
             d3dimage[i + 3] = image[i + 3]; // A
         }
+
+		apply_color_bleeding(d3dimage, width, height);  // 执行边缘膨胀
 
         return std::make_tuple(std::move(d3dimage), width, height);
     });
@@ -109,6 +247,8 @@ PNGDecodeFuture AsyncDecodeGMBCK(GMString file)
 
         memcpy(image.data(), imageData, size);
         gm::buffer_destroy(data);
+
+		apply_color_bleeding(image, width, height);  // 执行边缘膨胀
 
 		return std::make_tuple(std::move(image), width, height);
     });

@@ -4,6 +4,7 @@
 #include <vector>
 #include <charconv>
 #include "utf8.h"
+#include <algorithm>
 
 GMString string_to_cstr(const std::string& str)
 {
@@ -106,7 +107,7 @@ expString StringCopy(GMString str, GMReal index, GMReal count)
 	auto start_it = begin_it;
 	try
 	{
-		utf8::advance(start_it, max(0, (size_t)index - 1), end_it);
+		utf8::advance(start_it, std::max(0U, (size_t)index - 1), end_it);
 	}
 	catch (const utf8::not_enough_room&)
 	{
@@ -141,7 +142,7 @@ expString StringCharAt(GMString str, GMReal index)
 
 	try
 	{
-		utf8::advance(begin_it, max(0, (size_t)index - 1), end_it);
+		utf8::advance(begin_it, std::max(0U, (size_t)index - 1), end_it);
 		auto next_it = begin_it;
 		utf8::next(next_it, end_it);
 
@@ -168,7 +169,7 @@ expString StringDelete(GMString str, GMReal index, GMReal count)
 	auto start_it = begin_it;
 	try
 	{
-		utf8::advance(start_it, max(0, (size_t)index - 1), end_it);
+		utf8::advance(start_it, std::max(0U, (size_t)index - 1), end_it);
 	}
 	catch (const utf8::not_enough_room&)
 	{
