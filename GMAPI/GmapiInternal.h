@@ -900,6 +900,15 @@ namespace gm {
       return ( CGlobals::UseNewStructs() ? structNew.deactivated : structOld.deactivated ) = aValue;
     }
 
+	__declspec(property(get = _Get_destroyed, put = _Set_destroyed)) bool destroyed;
+	bool& _Get_destroyed() {
+		return (CGlobals::UseNewStructs() ? structNew.destroyed : structOld.destroyed);
+	}
+
+	bool& _Set_destroyed(bool aValue) {
+		return (CGlobals::UseNewStructs() ? structNew.destroyed : structOld.destroyed) = aValue;
+	}
+
     __declspec( property( get = _Get_path_index, put = _Set_path_index ) ) int path_index;
     int& _Get_path_index() {
       return ( CGlobals::UseNewStructs() ? structNew.path_index : structOld.path_index );

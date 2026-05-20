@@ -334,7 +334,7 @@ namespace gm {
     int alarm[12];
     PGMVARIABLELIST variableListPtr;
 
-    __PADDING1 _padding3;
+    bool destroyed;
     bool deactivated;
     __PADDING1 _padding4[2];
 
@@ -394,7 +394,7 @@ namespace gm {
     int alarm[12];
     PGMVARIABLELIST variableListPtr;
 
-    __PADDING1 _padding3;
+    bool destroyed;
     bool deactivated;
     __PADDING1 _padding4[2];
 

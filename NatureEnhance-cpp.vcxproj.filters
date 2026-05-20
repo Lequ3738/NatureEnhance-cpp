@@ -474,6 +474,9 @@
     <ClInclude Include="NatureEnhance\LoadPicture.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="NatureEnhance\Instance.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -567,6 +570,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="NatureEnhance\Room.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="NatureEnhance\Instance.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
