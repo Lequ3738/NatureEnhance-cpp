@@ -48,13 +48,13 @@ gm::GMINSTANCE** GM_GetInstanceArray(int& size)
 int GM_GetInstanceCount(int objID)
 {
 	BYTE* roomPtr = (BYTE*)gmapi->GetCurrentRoomPtr();
-	int* objectNumArray = *(int**)(roomPtr + 0x84);
+	int* objectNumArray = *((int**)(roomPtr + 0x84));
 
 	if (!objectNumArray)
 		return 0;
 
-	int objectSize = *((int*)objectNumArray - 1);
-	if (objID >= 0 && objID < objectSize)
+	int objectNum = objectNumArray[-1];
+	if (objID >= 0 && objID < objectNum)
 		return objectNumArray[objID];
 
 	return 0;
@@ -62,45 +62,68 @@ int GM_GetInstanceCount(int objID)
 
 gm::PGMINSTANCE GM_GetInstPtr(int objID, int n)
 {
-	int roomPtr = (int)gmapi->GetCurrentRoomPtr();
+	BYTE* roomPtr = (BYTE*)gmapi->GetCurrentRoomPtr();
 	if (!roomPtr)
 		return nullptr;
 
-	int objectSize = *((DWORD*)(roomPtr + 0x80));
 	int* objectNumArray = *((int**)(roomPtr + 0x84));
+	gm::PGMINSTANCE** instTable = *((gm::PGMINSTANCE***)(roomPtr + 0x80));
 
-	if (!objectNumArray || objID < 0 || objID >= objectSize)
+	if (!objectNumArray || !instTable)
 		return nullptr;
 
-	if (n < 0 || n >= objectNumArray[objID])
+	int objectNum = objectNumArray[-1];
+	if (objID < 0 || objID >= objectNum)
 		return nullptr;
 
+	int instNum = objectNumArray[objID];
+	if (n < 0 || n >= instNum)
+		return nullptr;
 
+	return instTable[objID][n];
 }
 
-expReal InstancePlaceList(GMReal x, GMReal y, GMReal id)
+expReal InstancePlaceList(GMReal x, GMReal y, GMReal id, GMReal fast)
 {
 	int list = gm::noone;
+	int ind = (int)id;
+	bool prec = !(bool)fast;
 	
 	gm::PGMINSTANCE curInst = gmapi->GetCurrentInstancePtr();
 	GMReal prevX = curInst->x, prevY = curInst->y;
 	GM_MoveInstance(curInst, x, y);
 
-	if (id == gm::all)
-	{
-
-	}
-	else if (id >= 100000)  // instance
+	if (ind == gm::all)
 	{
 		int instanceArraySize = 0;
 		gm::GMINSTANCE** instanceArray = GM_GetInstanceArray(instanceArraySize);
 
 		for (int i = 0; i < instanceArraySize; ++i)
 		{
-			if (!instanceArray[i]->destroyed && instanceArray[i]->id == id)
+			if (!instanceArray[i]->destroyed)
 			{
 				gm::PGMINSTANCE inst = instanceArray[i];
-				if (GM_CollisionCheck(inst, curInst, true))
+				if (GM_CollisionCheck(inst, curInst, prec))
+				{
+					if (list < 0)
+						list = static_cast<int>(ne_list_create("instance_place_list() Created List."));
+
+					gm::ds_list_add(list, inst->id);
+				}
+			}
+		}
+	}
+	else if (ind >= 100000)  // instance
+	{
+		int instanceArraySize = 0;
+		gm::GMINSTANCE** instanceArray = GM_GetInstanceArray(instanceArraySize);
+
+		for (int i = 0; i < instanceArraySize; ++i)
+		{
+			if (!instanceArray[i]->destroyed && instanceArray[i]->id == ind)
+			{
+				gm::PGMINSTANCE inst = instanceArray[i];
+				if (GM_CollisionCheck(inst, curInst, prec))
 				{
 					if (list < 0)
 						list = static_cast<int>(ne_list_create("instance_place_list() Created List."));
@@ -112,10 +135,19 @@ expReal InstancePlaceList(GMReal x, GMReal y, GMReal id)
 	}
 	else  // object
 	{
-		int instNum = GM_GetInstanceCount(id);
+		int instNum = GM_GetInstanceCount(ind);
 		for (int i = 0; i < instNum; ++i)
 		{
+			gm::PGMINSTANCE inst = GM_GetInstPtr(ind, i);
+			if (inst->destroyed) continue;
 
+			if (GM_CollisionCheck(inst, curInst, prec))
+			{
+				if (list < 0)
+					list = static_cast<int>(ne_list_create("instance_place_list() Created List."));
+
+				gm::ds_list_add(list, inst->id);
+			}
 		}
 	}
 
