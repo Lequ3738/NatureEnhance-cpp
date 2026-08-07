@@ -258,11 +258,11 @@ expReal VideoUpdate()
 			gm::draw_clear(gm::c_black);
 			gm::draw_surface(VideoTempSurface1, 0, 0);
 			
-			Device->SetRenderState(D3DRS_COLORWRITEENABLE, D3DCOLORWRITEENABLE_RED |
+			d3d::set_render_state(D3DRS_COLORWRITEENABLE, D3DCOLORWRITEENABLE_RED |
 				D3DCOLORWRITEENABLE_GREEN | D3DCOLORWRITEENABLE_BLUE);
-			gm::draw_surface_ext(VideoExportSurface, 0, 0, 1, 1, 0, 0xffffff, 
+			gm::draw_surface_ext(VideoExportSurface, 0, 0, 1, 1, 0, 0xffffff,
 				FrameOffset + (VideoCurrent == 0));
-			Device->SetRenderState(D3DRS_COLORWRITEENABLE, D3DCOLORWRITEENABLE_RED |
+			d3d::set_render_state(D3DRS_COLORWRITEENABLE, D3DCOLORWRITEENABLE_RED |
 				D3DCOLORWRITEENABLE_GREEN | D3DCOLORWRITEENABLE_BLUE | D3DCOLORWRITEENABLE_ALPHA);
 
 			gm::surface_reset_target();

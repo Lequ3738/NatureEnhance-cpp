@@ -1,8 +1,7 @@
 #pragma once
 #include "Gmapi.h"
 #include "GameMakerMath.h"
-#include "d3dx8.h"
-#include "dxerr8.h"
+#include "d3d_adapter.h"
 #include <variant>
 #include <string>
 
@@ -37,7 +36,7 @@ extern bool show_error;
 extern HWND GMWindowsHandle;
 extern gm::CGMAPI* gmapi;
 extern GMReal PropertyMap, NameMap;
-extern IDirect3DDevice8* Device;
+extern void* Device;   // D3D8/9 设备对象, 不透明指针, 只经 d3d:: 适配器使用
 
 extern std::string GMReturnString;
 

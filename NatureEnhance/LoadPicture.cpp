@@ -186,19 +186,19 @@ expReal ToBackgroundAsync(GMReal id)
 
         // 新建 GM 的背景资源并返回其纹理和表面
         int back = gm::background_create_color(width, height, 0);
-        IDirect3DTexture8* texture = gmapi->Backgrounds[back].GetTexture();
+        void* texture = gmapi->Backgrounds[back].GetTexture();
 
-        IDirect3DSurface8* surf = nullptr;
-        D3DCheck(texture->GetSurfaceLevel(0, &surf), 1);
+        void* surf = nullptr;
+        D3DCheck(d3d::get_surface_level(texture, 0, &surf), 1);
 
         // 载入数据
         RECT rect = { .left = 0, .top = 0, .right = (long)width, .bottom = (long)height };
 
-        D3DCheck(D3DXLoadSurfaceFromMemory(surf, nullptr, &rect, d3dimage.data(),
-            D3DFMT_A8R8G8B8, width * 4, nullptr, &rect, D3DX_FILTER_NONE, 0), 2);
+        D3DCheck(d3d::load_surface_from_memory(surf, &rect, d3dimage.data(),
+            D3DFMT_A8R8G8B8, width * 4, &rect), 2);
 
-        D3DCheck(texture->AddDirtyRect(&rect), 3);
-        surf->Release();
+        D3DCheck(d3d::add_dirty_rect(texture, &rect), 3);
+        d3d::release(surf);
 
         return back;
     }

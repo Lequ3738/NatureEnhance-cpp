@@ -6,7 +6,7 @@ void D3DCheck(HRESULT result, int pos)
     if (SUCCEEDED(result))
         return;
 
-	throw std::runtime_error("位置" + std::to_string(pos) + ": " + DXGetErrorDescription8A(result));
+	throw std::runtime_error("位置" + std::to_string(pos) + ": " + d3d::error_text(result));
 }
 
 expReal TextureToBuffer(GMReal buffer, GMReal gmtex, GMReal w, GMReal h)
@@ -15,23 +15,25 @@ expReal TextureToBuffer(GMReal buffer, GMReal gmtex, GMReal w, GMReal h)
     {
         UINT width = (UINT)w, height = (UINT)h;
 
-        IDirect3DTexture8* texture = gm::CGMAPI::GetTextureArray()[(int)gmtex].texture;
+        void* texture = gm::CGMAPI::GetTextureArray()[(int)gmtex].texture;
         if (Device == nullptr)
-            D3DCheck(texture->GetDevice(&Device), 1);
+        {
+            D3DCheck(d3d::get_device_from_texture(texture, &Device), 1);
+            d3d::ensure_version(Device, nullptr);   // 惰性拿到设备后补一次后端判定
+        }
 
-        IDirect3DSurface8* surf = nullptr;
-        IDirect3DSurface8* surfTemp = nullptr;
-        D3DCheck(texture->GetSurfaceLevel(0, &surf), 2);
+        void* surf = nullptr;
+        void* surfTemp = nullptr;
+        D3DCheck(d3d::get_surface_level(texture, 0, &surf), 2);
 
         // 因为 GameMaker 的纹理被设置为 D3DPOOL_DEFAULT，不能直接读取数据信息
-        // 所以要创建一个额外的 IDirect3DSurface8，将里面的数据复制过来
-        D3DCheck(Device->CreateImageSurface(width, height, D3DFMT_A8R8G8B8, &surfTemp), 3);
-        D3DCheck(D3DXLoadSurfaceFromSurface(surfTemp, nullptr, nullptr, surf, nullptr,
-            nullptr, D3DX_FILTER_NONE, 0), 4);
+        // 所以要创建一个额外的可锁定表面，将里面的数据复制过来
+        D3DCheck(d3d::create_image_surface(width, height, D3DFMT_A8R8G8B8, &surfTemp), 3);
+        D3DCheck(d3d::load_surface_from_surface(surfTemp, surf), 4);
 
         // 获取纹理数据信息
-        D3DLOCKED_RECT lock;
-        D3DCheck(surfTemp->LockRect(&lock, nullptr, 0), 5);
+        d3d::LockedRect lock;
+        D3DCheck(d3d::lock_rect(surfTemp, &lock, nullptr, 0), 5);
         char* src = (char*)lock.pBits;
 
         // 传入的 buffer 直接操作其指向的内存，提高效率
@@ -55,9 +57,9 @@ expReal TextureToBuffer(GMReal buffer, GMReal gmtex, GMReal w, GMReal h)
         }
 
         // 结束，释放内存
-        D3DCheck(surfTemp->UnlockRect(), 6);
-        surfTemp->Release();
-        surf->Release();
+        D3DCheck(d3d::unlock_rect(surfTemp), 6);
+        d3d::release(surfTemp);
+        d3d::release(surf);
 
         finish;
     }
@@ -82,18 +84,18 @@ expReal BufferToTexture(GMReal buffer, GMReal gmtex, GMReal w, GMReal h)
         if (src == nullptr)
             throw std::runtime_error("传入无效的 buffer 引用。");
 
-        IDirect3DTexture8* texture = gm::CGMAPI::GetTextureArray()[(int)gmtex].texture;
+        void* texture = gm::CGMAPI::GetTextureArray()[(int)gmtex].texture;
 
-        IDirect3DSurface8* surf = nullptr;
-        D3DCheck(texture->GetSurfaceLevel(0, &surf), 1);
+        void* surf = nullptr;
+        D3DCheck(d3d::get_surface_level(texture, 0, &surf), 1);
 
         RECT rect = { .left = 0, .top = 0, .right = (long)width, .bottom = (long)height };
 
-        D3DCheck(D3DXLoadSurfaceFromMemory(surf, nullptr, &rect, src, D3DFMT_A8R8G8B8,
-            width * 4, nullptr, &rect, D3DX_FILTER_NONE, 0), 2);
+        D3DCheck(d3d::load_surface_from_memory(surf, &rect, src, D3DFMT_A8R8G8B8,
+            width * 4, &rect), 2);
 
-        D3DCheck(texture->AddDirtyRect(&rect), 3);
-        surf->Release();
+        D3DCheck(d3d::add_dirty_rect(texture, &rect), 3);
+        d3d::release(surf);
 
         finish;
     }

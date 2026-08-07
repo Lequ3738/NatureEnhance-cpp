@@ -71,16 +71,16 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>Librarys;NatureEnhance;GMAPI;$(IncludePath);Direct3D_8</IncludePath>
+    <IncludePath>Librarys;NatureEnhance;GMAPI;$(IncludePath);Direct3D_8;Direct3D_9</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>Librarys;NatureEnhance;GMAPI;$(IncludePath);Direct3D_8</IncludePath>
+    <IncludePath>Librarys;NatureEnhance;GMAPI;$(IncludePath);Direct3D_8;Direct3D_9</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>Librarys;NatureEnhance;GMAPI;$(IncludePath);Direct3D_8</IncludePath>
+    <IncludePath>Librarys;NatureEnhance;GMAPI;$(IncludePath);Direct3D_8;Direct3D_9</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>Librarys;NatureEnhance;GMAPI;$(IncludePath);Direct3D_8</IncludePath>
+    <IncludePath>Librarys;NatureEnhance;GMAPI;$(IncludePath);Direct3D_8;Direct3D_9</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -298,6 +298,19 @@
     <ClInclude Include="Direct3D_8\vpnotify.h" />
     <ClInclude Include="Direct3D_8\vptype.h" />
     <ClInclude Include="Direct3D_8\xprtdefs.h" />
+    <ClInclude Include="Direct3D_9\d3d9.h" />
+    <ClInclude Include="Direct3D_9\d3d9caps.h" />
+    <ClInclude Include="Direct3D_9\d3d9types.h" />
+    <ClInclude Include="Direct3D_9\d3dx9.h" />
+    <ClInclude Include="Direct3D_9\d3dx9anim.h" />
+    <ClInclude Include="Direct3D_9\d3dx9core.h" />
+    <ClInclude Include="Direct3D_9\d3dx9effect.h" />
+    <ClInclude Include="Direct3D_9\d3dx9math.h" />
+    <ClInclude Include="Direct3D_9\d3dx9mesh.h" />
+    <ClInclude Include="Direct3D_9\d3dx9shader.h" />
+    <ClInclude Include="Direct3D_9\d3dx9shape.h" />
+    <ClInclude Include="Direct3D_9\d3dx9tex.h" />
+    <ClInclude Include="Direct3D_9\d3dx9xof.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="GMAPI\Gmapi.h" />
     <ClInclude Include="GMAPI\Gmapi3DGraphics.h" />
@@ -334,6 +347,7 @@
     <ClInclude Include="NatureEnhance\Instance.h" />
     <ClInclude Include="NatureEnhance\LoadPicture.h" />
     <ClInclude Include="NatureEnhance\Main.h" />
+    <ClInclude Include="NatureEnhance\d3d_adapter.h" />
     <ClInclude Include="pch.h" />
   </ItemGroup>
   <ItemGroup>
@@ -368,6 +382,9 @@
     <ClCompile Include="NatureEnhance\RopeCalculate.cpp" />
     <ClCompile Include="NatureEnhance\String.cpp" />
     <ClCompile Include="NatureEnhance\Video.cpp" />
+    <ClCompile Include="NatureEnhance\d3d_adapter8.cpp" />
+    <ClCompile Include="NatureEnhance\d3d_adapter9.cpp" />
+    <ClCompile Include="NatureEnhance\d3d_version.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

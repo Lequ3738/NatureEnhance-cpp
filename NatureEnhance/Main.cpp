@@ -95,12 +95,14 @@ expReal ShowErrorMessage(GMReal mode)
 }
 
 HWND GMWindowsHandle = nullptr;
-IDirect3DDevice8* Device = nullptr;
+void* Device = nullptr;
 
 expReal GetGMWindowsHandle(GMReal handle)
 {
     GMWindowsHandle = (HWND)(DWORD)handle;
     Device = gmapi->GetDirect3DDevice();
+    // 双后端: 判定设备对象是 D3D8 还是 D3D9(读 vtable 属主模块)。
+    d3d::ensure_version(Device, (void*)gmapi->GetDirect3DInterface());
 
     finish;
 }
@@ -738,11 +740,11 @@ expReal GetGlobalSecondDimensionSize(GMString var, GMReal index)
 
 expReal GetTextureMipmapCount(GMReal gmtex)
 {
-    IDirect3DTexture8* texture = gm::CGMAPI::GetTextureArray()[(int)gmtex].texture;
+    void* texture = gm::CGMAPI::GetTextureArray()[(int)gmtex].texture;
     if (texture == nullptr)
 		return -1;
 
-	return texture->GetLevelCount();
+	return d3d::get_level_count(texture);
 }
 
 #pragma endregion
