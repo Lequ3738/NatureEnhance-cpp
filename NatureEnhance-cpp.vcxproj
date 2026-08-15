@@ -334,7 +334,6 @@
     <ClInclude Include="Librarys\iconv.h" />
     <ClInclude Include="Librarys\json.hpp" />
     <ClInclude Include="Librarys\lodepng.h" />
-    <ClInclude Include="Librarys\MaizeMusic.h" />
     <ClInclude Include="Librarys\utf8.h" />
     <ClInclude Include="Librarys\utf8\checked.h" />
     <ClInclude Include="Librarys\utf8\core.h" />
@@ -367,7 +366,6 @@
     <ClCompile Include="GMAPI\GmapiSounds.cpp" />
     <ClCompile Include="Librarys\buffer.cpp" />
     <ClCompile Include="Librarys\lodepng.cpp" />
-    <ClCompile Include="Librarys\MaizeMusic.cpp" />
     <ClCompile Include="NatureEnhance\Algorithm.cpp" />
     <ClCompile Include="NatureEnhance\Base64.cpp" />
     <ClCompile Include="NatureEnhance\Camera.cpp" />
@@ -381,7 +379,6 @@
     <ClCompile Include="NatureEnhance\Room.cpp" />
     <ClCompile Include="NatureEnhance\RopeCalculate.cpp" />
     <ClCompile Include="NatureEnhance\String.cpp" />
-    <ClCompile Include="NatureEnhance\Video.cpp" />
     <ClCompile Include="NatureEnhance\d3d_adapter8.cpp" />
     <ClCompile Include="NatureEnhance\d3d_adapter9.cpp" />
     <ClCompile Include="NatureEnhance\d3d_version.cpp" />
