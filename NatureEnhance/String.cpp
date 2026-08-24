@@ -396,3 +396,182 @@ expString string_replace_all(GMString str, GMString from, GMString to)
 	GMReturnString = std::move(result);
 	return GMReturnString.c_str();
 }
+
+// ================= GMS2 字符串函数补全（UTF-8 字符语义，位置 1 起） =================
+
+static bool is_whitespace(char c)
+{
+	return c == ' ' || c == '\t' || c == '\n' || c == '\r' || c == '\f' || c == '\v';
+}
+
+expReal string_last_pos(GMString substr, GMString str)
+{
+	if (*substr == '\0' || *str == '\0')
+		return 0;
+
+	std::string substring(substr);
+	std::string string(str);
+
+	size_t byte_pos = string.rfind(substring);
+	if (byte_pos == std::string::npos)
+		return 0;
+
+	try
+	{
+		return utf8::distance(string.begin(), string.begin() + byte_pos) + 1;
+	}
+	utf8catch(L"string_last_pos", 0);
+}
+
+expReal string_last_pos_ext(GMString substr, GMString str, GMReal start_pos)
+{
+	if (*substr == '\0' || *str == '\0' || start_pos < 1)
+		return 0;
+
+	std::string substring(substr);
+	std::string string(str);
+
+	auto begin_it = string.begin();
+	auto end_it = string.end();
+
+	auto prefix_end = begin_it;
+	try
+	{
+		utf8::advance(prefix_end, (size_t)start_pos, end_it);
+	}
+	catch (const utf8::not_enough_room&)
+	{
+		prefix_end = end_it;  // 超过字符串长度，钳制到末尾
+	}
+	utf8catch(L"string_last_pos_ext", 0);
+
+	std::string prefix(begin_it, prefix_end);
+	size_t byte_pos = prefix.rfind(substring);
+	if (byte_pos == std::string::npos)
+		return 0;
+
+	try
+	{
+		return utf8::distance(prefix.begin(), prefix.begin() + byte_pos) + 1;
+	}
+	utf8catch(L"string_last_pos_ext", 0);
+}
+
+expReal string_starts_with(GMString str, GMString substr)
+{
+	std::string string(str);
+	std::string substring(substr);
+
+	if (substring.empty())
+		return 1;
+
+	if (substring.size() > string.size())
+		return 0;
+
+	return string.compare(0, substring.size(), substring) == 0 ? 1.0 : 0.0;
+}
+
+expReal string_ends_with(GMString str, GMString substr)
+{
+	std::string string(str);
+	std::string substring(substr);
+
+	if (substring.empty())
+		return 1;
+
+	if (substring.size() > string.size())
+		return 0;
+
+	return string.compare(string.size() - substring.size(), substring.size(), substring) == 0 ? 1.0 : 0.0;
+}
+
+expString string_trim(GMString str, GMString substr)
+{
+	std::string string(str);
+	std::string substring(substr);
+
+	if (substring.empty())
+	{
+		size_t start = 0;
+		while (start < string.size() && is_whitespace(string[start]))
+			++start;
+
+		size_t end = string.size();
+		while (end > start && is_whitespace(string[end - 1]))
+			--end;
+
+		GMReturnString = string.substr(start, end - start);
+		return GMReturnString.c_str();
+	}
+	else
+	{
+		bool changed = true;
+		while (changed && !string.empty())
+		{
+			changed = false;
+
+			if (string.compare(0, substring.size(), substring) == 0)
+			{
+				string.erase(0, substring.size());
+				changed = true;
+			}
+
+			if (string.size() >= substring.size() &&
+				string.compare(string.size() - substring.size(), substring.size(), substring) == 0)
+			{
+				string.erase(string.size() - substring.size());
+				changed = true;
+			}
+		}
+
+		GMReturnString = std::move(string);
+		return GMReturnString.c_str();
+	}
+}
+
+expString string_trim_start(GMString str, GMString substr)
+{
+	std::string string(str);
+	std::string substring(substr);
+
+	if (substring.empty())
+	{
+		size_t start = 0;
+		while (start < string.size() && is_whitespace(string[start]))
+			++start;
+		string.erase(0, start);
+	}
+	else
+	{
+		while (!string.empty() && string.compare(0, substring.size(), substring) == 0)
+			string.erase(0, substring.size());
+	}
+
+	GMReturnString = std::move(string);
+	return GMReturnString.c_str();
+}
+
+expString string_trim_end(GMString str, GMString substr)
+{
+	std::string string(str);
+	std::string substring(substr);
+
+	if (substring.empty())
+	{
+		size_t end = string.size();
+		while (end > 0 && is_whitespace(string[end - 1]))
+			--end;
+		string.erase(end);
+	}
+	else
+	{
+		while (!string.empty() && string.size() >= substring.size() &&
+			string.compare(string.size() - substring.size(), substring.size(), substring) == 0)
+		{
+			string.erase(string.size() - substring.size());
+		}
+	}
+
+	GMReturnString = std::move(string);
+	return GMReturnString.c_str();
+}
