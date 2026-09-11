@@ -1,6 +1,8 @@
 #include "Main.h"
 #include "DataStruct.h"
 #include "Instance.h"
+#include <vector>
+#include <string>
 
 void GM_MoveInstance(gm::PGMINSTANCE inst, double x, double y)
 {
@@ -153,4 +155,76 @@ expReal InstancePlaceList(GMReal x, GMReal y, GMReal id, GMReal fast)
 
 	GM_MoveInstance(curInst, prevX, prevY);
 	return static_cast<GMReal>(list);
+}
+
+//------------------------------------------------------------------------------
+// GM8.0 Runner 变量反射（偏移经 IDA 三方互证，2026-09-11）：
+//   [0x58F134] = 变量名表：ANSI Delphi 串指针数组（dword 长度前缀在 ptr[-4]）
+//   [0x58F138] = 变量名计数
+//   变量 id = 名字索引 + 100000（与 gm82 inst_meta.c 同款偏置）
+//   变量条目步长 = sizeof(gm::GMVARIABLE) = 40 字节（INNER_variable_global_get/local_get 查找循环同值）
+// 名字缓存懒转换；DLL 生命周期内有效。
+//------------------------------------------------------------------------------
+
+static void* const GM80_varNameList = (void*)0x0058F134;
+static void* const GM80_varNameCount = (void*)0x0058F138;
+
+static std::vector<std::string> s_varNameCache;
+
+static const char* GM80_GetVarName(int index)
+{
+	int count = *(int*)GM80_varNameCount;
+	if (index < 0 || index >= count)
+		return "";
+
+	char** names = *(char***)GM80_varNameList;
+	if ((int)s_varNameCache.size() < count)
+		s_varNameCache.resize(count);
+
+	if (s_varNameCache[index].empty())
+	{
+		char* str = names[index];
+		int len = *(int*)(str - 4);
+		s_varNameCache[index].assign(str, len);
+	}
+
+	return s_varNameCache[index].c_str();
+}
+
+static gm::PGMINSTANCE s_metaInst = nullptr;
+static gm::PGMVARIABLELIST s_metaList = nullptr;
+static int s_metaIndex = 0;
+
+expReal InstmetaStart(GMReal id)
+{
+	s_metaInst = gmapi->GetInstancePtr(static_cast<int>(id));
+	s_metaList = s_metaInst ? s_metaInst->variableListPtr : nullptr;
+	s_metaIndex = 0;
+	if (!s_metaList || s_metaList->count <= 0)
+	{
+		s_metaList = nullptr;
+		return 0;
+	}
+	return static_cast<GMReal>(s_metaList->count);
+}
+
+expString InstmetaNext()
+{
+	if (!s_metaList || s_metaIndex >= s_metaList->count)
+		return "";
+	gm::GMVARIABLE& var = s_metaList->variables[s_metaIndex];
+	s_metaIndex += 1;
+	GMReturnString = GM80_GetVarName(var.symbolId - 100000);
+	return GMReturnString.c_str();
+}
+
+expReal VarnameCount()
+{
+	return static_cast<GMReal>(*(int*)GM80_varNameCount);
+}
+
+expString VarnameGet(GMReal index)
+{
+	GMReturnString = GM80_GetVarName(static_cast<int>(index));
+	return GMReturnString.c_str();
 }
