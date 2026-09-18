@@ -592,6 +592,9 @@ static gm80hook::InlineHook g_hookSink;
 // actually deploys into. A GM8 IDE test run loads the DLL from a gm_ttt_*
 // temp folder that is deleted afterwards, and a protected exe folder may be
 // unwritable, so those cases fall back to %TEMP%.
+// Install diagnostics (errtrace.log next to this DLL): Debug builds only -
+// Release builds run silently and simply disable the feature on mismatch.
+#ifdef _DEBUG
 static bool AppendLine(const char* path, const char* line, int len) {
     HANDLE h = CreateFileA(path, FILE_APPEND_DATA, FILE_SHARE_READ, nullptr,
                            OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
@@ -664,6 +667,10 @@ static void LogSiteMismatch(const char* site, std::uint32_t rva, const unsigned 
         Log(text);
     }
 }
+#else
+static void Log(const char*) {}
+static void LogSiteMismatch(const char*, std::uint32_t, const unsigned char*, std::size_t) {}
+#endif
 
 bool Install() {
     if (g_installed)
