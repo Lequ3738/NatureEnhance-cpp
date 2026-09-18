@@ -90,6 +90,12 @@
     <ClInclude Include="NatureEnhance\DataStruct.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="NatureEnhance\ErrorTraceback.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="NatureEnhance\RunnerHook.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
     <ClInclude Include="Direct3D_8\activecf.h">
       <Filter>头文件</Filter>
     </ClInclude>
@@ -537,6 +543,12 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="NatureEnhance\DataStruct.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="NatureEnhance\ErrorTraceback.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="NatureEnhance\RunnerHook.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="NatureEnhance\String.cpp">
