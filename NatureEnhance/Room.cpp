@@ -59,6 +59,21 @@ static void AdjustSpritePositionsAfterDelete(int list, int pos)
 			kv.second.pos -= 1;
 }
 
+// 静默销毁：直接置 runner 的实例 destroyed 标记（GMINSTANCE+0x108）。
+// IDA 实证（GM8 runner 空工程.exe）：Inner_instance_destroy(0x4E5310) =
+// 「InnerInstanceDestroy 执行 ev_destroy 事件」+「*(BYTE*)(inst+264)=1」两步，
+// 标记即 runner 的延迟回收机制——只置标记 = instance_destroy 去掉事件。
+// 勿用 instance_change：INNER_instance_change(0x4E5320) 的 perf=false 是
+// 「标记旧实例 + gm_room_instance_add 新建空壳（新 id，仅拷 x/y 等字段）」，
+// 并非就地变形；且对已标记实例再调 instance_destroy 时事件照常执行
+// （InstDestroy 不检查标记）——会触发敌人死亡掉落。
+static void SilentDestroyById(int id)
+{
+	gm::PGMINSTANCE inst = gmapi->GetInstancePtr(id);
+	if (inst)
+		inst->destroyed = true;
+}
+
 static void LiveRoomCleanup()
 {
 	for (int tile : LiveTiles)
@@ -81,10 +96,8 @@ static void LiveRoomCleanup()
 
 	if (!LiveInstances.empty())
 	{
-		std::string code;
 		for (int id : LiveInstances)
-			code += "with (" + std::to_string(id) + ") instance_destroy();\n";
-		gm::execute_string(code);
+			SilentDestroyById(id);
 	}
 
 	RoomTilesSessionReset();
@@ -517,7 +530,7 @@ expReal LoadRoomTilesDelta(GMReal buffer, GMReal tileLayerList)
 				auto it = s_instById.find(id);
 				if (it != s_instById.end())
 				{
-					gmlCode += "with (" + std::to_string(it->second) + ") instance_destroy();\n";
+					SilentDestroyById(it->second);
 					s_instById.erase(it);
 				}
 			}
