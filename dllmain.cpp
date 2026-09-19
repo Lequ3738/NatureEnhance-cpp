@@ -34,6 +34,9 @@ BOOL APIENTRY DllMain( HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReser
             break;
 
         case DLL_PROCESS_DETACH:
+            // 先还原 runner 的钩子/补丁：宿主可能在 runner 仍在执行 GML 时
+            // 释放本 DLL，残留的 detour 会让之后的调用跳进已释放的映像
+            errtrace::Uninstall();
             gm::CGMAPI::Destroy();
             break;
     }

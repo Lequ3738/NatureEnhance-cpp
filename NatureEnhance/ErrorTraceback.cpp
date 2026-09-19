@@ -29,6 +29,10 @@ namespace errtrace {
 
 using gm80hook::base;
 
+// Debug-build diagnostics (an empty stub in Release; see the #ifdef near the
+// installation section).
+static void Log(const char* msg);
+
 // ---------------------------------------------------------------- shadow stack
 
 struct Frame {
@@ -238,6 +242,15 @@ static void PrependScriptFrame(unsigned scriptIdx, std::uint32_t codeObj, std::u
 extern "C" void __cdecl errtraceCallOpEnter(const unsigned* saved) {
     // saved[0]=eax(ctx) saved[1]=edx(callNode) saved[2]=ecx(result)
     ++g_depth;
+#ifdef _DEBUG
+    // Shutdown-freeze diagnosis: one-shot depth sentinels. Runaway GML
+    // recursion at teardown shows here long before the guard page does.
+    static bool logged100 = false, logged150 = false, logged200 = false, logged250 = false;
+    if (g_depth >= 100 && !logged100) { logged100 = true; Log("errtrace: call depth 100"); }
+    if (g_depth >= 150 && !logged150) { logged150 = true; Log("errtrace: call depth 150"); }
+    if (g_depth >= 200 && !logged200) { logged200 = true; Log("errtrace: call depth 200"); }
+    if (g_depth >= 250 && !logged250) { logged250 = true; Log("errtrace: call depth 250"); }
+#endif
     if (g_depth > kMaxFrames)
         return;
 
@@ -249,8 +262,15 @@ extern "C" void __cdecl errtraceCallOpEnter(const unsigned* saved) {
             f.codeObj = *reinterpret_cast<std::uint32_t*>(ctx + gm80hook::OFF_CtxCodeObj);
             f.pos = *reinterpret_cast<std::uint32_t*>(node + gm80hook::OFF_NodePos);
             f.funcId = *reinterpret_cast<std::uint32_t*>(node + gm80hook::OFF_NodeFuncId);
+#ifdef _DEBUG
+        } else if (g_depth <= 4) {
+            Log("errtrace: enter with null ctx/node");
+#endif
         }
     } __except (EXCEPTION_EXECUTE_HANDLER) {
+#ifdef _DEBUG
+        Log("errtrace: enter ctx/node read faulted (suppressed)");
+#endif
         f = Frame{0, 0, 0};
     }
     g_frames[g_depth - 1] = f;
@@ -260,8 +280,12 @@ extern "C" void __cdecl errtraceCallOpEnter(const unsigned* saved) {
 // (funcId 100000..499999) that is our cue to prepend "In script <name>
 // (line N):" - the frame just popped carries the exact call site.
 extern "C" void __cdecl errtraceCallOpLeave(unsigned retval) {
-    if (g_depth <= 0)
+    if (g_depth <= 0) {
+#ifdef _DEBUG
+        Log("errtrace: leave depth underflow");
+#endif
         return;
+    }
     --g_depth;
 
     if (retval != 0xFFFFFFFFu)
@@ -273,9 +297,20 @@ extern "C" void __cdecl errtraceCallOpLeave(unsigned retval) {
     if (f.funcId < gm80hook::FID_SCRIPT_BASE || f.funcId >= gm80hook::FID_EXT_BASE)
         return;
 
+#ifdef _DEBUG
+    {
+        char diag[96];
+        std::snprintf(diag, sizeof diag, "errtrace: script call failed idx=%u depth=%d pos=%u",
+                      f.funcId - gm80hook::FID_SCRIPT_BASE, g_depth, f.pos);
+        Log(diag);
+    }
+#endif
     __try {
         PrependScriptFrame(f.funcId - gm80hook::FID_SCRIPT_BASE, f.codeObj, f.pos);
     } __except (EXCEPTION_EXECUTE_HANDLER) {
+#ifdef _DEBUG
+        Log("errtrace: prepend faulted (suppressed)");
+#endif
     }
 }
 
@@ -438,6 +473,13 @@ extern "C" const char* __cdecl errtraceShowErrorPre(const char* msg, unsigned fa
         return msg;
     if (!g_installed || g_busy)
         return msg;
+#ifdef _DEBUG
+    {
+        char diag[80];
+        std::snprintf(diag, sizeof diag, "errtrace: ShowError pre fatal=%u depth=%d", fatal, g_depth);
+        Log(diag);
+    }
+#endif
 
     // A code error is already assembling its own text; leave it alone.
     if (*reinterpret_cast<volatile unsigned char*>(base() + gm80hook::RVA_ErrorInProgress) != 0)
@@ -489,6 +531,9 @@ extern "C" const char* __cdecl errtraceSinkPre(const char* text, unsigned fatal)
     (void)fatal;
     if (!g_pendingEventLoc || !text)
         return text;
+#ifdef _DEBUG
+    Log("errtrace: sink splice");
+#endif
     g_pendingEventLoc = false;
 
     const char* anchor = std::strstr(text, "for object ");
@@ -736,6 +781,20 @@ bool Install() {
     g_installed = true;
     Log("errtrace: installed (GM8.0 error traceback active)");
     return true;
+}
+
+void Uninstall() {
+    if (!g_installed)
+        return;
+    // Reverse of Install. The host frees this DLL while the runner is still
+    // executing GML (observed mid-shutdown), so nothing runner-side may keep
+    // pointing at this image once detach has run.
+    g_hookSink.uninstall();
+    g_hookShowError.uninstall();
+    gm80hook::patchBytes(gm80hook::RVA_SuppressJnz, gm80hook::PATCH_SuppressJmp,
+                         gm80hook::SIG_SuppressJnz, sizeof gm80hook::PATCH_SuppressJmp);
+    g_hookCallOp.uninstall();
+    g_installed = false;
 }
 
 } // namespace errtrace

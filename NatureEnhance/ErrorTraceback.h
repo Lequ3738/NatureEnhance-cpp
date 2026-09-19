@@ -10,4 +10,10 @@ namespace errtrace {
 // GM8.0 signatures, so foreign runner versions keep their native behavior.
 bool Install();
 
+// Restores every hooked/patched runner byte. Must run before this DLL's code
+// disappears: the host frees the plugin DLLs mid-shutdown while the runner is
+// still executing GML, and a leftover detour makes the very next call jump
+// into the freed image (observed as the close-time hang).
+void Uninstall();
+
 } // namespace errtrace
