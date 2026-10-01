@@ -2,11 +2,15 @@
 #include "DataStruct.h"
 #include "iconv.h"
 #include "Main.h"
+#include "RunnerHook.h"
 #include <filesystem>
 #include <fstream>
+#include <imm.h>
 #include <psapi.h>
 #include <regex>
 #include <vector>
+
+#pragma comment(lib, "imm32.lib")
 
 std::string GMReturnString;
 
@@ -94,6 +98,37 @@ expReal ShowErrorMessage(GMReal mode)
 	finish;
 }
 
+// Runner 错误弹窗的总门禁：GM80_ErrorDisplaySink 展示错误文本前检查此开关。
+// 置 0 压制全部错误弹窗，包括 execute_string 对编译失败代码弹的框；
+// error_occurred / error_last 仍向 GML 报告失败，无人值守 eval 依赖这一点。
+// 指针槽自校验失败（异版本 runner）时返回 -1，不写任何内存。
+namespace {
+
+bool errorMsgSwitchValid()
+{
+	return *reinterpret_cast<const std::uint32_t*>(gm80hook::base() + gm80hook::RVA_pErrorMsgEnabled)
+		== reinterpret_cast<std::uint32_t>(gm80hook::base() + gm80hook::RVA_ErrorMsgEnabled);
+}
+
+} // namespace
+
+expReal ErrorIsEnabled()
+{
+	if (!errorMsgSwitchValid())
+		return -1.0;
+	return *reinterpret_cast<const std::uint8_t*>(gm80hook::base() + gm80hook::RVA_ErrorMsgEnabled);
+}
+
+expReal ErrorSetEnabled(GMReal enabled)
+{
+	if (!errorMsgSwitchValid())
+		return -1.0;
+	auto* flag = reinterpret_cast<std::uint8_t*>(gm80hook::base() + gm80hook::RVA_ErrorMsgEnabled);
+	const std::uint8_t previous = *flag;
+	*flag = (enabled > 0.5) ? 1 : 0;
+	return previous;
+}
+
 HWND GMWindowsHandle = nullptr;
 void* Device = nullptr;
 
@@ -103,6 +138,10 @@ expReal GetGMWindowsHandle(GMReal handle)
     Device = gmapi->GetDirect3DDevice();
     // 双后端: 判定设备对象是 D3D8 还是 D3D9(读 vtable 属主模块)。
     d3d::ensure_version(Device, (void*)gmapi->GetDirect3DInterface());
+
+    // 游戏不接收文字输入: 解除窗口与 IME 的关联, 按键不再进入组字,
+    // 只影响本窗口, 不改系统输入法状态。
+    ImmAssociateContext(GMWindowsHandle, nullptr);
 
     finish;
 }

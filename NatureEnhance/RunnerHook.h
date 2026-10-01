@@ -58,6 +58,18 @@ constexpr std::uint32_t RVA_ErrorInProgress = 0x18F194; // byte: set while a cod
 constexpr std::uint32_t RVA_ErrBufVarPtr    = 0x18FC98; // dword: address of the error-text AnsiString variable
 constexpr std::uint32_t RVA_BuiltinTable    = 0x18FBE8; // DOUBLE indirection: dword here -> array variable -> heap entries (same as the dispatcher's resolution)
 
+// ---- Error dialog switch ----
+// Runtime copy of the "display error messages" game setting (the settings
+// loader seeds it, so the byte mirrors the packaged game's setting).
+// GM80_ErrorDisplaySink shows error text only while the byte is nonzero;
+// clearing it suppresses every error dialog - including the one
+// execute_string() raises for code that fails to compile - while
+// error_occurred / error_last still report the failure to GML.
+// Writers must verify the pointer slot below equals
+// base+RVA_ErrorMsgEnabled first and write nothing on mismatch.
+constexpr std::uint32_t RVA_ErrorMsgEnabled  = 0x18D458; // byte: 1 = display error messages
+constexpr std::uint32_t RVA_pErrorMsgEnabled = 0x18FA58; // dword: ErrorDisplaySink's pointer to the flag
+
 // ---- Builtin table entry ----
 constexpr std::uint32_t OFF_BuiltinFnPtr    = 0x44; // [entry+0x44] = implementation function pointer
 
