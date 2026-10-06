@@ -2,6 +2,7 @@
 #include "pch.h"
 #include "Gmapi.h"
 #include "NatureEnhance/ErrorTraceback.h"
+#include "NatureEnhance/FrameSortGuard.h"
 
 gm::CGMAPI* gmapi = nullptr;
 
@@ -26,6 +27,9 @@ BOOL APIENTRY DllMain( HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReser
 
             // GM8.0 报错信息增强（签名不匹配的 runner 上自动禁用）
             errtrace::Install();
+
+            // GM8.0 动画段排序守卫（同上）
+            framesort::Install();
         }
         break;
 
@@ -36,6 +40,7 @@ BOOL APIENTRY DllMain( HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReser
         case DLL_PROCESS_DETACH:
             // 先还原 runner 的钩子/补丁：宿主可能在 runner 仍在执行 GML 时
             // 释放本 DLL，残留的 detour 会让之后的调用跳进已释放的映像
+            framesort::Uninstall();
             errtrace::Uninstall();
             gm::CGMAPI::Destroy();
             break;

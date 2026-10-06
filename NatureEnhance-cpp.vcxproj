@@ -294,6 +294,7 @@
     <ClCompile Include="NatureEnhance\Camera.cpp" />
     <ClCompile Include="NatureEnhance\DataStruct.cpp" />
     <ClCompile Include="NatureEnhance\ErrorTraceback.cpp" />
+    <ClCompile Include="NatureEnhance\FrameSortGuard.cpp" />
     <ClCompile Include="NatureEnhance\GameMakerMath.cpp" />
     <ClCompile Include="NatureEnhance\GMJson.cpp" />
     <ClCompile Include="NatureEnhance\Instance.cpp" />

@@ -93,6 +93,9 @@
     <ClInclude Include="NatureEnhance\ErrorTraceback.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="NatureEnhance\FrameSortGuard.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
     <ClInclude Include="NatureEnhance\RunnerHook.h">
       <Filter>头文件</Filter>
     </ClInclude>
@@ -546,6 +549,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="NatureEnhance\ErrorTraceback.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="NatureEnhance\FrameSortGuard.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="NatureEnhance\RunnerHook.cpp">

@@ -97,6 +97,27 @@ inline constexpr unsigned char SIG_ErrorDisplaySink[16] = {
 inline constexpr unsigned char SIG_SuppressJnz[2] = { 0x75, 0x3C };
 inline constexpr unsigned char PATCH_SuppressJmp[2] = { 0xEB, 0x3C };
 
+// ---- Frame animation-section guard (see FrameSortGuard.cpp) ----
+// GM80_RunFrame's animation section walks the room instance array by index
+// and fires Animation End; the frame's draw driver hangs off that event, and
+// every ScreenRegion entry sorts the same array by depth in place. An
+// instance created earlier in the frame leaves the array unsorted, so the
+// sort permutes it mid-walk and shifted instances are visited twice in one
+// frame (the frame renders twice and one-shot draw gates are consumed).
+constexpr std::uint32_t RVA_InstArraySort          = 0x0AEF24; // GM80_InstArraySortByDepth (room argument in eax)
+constexpr std::uint32_t RVA_SortCallInScreenRegion = 0x0BF861; // its only call site, in ScreenRegion
+constexpr std::uint32_t RVA_ViewSpeedAdvance       = 0x0AF130; // GM80_ViewSpeedAdvance (last call before the walk)
+constexpr std::uint32_t RVA_FrameViewAdvanceCall   = 0x13E75E; // call GM80_ViewSpeedAdvance in GM80_RunFrame
+constexpr std::uint32_t RVA_FrameEndFn             = 0x113EC8; // sub_513EC8, the frame function's last call
+constexpr std::uint32_t RVA_FrameEndCall           = 0x13E803; // call sub_513EC8 in GM80_RunFrame
+constexpr std::uint32_t RVA_CurRoomPtr             = 0x18FAC4; // dword: address of the current-room pointer variable
+
+inline constexpr unsigned char SIG_InstArraySort[16] = {
+    0x53, 0x56, 0x57, 0x55, 0x8B, 0xC8, 0xB2, 0x01, 0x8B, 0x71, 0x68, 0x83, 0xEE, 0x02, 0x85, 0xF6 };
+inline constexpr unsigned char SIG_SortCallInScreenRegion[5] = { 0xE8, 0xBE, 0xF6, 0xFE, 0xFF };
+inline constexpr unsigned char SIG_FrameViewAdvanceCall[5] = { 0xE8, 0xCD, 0x09, 0xF7, 0xFF };
+inline constexpr unsigned char SIG_FrameEndCall[5] = { 0xE8, 0xC0, 0x56, 0xFD, 0xFF };
+
 // Runtime base of the game executable (0x400000 unless relocated).
 std::uint8_t* base();
 
