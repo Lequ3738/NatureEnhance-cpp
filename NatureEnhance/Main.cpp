@@ -139,10 +139,49 @@ expReal GetGMWindowsHandle(GMReal handle)
     // 双后端: 判定设备对象是 D3D8 还是 D3D9(读 vtable 属主模块)。
     d3d::ensure_version(Device, (void*)gmapi->GetDirect3DInterface());
 
-    // 游戏不接收文字输入: 解除窗口与 IME 的关联, 按键不再进入组字,
-    // 只影响本窗口, 不改系统输入法状态。
-    ImmAssociateContext(GMWindowsHandle, nullptr);
+    // 游戏默认不接收文字输入: 解除窗口与 IME 的关联, 按键不再进入组字,
+    // 只影响本窗口, 不改系统输入法状态。文字输入场景经 ImeSetEnabled 临时恢复。
+    ImmAssociateContextEx(GMWindowsHandle, nullptr, 0);
 
+    finish;
+}
+
+// 开关游戏窗口的 IME 关联（ne_init 时默认已解除）。enabled > 0.5 = 恢复系统默认关联，
+// 否则解除关联。恢复走 IACE_DEFAULT 而非缓存旧句柄：ne_init 时窗口可能尚未建立输入上下文，
+// 缓存会拿到空导致无法恢复。只影响本窗口，不改系统输入法状态。
+expReal ImeSetEnabled(GMReal enabled)
+{
+    if (!GMWindowsHandle)
+        fail;
+    ImmAssociateContextEx(GMWindowsHandle, nullptr, (enabled > 0.5) ? IACE_DEFAULT : 0);
+    finish;
+}
+
+// 把 IME 输入锚点钉到游戏窗口客户区的指定像素位置：组字串原点（COMPOSITIONFORM
+// CFS_POINT）与候选框（CANDIDATEFORM CFS_CANDIDATEPOS）成对指向同一处。
+// 只设候选框时，部分输入法在组字串增长或重新组字后按组字原点重排候选框，
+// 原点未设置即默认 (0,0)，候选框会跳到窗口左上角。
+// 坐标由调用方换算好（GUI 逻辑坐标 → 客户区像素在 GML 侧完成）；
+// IME 关联被解除（默认态）时取不到输入上下文，返回 0。
+expReal ImeSetPosition(GMReal x, GMReal y)
+{
+    if (!GMWindowsHandle)
+        fail;
+    HIMC himc = ImmGetContext(GMWindowsHandle);
+    if (!himc)
+        fail;
+    COMPOSITIONFORM comp = {};
+    comp.dwStyle = CFS_POINT;
+    comp.ptCurrentPos.x = (LONG)x;
+    comp.ptCurrentPos.y = (LONG)y;
+    ImmSetCompositionWindow(himc, &comp);
+    CANDIDATEFORM cand = {};
+    cand.dwIndex = 0;
+    cand.dwStyle = CFS_CANDIDATEPOS;
+    cand.ptCurrentPos.x = (LONG)x;
+    cand.ptCurrentPos.y = (LONG)y;
+    ImmSetCandidateWindow(himc, &cand);
+    ImmReleaseContext(GMWindowsHandle, himc);
     finish;
 }
 

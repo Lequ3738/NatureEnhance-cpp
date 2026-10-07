@@ -26,6 +26,11 @@ static std::unordered_map<int, LiveSpriteRef> s_sprRefById;      // id → 绘�
 static std::unordered_map<int, int> s_instById;                  // id → 实例 id
 static unsigned int s_expectedSeq = 0;                           // 下一 delta 的序号（全量后清 0）
 
+// 最近一次房间操作摘要：全量=创建统计，增量=整批 op 摘要，RoomTilesLastSummary 取回。
+// 批内 op 数超过 DeltaDetailMaxOps 时退化为聚合计数，防大批量 delta 刷出超长日志行
+static std::string s_lastSummary;
+static const UINT DeltaDetailMaxOps = 8;
+
 // 资源名解析缓存：同名资源每拍重复解析是全量/增量共同的执行字符串开销大头
 static int GetResourceCached(const std::string& name)
 {
@@ -46,6 +51,7 @@ static void RoomTilesSessionReset()
 	s_sprRefById.clear();
 	s_instById.clear();
 	s_expectedSeq = 0;
+	s_lastSummary.clear();
 }
 
 // delta 删除一个精灵表项后，同一列表中更高位置的记录位置前移
@@ -149,6 +155,12 @@ static void LoadRoomTilesParse(GMReal buffer, GMReal tileLayerList, std::string&
 	std::vector<int> resList;
 	std::vector<bool> resExistsList;
 
+	// 增量编号：与编辑器全量快照的编号同规则，按 .bin 条目序从 1 连续递增：
+	// tiles → sprites → objects；资源不存在被跳过的条目也占号，否则后续编号整体错位。
+	// delta 的删除/更新 op 引用这批编号，全量解析不登记会让全量创建的实体删不掉，
+	// 删旧+加新的更新因此在游戏里留下旧副本。
+	UINT liveId = 0;
+
 	// Tiles
 	num = static_cast<UINT>(gm::buffer_read_uint32(buffer));
 	resList.reserve(num);
@@ -172,6 +184,8 @@ static void LoadRoomTilesParse(GMReal buffer, GMReal tileLayerList, std::string&
 	num = static_cast<UINT>(gm::buffer_read_uint32(buffer));
 	for (UINT i = 0; i < num; ++i)
 	{
+		++liveId;
+
 		int pos = static_cast<int>(gm::buffer_read_int32(buffer));
 		if (!resExistsList[pos])
 		{
@@ -200,6 +214,7 @@ static void LoadRoomTilesParse(GMReal buffer, GMReal tileLayerList, std::string&
 			gm::tile_set_blend(tile, (int)gm::buffer_read_uint32(buffer));
 
 		LiveTiles.push_back(tile);
+		s_tileById[liveId] = tile;
 	}
 
 	resList.clear();
@@ -228,6 +243,8 @@ static void LoadRoomTilesParse(GMReal buffer, GMReal tileLayerList, std::string&
 	num = static_cast<UINT>(gm::buffer_read_uint32(buffer));
 	for (UINT i = 0; i < num; ++i)
 	{
+		++liveId;
+
 		int pos = static_cast<int>(gm::buffer_read_int32(buffer));
 		if (!resExistsList[pos])
 		{
@@ -264,8 +281,10 @@ static void LoadRoomTilesParse(GMReal buffer, GMReal tileLayerList, std::string&
 		}
 
 		gm::ds_list_add(DrawSpritesList[listPos], map);
-		LiveSprites.push_back({ DrawSpritesList[listPos],
-			gm::ds_list_size(DrawSpritesList[listPos]) - 1, map });
+		LiveSpriteRef ref = { DrawSpritesList[listPos],
+			gm::ds_list_size(DrawSpritesList[listPos]) - 1, map };
+		LiveSprites.push_back(ref);
+		s_sprRefById[liveId] = ref;
 	}
 
 	resList.clear();
@@ -295,13 +314,15 @@ static void LoadRoomTilesParse(GMReal buffer, GMReal tileLayerList, std::string&
 
 		std::string code;
 
-		num = static_cast<UINT>(gm::buffer_read_uint32(buffer));
-		for (UINT i = 0; i < num; ++i)
+	num = static_cast<UINT>(gm::buffer_read_uint32(buffer));
+	for (UINT i = 0; i < num; ++i)
+	{
+		++liveId;
+
+		int pos = static_cast<int>(gm::buffer_read_int32(buffer));
+		if (!resExistsList[pos])
 		{
-			int pos = static_cast<int>(gm::buffer_read_int32(buffer));
-			if (!resExistsList[pos])
-			{
-				gm::buffer_jump(buffer, 4 * 4);
+			gm::buffer_jump(buffer, 4 * 4);
 				gm::buffer_read_string(buffer);
 				gm::buffer_read_string(buffer);
 				continue;
@@ -317,6 +338,7 @@ static void LoadRoomTilesParse(GMReal buffer, GMReal tileLayerList, std::string&
 			int id = gm::instance_create(x, y, resList[pos]);
 			instance_set_scale(id, xscale, yscale);
 			LiveInstances.push_back(id);
+			s_instById[liveId] = id;
 
 			if (!icc.empty())
 				code += "with " + std::to_string(id) + " {\n" + icc + "\n}\n";
@@ -324,6 +346,11 @@ static void LoadRoomTilesParse(GMReal buffer, GMReal tileLayerList, std::string&
 
 		gm::execute_string(code);
 	}
+
+	// 摘要记实际创建数：资源不存在被跳过的条目不计数
+	s_lastSummary = "tiles=" + std::to_string(LiveTiles.size()) +
+		" spr=" + std::to_string(LiveSprites.size()) +
+		" obj=" + std::to_string(LiveInstances.size());
 }
 
 expReal LoadRoomTiles(GMString path, GMReal tileLayerList)
@@ -370,6 +397,12 @@ expReal LoadRoomTilesBuffer(GMReal buffer, GMReal tileLayerList)
 	simplecatch("LoadRoomTilesBuffer()", 0)
 }
 
+// buffer_read_int32 以 GMReal 返回，直接 to_string(double) 会带 6 位小数
+static std::string IntStr(GMReal v)
+{
+	return std::to_string(static_cast<int>(v));
+}
+
 // Live 增量应用：buffer 位置位于 delta 头（游戏侧已读过 type 与房间名）。
 // 头 = u32 seq + u32 opCount + ops；op 字段序与编辑器 liveRoom.ts 编码严格一致。
 // 返回：1 = 已应用；2 = 序号失步（调用方发请求，编辑器回全量）；0 = 应用出错（同上）。
@@ -386,6 +419,12 @@ expReal LoadRoomTilesDelta(GMReal buffer, GMReal tileLayerList)
 		std::string err = "";
 		std::string gmlCode;
 		UINT opCount = static_cast<UINT>(gm::buffer_read_uint32(buffer));
+
+		// 摘要整批成功后才写入 s_lastSummary；批小逐 op 明细，批大聚合计数
+		bool recordDetail = opCount <= DeltaDetailMaxOps;
+		std::string summary = "seq=" + std::to_string(seq) + " ops=" + std::to_string(opCount) + ":";
+		std::string detail;
+		UINT addTile = 0, delTile = 0, addSpr = 0, delSpr = 0, addObj = 0, delObj = 0, setLayers = 0;
 
 		for (UINT i = 0; i < opCount; ++i)
 		{
@@ -407,6 +446,10 @@ expReal LoadRoomTilesDelta(GMReal buffer, GMReal tileLayerList)
 				GMReal alpha = gm::buffer_read_uint8(buffer) / 255;
 				int blend = static_cast<int>(gm::buffer_read_uint32(buffer));
 
+				++addTile;
+				if (recordDetail)
+					detail += " +tile " + reso + " (" + IntStr(x) + "," + IntStr(y) + ") d" + std::to_string(depth);
+
 				int back = GetResourceCached(reso);
 				if (!gm::background_exists(back))
 				{
@@ -423,6 +466,10 @@ expReal LoadRoomTilesDelta(GMReal buffer, GMReal tileLayerList)
 			else if (kind == 1) // delTile
 			{
 				int id = static_cast<int>(gm::buffer_read_uint32(buffer));
+				++delTile;
+				if (recordDetail)
+					detail += " -tile #" + std::to_string(id);
+
 				auto it = s_tileById.find(id);
 				if (it != s_tileById.end())
 				{
@@ -446,6 +493,10 @@ expReal LoadRoomTilesDelta(GMReal buffer, GMReal tileLayerList)
 				GMReal speed = gm::buffer_read_float32(buffer);
 				int blend = static_cast<int>(gm::buffer_read_uint32(buffer));
 				size_t listPos = static_cast<size_t>(gm::buffer_read_uint8(buffer));
+
+				++addSpr;
+				if (recordDetail)
+					detail += " +spr " + reso + " (" + std::to_string(x) + "," + std::to_string(y) + ") L" + std::to_string(listPos);
 
 				int spr = GetResourceCached(reso);
 				if (!gm::sprite_exists(spr))
@@ -483,6 +534,10 @@ expReal LoadRoomTilesDelta(GMReal buffer, GMReal tileLayerList)
 			else if (kind == 3) // delSprite
 			{
 				int id = static_cast<int>(gm::buffer_read_uint32(buffer));
+				++delSpr;
+				if (recordDetail)
+					detail += " -spr #" + std::to_string(id);
+
 				auto it = s_sprRefById.find(id);
 				if (it != s_sprRefById.end())
 				{
@@ -511,6 +566,10 @@ expReal LoadRoomTilesDelta(GMReal buffer, GMReal tileLayerList)
 				std::string uid = gm::buffer_read_string(buffer);
 				std::string icc = gm::buffer_read_string(buffer);
 
+				++addObj;
+				if (recordDetail)
+					detail += " +obj " + reso + " (" + IntStr(x) + "," + IntStr(y) + ")";
+
 				int obj = GetResourceCached(reso);
 				if (!gm::object_exists(obj))
 				{
@@ -527,6 +586,10 @@ expReal LoadRoomTilesDelta(GMReal buffer, GMReal tileLayerList)
 			else if (kind == 5) // delObject
 			{
 				int id = static_cast<int>(gm::buffer_read_uint32(buffer));
+				++delObj;
+				if (recordDetail)
+					detail += " -obj #" + std::to_string(id);
+
 				auto it = s_instById.find(id);
 				if (it != s_instById.end())
 				{
@@ -538,6 +601,10 @@ expReal LoadRoomTilesDelta(GMReal buffer, GMReal tileLayerList)
 			{
 				int layerList = static_cast<int>(tileLayerList);
 				UINT n = static_cast<UINT>(gm::buffer_read_uint16(buffer));
+				++setLayers;
+				if (recordDetail)
+					detail += " layers " + std::to_string(n);
+
 				gm::ds_list_clear(layerList);
 				for (UINT k = 0; k < n; ++k)
 					gm::ds_list_add(layerList, gm::buffer_read_int32(buffer));
@@ -554,7 +621,33 @@ expReal LoadRoomTilesDelta(GMReal buffer, GMReal tileLayerList)
 		if (err != "")
 			throw std::runtime_error(err);
 
+		if (recordDetail)
+			summary += detail;
+		else
+		{
+			// 聚合只列本批实际出现的 op 类别
+			if (addTile > 0) summary += " +tile" + std::to_string(addTile);
+			if (delTile > 0) summary += " -tile" + std::to_string(delTile);
+			if (addSpr > 0) summary += " +spr" + std::to_string(addSpr);
+			if (delSpr > 0) summary += " -spr" + std::to_string(delSpr);
+			if (addObj > 0) summary += " +obj" + std::to_string(addObj);
+			if (delObj > 0) summary += " -obj" + std::to_string(delObj);
+			if (setLayers > 0) summary += " layers" + std::to_string(setLayers);
+		}
+		s_lastSummary = summary;
+
 		finish;
 	}
 	simplecatch("LoadRoomTilesDelta()", 0)
+}
+
+// 取回最近一次房间操作摘要：全量=创建统计，增量=整批 op 摘要；
+// 会话重置（切房/整房重载）后为空串，调用方据此跳过拼接
+expString RoomTilesLastSummary()
+{
+	try
+	{
+		return string_to_cstr(s_lastSummary);
+	}
+	simplecatch("RoomTilesLastSummary()", "")
 }
