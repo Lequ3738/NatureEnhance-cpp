@@ -118,6 +118,42 @@ inline constexpr unsigned char SIG_SortCallInScreenRegion[5] = { 0xE8, 0xBE, 0xF
 inline constexpr unsigned char SIG_FrameViewAdvanceCall[5] = { 0xE8, 0xCD, 0x09, 0xF7, 0xFF };
 inline constexpr unsigned char SIG_FrameEndCall[5] = { 0xE8, 0xC0, 0x56, 0xFD, 0xFF };
 
+// ---- Sprite resource internals (frame-range duplication, see SpriteTools.cpp) ----
+// The runner builds its GML sprite_duplicate (INNER_sprite_duplicate) as:
+// grow the storage's two parallel arrays, name the slot, Delphi-construct a
+// sprite object, then GM80_SpriteAssign copies scalars + per-frame data and
+// finally pushes the frames onto texture pages. A frame-range duplicate is
+// the same sequence with a subset loop in place of the full Assign.
+// Field layout cross-validated twice: GMAPI's GMSPRITE_NEW/GMSPRITESTORAGE
+// and the GM80_SpriteAssign disassembly agree offset for offset.
+constexpr std::uint32_t RVA_SpriteStorage        = 0x18D3D4; // GMSPRITESTORAGE {sprites; names; arraySize} (== GMAPI GM80_ADDRESS_STORAGE_SPRITES)
+constexpr std::uint32_t RVA_gm_array_grow        = 0x006F20; // (eax=&arrayVar, edx=info, ecx=1, stack=newCount)
+constexpr std::uint32_t RVA_SpriteNamePrep       = 0x00A8F4; // (eax=index, edx=&outInt); outInt feeds NameAssign's ecx
+constexpr std::uint32_t RVA_SpriteNameAssign     = 0x005C44; // (eax=&AnsiString var, edx=AnsiString literal, ecx=from NamePrep)
+constexpr std::uint32_t RVA_SpriteReleaseFields  = 0x00A5E08; // (eax=sprite) frees existing arrays; no-op on a fresh object
+constexpr std::uint32_t RVA_SpriteObjCreate      = 0x00A5D98; // Delphi ctor: (eax=VMT, dl=1) -> eax=new sprite object
+constexpr std::uint32_t RVA_SpriteFrameDuplicate = 0x0088108; // (eax=frame VMT, dl=1, ecx=srcFrame) -> eax=new frame
+constexpr std::uint32_t RVA_SpriteMaskDuplicate  = 0x00899D8; // (eax=mask VMT, dl=1, ecx=srcMask) -> eax=new mask
+constexpr std::uint32_t RVA_SpriteUploadTextures = 0x00A599C; // (eax=sprite) packs every frame onto texture pages, fills textureIds
+constexpr std::uint32_t RVA_LitNewsprite         = 0x00A68F8; // "__newsprite" AnsiString literal (the runner's own duplicate name)
+// Class VMTs and per-array descriptors, dereferenced/loaded at call time:
+constexpr std::uint32_t RVA_SpriteClassVMT = 0x00A4A3C;
+constexpr std::uint32_t RVA_FrameClassVMT  = 0x0087FA0;
+constexpr std::uint32_t RVA_MaskClassVMT   = 0x00898F0;
+constexpr std::uint32_t RVA_FrameArrayInfo = 0x00A49C4;
+constexpr std::uint32_t RVA_MaskArrayInfo  = 0x00A49EC;
+constexpr std::uint32_t RVA_SpriteArrInfo  = 0x00A6164;
+constexpr std::uint32_t RVA_NameArrInfo    = 0x00A6188;
+
+inline constexpr unsigned char SIG_gm_array_grow[6]        = { 0x54, 0x83, 0x04, 0x24, 0x04, 0xE8 };
+inline constexpr unsigned char SIG_SpriteNamePrep[6]       = { 0x56, 0x89, 0xE6, 0x83, 0xEC, 0x10 };
+inline constexpr unsigned char SIG_SpriteNameAssign[6]     = { 0x85, 0xD2, 0x74, 0x61, 0x85, 0xC9 };
+inline constexpr unsigned char SIG_SpriteReleaseFields[6]  = { 0x53, 0x56, 0x57, 0x83, 0xC4, 0xF0 };
+inline constexpr unsigned char SIG_SpriteObjCreate[6]      = { 0x53, 0x56, 0x84, 0xD2, 0x74, 0x08 };
+inline constexpr unsigned char SIG_SpriteFrameDuplicate[6] = { 0x53, 0x56, 0x84, 0xD2, 0x74, 0x08 };
+inline constexpr unsigned char SIG_SpriteMaskDuplicate[8]  = { 0x55, 0x8B, 0xEC, 0x83, 0xC4, 0xF4, 0x53, 0x56 };
+inline constexpr unsigned char SIG_SpriteUploadTextures[8] = { 0x53, 0x56, 0x57, 0x55, 0x8B, 0xD8, 0x8B, 0xC3 };
+
 // Runtime base of the game executable (0x400000 unless relocated).
 std::uint8_t* base();
 
